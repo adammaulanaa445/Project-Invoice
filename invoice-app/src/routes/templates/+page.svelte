@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import { theme } from '$lib/theme.svelte.js';
+  import { lang } from '$lib/lang.svelte.js';
 
   const templates = [
     { name: 'Neat Minimal', desc: 'Simpel & bersih, cocok untuk bisnis modern', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300' },
@@ -26,7 +27,16 @@
   <nav class="border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
     <a href="/" class="font-bold text-xl text-slate-900 dark:text-white">InvoiceKita</a>
     <div class="flex gap-4 items-center text-sm">
-      <a href="/templates" class="text-blue-600 dark:text-blue-400 font-medium">Templates</a>
+      <a href="/templates" class="text-blue-600 dark:text-blue-400 font-medium">{lang.t('nav_templates')}</a>
+      <select
+        value={lang.current}
+        onchange={(e) => lang.set(e.target.value)}
+        class="bg-transparent text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 dark:text-white"
+      >
+        {#each Object.entries(lang.options) as [code, label]}
+          <option value={code}>{label}</option>
+        {/each}
+      </select>
       <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
         {theme.dark ? '☀️' : '🌙'}
       </button>
@@ -34,14 +44,14 @@
         onclick={() => goto('/editor')}
         class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
       >
-        Buat Invoice
+        {lang.t('nav_create')}
       </button>
     </div>
   </nav>
 
   <div class="max-w-6xl mx-auto px-6 py-12">
-    <h1 class="text-3xl font-bold text-slate-900 dark:text-white text-center mb-2">Pilih Template Invoice</h1>
-    <p class="text-center text-slate-500 dark:text-slate-400 mb-10">10 desain profesional, gratis untuk dipakai.</p>
+    <h1 class="text-3xl font-bold text-slate-900 dark:text-white text-center mb-2">{lang.t('tp_title')}</h1>
+    <p class="text-center text-slate-500 dark:text-slate-400 mb-10">{lang.t('tp_subtitle')}</p>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
       {#each templates as t, i}
@@ -55,7 +65,7 @@
           <div class="p-3 bg-white dark:bg-slate-800">
             <p class="font-semibold text-sm text-slate-800 dark:text-white">{t.name}</p>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t.desc}</p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 opacity-0 group-hover:opacity-100 transition">Gunakan template →</p>
+            <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 opacity-0 group-hover:opacity-100 transition">{lang.t('use_template')}</p>
           </div>
         </button>
       {/each}

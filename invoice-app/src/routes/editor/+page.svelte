@@ -11,6 +11,7 @@
   import Invoice10Freelance from '$lib/components/invoices/Invoice10Freelance.svelte';
   import { page } from '$app/state';
   import { theme } from '$lib/theme.svelte.js';
+  import { lang } from '$lib/lang.svelte.js';
 
   const templates = [
     { name: '1. Neat Minimal', component: Invoice01Neat },
@@ -62,7 +63,16 @@
   <nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 flex justify-between items-center">
     <a href="/" class="font-bold text-xl text-slate-900 dark:text-white">InvoiceKita</a>
     <div class="flex gap-4 items-center text-sm">
-      <a href="/templates" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Templates</a>
+      <a href="/templates" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">{lang.t('nav_templates')}</a>
+      <select
+        value={lang.current}
+        onchange={(e) => lang.set(e.target.value)}
+        class="bg-transparent text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 dark:text-white"
+      >
+        {#each Object.entries(lang.options) as [code, label]}
+          <option value={code}>{label}</option>
+        {/each}
+      </select>
       <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
         {theme.dark ? '☀️' : '🌙'}
       </button>

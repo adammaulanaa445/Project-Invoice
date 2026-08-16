@@ -111,11 +111,40 @@ const translations = {
     tp_title: '請求書テンプレートを選択', tp_subtitle: '10種類のプロデザイン、無料でご利用可能。',
     use_template: 'このテンプレートを使う →',
   },
+  ko: {
+    nav_templates: '템플릿', nav_create: '인보이스 만들기',
+    hero_title: '100개 이상의 무료 인보이스 템플릿',
+    hero_subtitle: '몇 분 만에 전문적인 인보이스를 만드세요. 디자인을 선택하고, 정보를 입력하고, 바로 보내세요.',
+    hero_cta: '지금 인보이스 만들기!',
+    gallery_title: '인보이스 디자인 선택하기', gallery_subtitle: '여기서 전문적인 인보이스 만들기를 시작하세요!',
+    see_all: '모든 템플릿 보기',
+    f1_title: '인보이스 만들기', f1_desc: '다양한 템플릿 중에서 선택하고 회사 로고를 추가하세요.',
+    f2_title: '이메일로 보내기', f2_desc: 'PDF로 클라이언트에게 바로 보내거나 인쇄하세요.',
+    f3_title: '결제 받기', f3_desc: '온라인으로 더 빠르게 결제를 받으세요.',
+    footer: '그룹 프로젝트를 위해 제작 — InvoiceKita 2026',
+    tp_title: '인보이스 템플릿 선택', tp_subtitle: '10가지 전문 디자인, 무료로 사용 가능.',
+    use_template: '이 템플릿 사용하기 →',
+  },
+  zh: {
+    nav_templates: '模板', nav_create: '创建发票',
+    hero_title: '100多种免费发票模板',
+    hero_subtitle: '几分钟内创建专业发票。选择设计，填写信息，直接发送。',
+    hero_cta: '立即创建发票！',
+    gallery_title: '选择您的发票设计', gallery_subtitle: '从这里开始创建您的专业发票！',
+    see_all: '查看所有模板',
+    f1_title: '创建发票', f1_desc: '从众多模板中选择，添加您的公司标志。',
+    f2_title: '通过电子邮件发送', f2_desc: '以PDF格式直接发送给客户，或打印。',
+    f3_title: '接收付款', f3_desc: '在线更快地收到付款。',
+    footer: '为小组作业制作 — InvoiceKita 2026',
+    tp_title: '选择发票模板', tp_subtitle: '10种专业设计，免费使用。',
+    use_template: '使用此模板 →',
+  },
 };
 
 const languageNames = {
   id: '🇮🇩 Indonesia', en: '🇬🇧 English', es: '🇪🇸 Español', fr: '🇫🇷 Français',
   de: '🇩🇪 Deutsch', it: '🇮🇹 Italiano', pt: '🇵🇹 Português', ja: '🇯🇵 日本語',
+  ko: '🇰🇷 한국어', zh: '🇨🇳 中文',
 };
 
 function createLang() {
