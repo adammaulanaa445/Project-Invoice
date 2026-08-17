@@ -47,6 +47,35 @@
     status: 'unpaid'
   });
 
+  let logoError = $state('');
+
+  function handleLogoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    logoError = '';
+
+    // Validasi: harus gambar, maksimal 2MB
+    if (!file.type.startsWith('image/')) {
+      logoError = 'File harus berupa gambar (PNG/JPG/SVG).';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      logoError = 'Ukuran gambar maksimal 2MB.';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      invoice.logoUrl = event.target.result; // base64 data URL
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeLogo() {
+    invoice.logoUrl = '';
+  }
+
   function addItem() {
     invoice.items.push({ description: '', qty: 1, price: 0 });
     invoice.items = invoice.items; // trigger reactivity
@@ -80,7 +109,7 @@
   </nav>
 
   <div class="py-8 px-4">
-   <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">{lang.t('et_title')}</h1>
+    <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">{lang.t('et_title')}</h1>
 
     <div class="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl mx-auto">
       {#each templates as t, i}
@@ -97,6 +126,35 @@
 
       <!-- FORM INPUT -->
       <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 space-y-5 h-fit">
+
+        <!-- LOGO UPLOAD -->
+        <div>
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Logo Perusahaan</h2>
+          <div class="flex items-center gap-4">
+            {#if invoice.logoUrl}
+              <img src={invoice.logoUrl} alt="Logo preview" class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-slate-600 bg-white p-1" />
+            {:else}
+              <div class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs text-center">
+                Belum ada logo
+              </div>
+            {/if}
+            <div class="flex-1">
+              <input
+                type="file"
+                accept="image/*"
+                onchange={handleLogoUpload}
+                class="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-slate-900 dark:file:bg-blue-600 file:text-white file:text-xs"
+              />
+              {#if invoice.logoUrl}
+                <button onclick={removeLogo} class="text-xs text-red-500 mt-1 hover:underline">Hapus logo</button>
+              {/if}
+              {#if logoError}
+                <p class="text-xs text-red-500 mt-1">{logoError}</p>
+              {/if}
+            </div>
+          </div>
+        </div>
+
         <div>
           <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_info')}</h2>
           <div class="grid grid-cols-2 gap-3">
