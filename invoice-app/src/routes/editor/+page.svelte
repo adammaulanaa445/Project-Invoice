@@ -84,6 +84,27 @@
   function removeItem(index) {
     invoice.items = invoice.items.filter((_, i) => i !== index);
   }
+
+  let previewEl = $state();
+  let downloading = $state(false);
+
+  async function downloadPDF() {
+    downloading = true;
+    const { default: html2canvas } = await import('html2canvas-pro');
+    const { jsPDF } = await import('jspdf');
+
+    const canvas = await html2canvas(previewEl, { scale: 2 });
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, imgHeight);
+    pdf.save(`${invoice.invoiceNumber || 'invoice'}.pdf`);
+
+    downloading = false;
+  }
 </script>
 
 <main class="min-h-screen bg-slate-100 dark:bg-slate-900 transition-colors">
@@ -238,9 +259,16 @@
 
       <!-- PREVIEW LIVE -->
       <div class="lg:sticky lg:top-6 h-fit">
-        <svelte:component this={templates[selected].component} {invoice} />
+        <button
+          onclick={downloadPDF}
+          disabled={downloading}
+          class="mb-3 w-full bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {downloading ? 'Membuat PDF...' : '📄 Download PDF'}
+        </button>
+        <div bind:this={previewEl}>
+          <svelte:component this={templates[selected].component} {invoice} />
+        </div>
       </div>
-
-    </div>
   </div>
 </main>
