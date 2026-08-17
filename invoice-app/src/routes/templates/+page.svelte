@@ -14,6 +14,18 @@
     { nameKey: 'tpl8_name', descKey: 'tpl8_desc', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
     { nameKey: 'tpl9_name', descKey: 'tpl9_desc', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' },
     { nameKey: 'tpl10_name', descKey: 'tpl10_desc', color: 'bg-orange-50 text-orange-500 dark:bg-orange-950 dark:text-orange-300' },
+    { nameKey: 'tpl11_name', descKey: 'tpl11_desc', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300' },
+    { nameKey: 'tpl12_name', descKey: 'tpl12_desc', color: 'bg-zinc-800 text-teal-400' },
+    { nameKey: 'tpl13_name', descKey: 'tpl13_desc', color: 'bg-stone-100 text-stone-800 dark:bg-stone-900 dark:text-stone-200' },
+    { nameKey: 'tpl14_name', descKey: 'tpl14_desc', color: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300' },
+    { nameKey: 'tpl15_name', descKey: 'tpl15_desc', color: 'bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-950 dark:text-fuchsia-300' },
+    { nameKey: 'tpl16_name', descKey: 'tpl16_desc', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+    { nameKey: 'tpl17_name', descKey: 'tpl17_desc', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+    { nameKey: 'tpl18_name', descKey: 'tpl18_desc', color: 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-300' },
+    { nameKey: 'tpl19_name', descKey: 'tpl19_desc', color: 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300' },
+    { nameKey: 'tpl20_name', descKey: 'tpl20_desc', color: 'bg-pink-50 text-pink-500 dark:bg-pink-950 dark:text-pink-300' },
+    { nameKey: 'tpl21_name', descKey: 'tpl21_desc', color: 'bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100' },
+    { nameKey: 'tpl22_name', descKey: 'tpl22_desc', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300' },
   ];
 
   function useTemplate(index) {

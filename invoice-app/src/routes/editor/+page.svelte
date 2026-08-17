@@ -9,6 +9,18 @@
   import Invoice08NatureEco from '$lib/components/invoices/Invoice08NatureEco.svelte';
   import Invoice09TechStartup from '$lib/components/invoices/Invoice09TechStartup.svelte';
   import Invoice10Freelance from '$lib/components/invoices/Invoice10Freelance.svelte';
+  import InvoiceBoldTypography from '$lib/components/invoices/InvoiceBoldTypography.svelte';
+  import InvoiceDarkTech from '$lib/components/invoices/InvoiceDarkTech.svelte';
+  import InvoiceEditorialKoran from '$lib/components/invoices/InvoiceEditorialKoran.svelte';
+  import InvoiceEleganEmas from '$lib/components/invoices/InvoiceEleganEmas.svelte';
+  import InvoiceGradientVibrant from '$lib/components/invoices/InvoiceGradientVibrant.svelte';
+  import InvoiceKlasikFormal from '$lib/components/invoices/InvoiceKlasikFormal.svelte';
+  import InvoiceKorporatBiru from '$lib/components/invoices/InvoiceKorporatBiru.svelte';
+  import InvoiceModernMinimalis from '$lib/components/invoices/InvoiceModernMinimalis.svelte';
+  import InvoiceNordicEarthy from '$lib/components/invoices/InvoiceNordicEarthy.svelte';
+  import InvoicePastelPlayful from '$lib/components/invoices/InvoicePastelPlayful.svelte';
+  import InvoiceRetroVintage from '$lib/components/invoices/InvoiceRetroVintage.svelte';
+  import InvoiceTechSaaS from '$lib/components/invoices/InvoiceTechSaaS.svelte';
   import { page } from '$app/state';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
@@ -24,6 +36,18 @@
     { name: () => `8. ${lang.t('tpl8_name')}`, component: Invoice08NatureEco },
     { name: () => `9. ${lang.t('tpl9_name')}`, component: Invoice09TechStartup },
     { name: () => `10. ${lang.t('tpl10_name')}`, component: Invoice10Freelance },
+    { name: () => `11. ${lang.t('tpl11_name')}`, component: InvoiceBoldTypography },
+    { name: () => `12. ${lang.t('tpl12_name')}`, component: InvoiceDarkTech },
+    { name: () => `13. ${lang.t('tpl13_name')}`, component: InvoiceEditorialKoran },
+    { name: () => `14. ${lang.t('tpl14_name')}`, component: InvoiceEleganEmas },
+    { name: () => `15. ${lang.t('tpl15_name')}`, component: InvoiceGradientVibrant },
+    { name: () => `16. ${lang.t('tpl16_name')}`, component: InvoiceKlasikFormal },
+    { name: () => `17. ${lang.t('tpl17_name')}`, component: InvoiceKorporatBiru },
+    { name: () => `18. ${lang.t('tpl18_name')}`, component: InvoiceModernMinimalis },
+    { name: () => `19. ${lang.t('tpl19_name')}`, component: InvoiceNordicEarthy },
+    { name: () => `20. ${lang.t('tpl20_name')}`, component: InvoicePastelPlayful },
+    { name: () => `21. ${lang.t('tpl21_name')}`, component: InvoiceRetroVintage },
+    { name: () => `22. ${lang.t('tpl22_name')}`, component: InvoiceTechSaaS },
   ];
 
   let selected = $state(Number(page.url.searchParams.get('template')) || 0);
