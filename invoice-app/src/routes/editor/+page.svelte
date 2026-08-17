@@ -14,16 +14,16 @@
   import { lang } from '$lib/lang.svelte.js';
 
   const templates = [
-    { name: '1. Neat Minimal', component: Invoice01Neat },
-    { name: '2. Classic Corporate', component: Invoice02Corporate },
-    { name: '3. Bold Band', component: Invoice03BoldBand },
-    { name: '4. Modern Gradient', component: Invoice04Gradient },
-    { name: '5. Dark Studio', component: Invoice05DarkStudio },
-    { name: '6. Elegant Luxury', component: Invoice06Luxury },
-    { name: '7. Creative Asymmetric', component: Invoice07Asymmetric },
-    { name: '8. Nature Eco', component: Invoice08NatureEco },
-    { name: '9. Tech Startup', component: Invoice09TechStartup },
-    { name: '10. Freelance', component: Invoice10Freelance },
+    { name: () => `1. ${lang.t('tpl1_name')}`, component: Invoice01Neat },
+    { name: () => `2. ${lang.t('tpl2_name')}`, component: Invoice02Corporate },
+    { name: () => `3. ${lang.t('tpl3_name')}`, component: Invoice03BoldBand },
+    { name: () => `4. ${lang.t('tpl4_name')}`, component: Invoice04Gradient },
+    { name: () => `5. ${lang.t('tpl5_name')}`, component: Invoice05DarkStudio },
+    { name: () => `6. ${lang.t('tpl6_name')}`, component: Invoice06Luxury },
+    { name: () => `7. ${lang.t('tpl7_name')}`, component: Invoice07Asymmetric },
+    { name: () => `8. ${lang.t('tpl8_name')}`, component: Invoice08NatureEco },
+    { name: () => `9. ${lang.t('tpl9_name')}`, component: Invoice09TechStartup },
+    { name: () => `10. ${lang.t('tpl10_name')}`, component: Invoice10Freelance },
   ];
 
   let selected = $state(Number(page.url.searchParams.get('template')) || 0);
@@ -80,7 +80,7 @@
   </nav>
 
   <div class="py-8 px-4">
-    <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">Buat Invoice</h1>
+   <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">{lang.t('et_title')}</h1>
 
     <div class="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl mx-auto">
       {#each templates as t, i}
@@ -88,7 +88,7 @@
           class="px-3 py-1.5 rounded-full text-sm border {selected === i ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'}"
           onclick={() => selected = i}
         >
-          {t.name}
+          {t.name()}
         </button>
       {/each}
     </div>
@@ -98,63 +98,63 @@
       <!-- FORM INPUT -->
       <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 space-y-5 h-fit">
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Info Dasar</h2>
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_info')}</h2>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">No. Invoice</label>
+              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_invoice_number')}</label>
               <input bind:value={invoice.invoiceNumber} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
             </div>
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">Status</label>
+              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_status')}</label>
               <select bind:value={invoice.status} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1">
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
-                <option value="overdue">Overdue</option>
+                <option value="unpaid">{lang.t('et_status_unpaid')}</option>
+                <option value="paid">{lang.t('et_status_paid')}</option>
+                <option value="overdue">{lang.t('et_status_overdue')}</option>
               </select>
             </div>
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">Tanggal Terbit</label>
+              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_issue_date')}</label>
               <input type="date" bind:value={invoice.issueDate} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
             </div>
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">Jatuh Tempo</label>
+              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_due_date')}</label>
               <input type="date" bind:value={invoice.dueDate} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
             </div>
           </div>
         </div>
 
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Dari (Perusahaan Kamu)</h2>
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_from')}</h2>
           <div class="space-y-2">
-            <input placeholder="Nama perusahaan" bind:value={invoice.from.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder="Alamat" bind:value={invoice.from.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+            <input placeholder={lang.t('et_company_name')} bind:value={invoice.from.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+            <input placeholder={lang.t('et_address')} bind:value={invoice.from.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
             <div class="grid grid-cols-2 gap-2">
-              <input placeholder="Email" bind:value={invoice.from.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-              <input placeholder="Telepon" bind:value={invoice.from.phone} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+              <input placeholder={lang.t('et_email')} bind:value={invoice.from.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+              <input placeholder={lang.t('et_phone')} bind:value={invoice.from.phone} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
             </div>
           </div>
         </div>
 
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Kepada (Klien)</h2>
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_to')}</h2>
           <div class="space-y-2">
-            <input placeholder="Nama klien" bind:value={invoice.to.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder="Alamat" bind:value={invoice.to.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder="Email" bind:value={invoice.to.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+            <input placeholder={lang.t('et_client_name')} bind:value={invoice.to.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+            <input placeholder={lang.t('et_address')} bind:value={invoice.to.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+            <input placeholder={lang.t('et_email')} bind:value={invoice.to.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
           </div>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-3">
-            <h2 class="font-semibold text-slate-800 dark:text-white">Item</h2>
-            <button onclick={addItem} class="text-xs px-2 py-1 bg-slate-900 dark:bg-blue-600 text-white rounded-lg">+ Tambah Item</button>
+            <h2 class="font-semibold text-slate-800 dark:text-white">{lang.t('et_items')}</h2>
+            <button onclick={addItem} class="text-xs px-2 py-1 bg-slate-900 dark:bg-blue-600 text-white rounded-lg">{lang.t('et_add_item')}</button>
           </div>
           <div class="space-y-2">
             {#each invoice.items as item, i}
               <div class="flex gap-2 items-center">
-                <input placeholder="Deskripsi" bind:value={item.description} class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-                <input type="number" placeholder="Qty" bind:value={item.qty} class="w-16 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
-                <input type="number" placeholder="Harga" bind:value={item.price} class="w-28 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
+                <input placeholder={lang.t('et_description')} bind:value={item.description} class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+                <input type="number" placeholder={lang.t('et_qty')} bind:value={item.qty} class="w-16 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
+                <input type="number" placeholder={lang.t('et_price')} bind:value={item.price} class="w-28 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
                 <button onclick={() => removeItem(i)} class="text-red-500 text-sm px-2">✕</button>
               </div>
             {/each}
@@ -163,17 +163,17 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs text-slate-500 dark:text-slate-400">Pajak (%)</label>
+            <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_tax')}</label>
             <input type="number" bind:value={invoice.taxPercent} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
           </div>
           <div>
-            <label class="text-xs text-slate-500 dark:text-slate-400">Diskon (%)</label>
+            <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_discount')}</label>
             <input type="number" bind:value={invoice.discountPercent} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
           </div>
         </div>
 
         <div>
-          <label class="text-xs text-slate-500 dark:text-slate-400">Catatan</label>
+          <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_notes')}</label>
           <textarea bind:value={invoice.notes} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" rows="2"></textarea>
         </div>
       </div>
