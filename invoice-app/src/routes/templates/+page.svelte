@@ -4,16 +4,16 @@
   import { lang } from '$lib/lang.svelte.js';
 
   const templates = [
-    { name: 'Neat Minimal', desc: 'Simpel & bersih, cocok untuk bisnis modern', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300' },
-    { name: 'Classic Corporate', desc: 'Formal, cocok untuk perusahaan besar', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' },
-    { name: 'Bold Band', desc: 'Warna cerah & berani, menarik perhatian', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300' },
-    { name: 'Modern Gradient', desc: 'Gradasi warna, kesan kreatif & fresh', color: 'bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-300' },
-    { name: 'Dark Studio', desc: 'Tema gelap, cocok untuk studio digital/tech', color: 'bg-slate-800 text-emerald-400' },
-    { name: 'Elegant Luxury', desc: 'Emas & elegan, kesan premium', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-300' },
-    { name: 'Creative Asymmetric', desc: 'Layout split unik, cocok untuk agensi kreatif', color: 'bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-300' },
-    { name: 'Nature Eco', desc: 'Hijau & natural, untuk bisnis ramah lingkungan', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
-    { name: 'Tech Startup', desc: 'Gaya SaaS modern, untuk perusahaan teknologi', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' },
-    { name: 'Freelance', desc: 'Playful & personal, cocok untuk freelancer', color: 'bg-orange-50 text-orange-500 dark:bg-orange-950 dark:text-orange-300' },
+    { nameKey: 'tpl1_name', descKey: 'tpl1_desc', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300' },
+    { nameKey: 'tpl2_name', descKey: 'tpl2_desc', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' },
+    { nameKey: 'tpl3_name', descKey: 'tpl3_desc', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300' },
+    { nameKey: 'tpl4_name', descKey: 'tpl4_desc', color: 'bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-300' },
+    { nameKey: 'tpl5_name', descKey: 'tpl5_desc', color: 'bg-slate-800 text-emerald-400' },
+    { nameKey: 'tpl6_name', descKey: 'tpl6_desc', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-300' },
+    { nameKey: 'tpl7_name', descKey: 'tpl7_desc', color: 'bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-300' },
+    { nameKey: 'tpl8_name', descKey: 'tpl8_desc', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
+    { nameKey: 'tpl9_name', descKey: 'tpl9_desc', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300' },
+    { nameKey: 'tpl10_name', descKey: 'tpl10_desc', color: 'bg-orange-50 text-orange-500 dark:bg-orange-950 dark:text-orange-300' },
   ];
 
   function useTemplate(index) {
@@ -63,8 +63,8 @@
             <span class="font-bold text-lg">{i + 1}</span>
           </div>
           <div class="p-3 bg-white dark:bg-slate-800">
-            <p class="font-semibold text-sm text-slate-800 dark:text-white">{t.name}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t.desc}</p>
+            <p class="font-semibold text-sm text-slate-800 dark:text-white">{lang.t(t.nameKey)}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{lang.t(t.descKey)}</p>
             <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 opacity-0 group-hover:opacity-100 transition">{lang.t('use_template')}</p>
           </div>
         </button>
