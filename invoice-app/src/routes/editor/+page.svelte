@@ -24,6 +24,7 @@
   import { page } from '$app/state';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
+  import { goto } from '$app/navigation';
 
   const templates = [
     { name: () => `1. ${lang.t('tpl1_name')}`, component: Invoice01Neat },
@@ -129,6 +130,91 @@
 
     downloading = false;
   }
+
+  let saving = $state(false);
+  let saveMessage = $state('');
+
+  async function saveInvoice() {
+    saving = true;
+    saveMessage = '';
+
+    const token = localStorage.getItem('auth_token');
+
+    if (!token) {
+      saveMessage = '❌ Silakan login terlebih dahulu.';
+      saving = false;
+      return;
+    }
+
+    try {
+      const payload = {
+        template_id: selected + 1,
+        issue_date: invoice.issueDate,
+        due_date: invoice.dueDate,
+        currency: invoice.currency,
+        from_name: invoice.from.name,
+        from_address: invoice.from.address,
+        from_email: invoice.from.email,
+        from_phone: invoice.from.phone,
+        logo_url: invoice.logoUrl || null,
+        to_name: invoice.to.name,
+        to_address: invoice.to.address,
+        to_email: invoice.to.email,
+        tax_percent: invoice.taxPercent,
+        discount_percent: invoice.discountPercent,
+        notes: invoice.notes,
+        status: invoice.status,
+        items: invoice.items.map((i) => ({
+          description: i.description,
+          qty: i.qty,
+          price: i.price
+        }))
+      };
+
+      const res = await fetch('http://localhost:8800/api/invoices', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Gagal menyimpan');
+      }
+
+      const data = await res.json();
+      invoice.invoiceNumber = data.invoice_number;
+      saveMessage = '✅ Invoice berhasil disimpan!';
+    } catch (e) {
+      saveMessage = '❌ Gagal menyimpan: ' + e.message;
+    } finally {
+      saving = false;
+      setTimeout(() => (saveMessage = ''), 4000);
+    }
+  }
+
+  // Fungsi Logout
+  async function handleLogout() {
+    const token = localStorage.getItem('auth_token');
+    
+    if (token) {
+      await fetch('http://localhost:8800/api/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+    }
+
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    goto('/login');
+  }
 </script>
 
 <main class="min-h-screen bg-slate-100 dark:bg-slate-900 transition-colors">
@@ -149,6 +235,12 @@
       </select>
       <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
         {theme.dark ? '☀️' : '🌙'}
+      </button>
+      <button 
+        onclick={handleLogout} 
+        class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg"
+      >
+        Logout
       </button>
     </div>
   </nav>
@@ -283,16 +375,29 @@
 
       <!-- PREVIEW LIVE -->
       <div class="lg:sticky lg:top-6 h-fit">
-        <button
-          onclick={downloadPDF}
-          disabled={downloading}
-          class="mb-3 w-full bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {downloading ? 'Membuat PDF...' : '📄 Download PDF'}
-        </button>
+        <div class="flex gap-2 mb-3">
+          <button
+            onclick={saveInvoice}
+            disabled={saving}
+            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : '💾 Simpan Invoice'}
+          </button>
+          <button
+            onclick={downloadPDF}
+            disabled={downloading}
+            class="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {downloading ? 'Membuat PDF...' : '📄 Download PDF'}
+          </button>
+        </div>
+        {#if saveMessage}
+          <p class="text-center text-sm mb-3 {saveMessage.startsWith('✅') ? 'text-emerald-600' : 'text-red-500'}">{saveMessage}</p>
+        {/if}
         <div bind:this={previewEl}>
           <svelte:component this={templates[selected].component} {invoice} />
         </div>
       </div>
+    </div>
   </div>
 </main>
