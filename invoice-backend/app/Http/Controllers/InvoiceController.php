@@ -16,40 +16,40 @@ class InvoiceController extends Controller
 
     // POST /api/invoices
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'template_id' => 'required|integer|min:1',
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:issue_date',
-            'currency' => 'required|string|size:3',
-            'from_name' => 'required|string|max:255',
-            'from_address' => 'nullable|string',
-            'from_email' => 'nullable|email',
-            'from_phone' => 'nullable|string|max:30',
-            'logo_url' => 'nullable|url',
-            'to_name' => 'required|string|max:255',
-            'to_address' => 'nullable|string',
-            'to_email' => 'nullable|email',
-            'tax_percent' => 'numeric|min:0|max:100',
-            'discount_percent' => 'numeric|min:0|max:100',
-            'notes' => 'nullable|string',
-            'status' => 'in:unpaid,paid,overdue',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string|max:255',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-        ]);
+{
+    $data = $request->validate([
+        'template_id' => 'required|integer|min:1',
+        'issue_date' => 'required|date',
+        'due_date' => 'required|date|after_or_equal:issue_date',
+        'currency' => 'required|string|size:3',
+        'from_name' => 'required|string|max:255',
+        'from_address' => 'nullable|string',
+        'from_email' => 'nullable|email',
+        'from_phone' => 'nullable|string|max:30',
+        'logo_url' => 'nullable|string',
+        'to_name' => 'required|string|max:255',
+        'to_address' => 'nullable|string',
+        'to_email' => 'nullable|email',
+        'tax_percent' => 'numeric|min:0|max:100',
+        'discount_percent' => 'numeric|min:0|max:100',
+        'notes' => 'nullable|string',
+        'status' => 'in:unpaid,paid,overdue',
+        'items' => 'required|array|min:1',
+        'items.*.description' => 'required|string|max:255',
+        'items.*.qty' => 'required|integer|min:1',
+        'items.*.price' => 'required|numeric|min:0',
+    ]);
 
-        $invoice = Invoice::create([
-            ...$data,
-            'user_id' => 1, // sementara, sampai fitur login dibuat
-            'invoice_number' => 'INV-' . strtoupper(Str::random(6)),
-        ]);
+    $invoice = Invoice::create([
+        ...$data,
+        'user_id' => $request->user()->id,
+        'invoice_number' => 'INV-' . strtoupper(Str::random(6)),
+    ]);
 
-        $invoice->items()->createMany($data['items']);
+    $invoice->items()->createMany($data['items']);
 
-        return $invoice->load('items');
-    }
+    return response()->json($invoice->load('items'), 201);
+}
 
     // GET /api/invoices/{invoice}
     public function show(Invoice $invoice)
