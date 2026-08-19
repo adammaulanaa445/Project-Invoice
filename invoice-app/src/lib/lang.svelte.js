@@ -29,7 +29,7 @@ const translations = {
     tpl7_name: 'Creative Asymmetric', tpl7_desc: 'Layout split unik, cocok untuk agensi kreatif',
     tpl8_name: 'Nature Eco', tpl8_desc: 'Hijau & natural, untuk bisnis ramah lingkungan',
     tpl9_name: 'Tech Startup', tpl9_desc: 'Gaya SaaS modern, untuk perusahaan teknologi',
-    tpl10_name: 'Freelance', tpl10_desc: 'Playful & personal, cocok untuk freelancer',
+    tpl10_name: 'Freelance', tpl10_desc: 'Playful & personal, cocok untuk freelancer', 
     tpl11_name: 'Bold Typography', tpl11_desc: 'Desain Bold yang tegas',
     tpl12_name: 'Dark Tech', tpl12_desc: 'Desain gelap & teknologi',
     tpl13_name: 'Editorial Koran', tpl13_desc: 'Desain surat kabar',
@@ -43,6 +43,17 @@ const translations = {
     tpl21_name: 'Retro Vintage', tpl21_desc: 'Desain Vintage',
     tpl22_name: 'Neon Bright', tpl22_desc: 'Desain Neon',
   
+
+    tpl23_name: 'Curved Teal', tpl23_desc: 'Header melengkung, gaya hangat',
+    tpl24_name: 'Pixel Receipt', tpl24_desc: 'Struk monospace, tepi bergerigi',
+    tpl25_name: 'Ledger Klasik', tpl25_desc: 'Gaya buku kas akuntansi lama',
+    tpl26_name: 'Swiss Grid', tpl26_desc: 'Grid tegas ala desain Swiss',
+    tpl27_name: 'Motif Warm', tpl27_desc: 'Indigo & emas, kesan mewah',
+    tpl28_name: 'Minimalis Mono', tpl28_desc: 'Nyaris tanpa warna, fokus tipografi',
+    tpl29_name: 'Studio Hitam', tpl29_desc: 'Hitam pekat, garis putih tegas',
+    tpl30_name: 'Brutalist Bracket', tpl30_desc: 'Flat & tegas, gaya brutalist',
+    tpl31_name: 'Editorial Merah', tpl31_desc: 'Headline merah besar ala majalah',
+    tpl32_name: 'Sidebar Biru', tpl32_desc: 'Sidebar biru solid untuk identitas',
   },
   en: {
     nav_templates: 'Templates', nav_create: 'Create Invoice',
@@ -75,6 +86,7 @@ const translations = {
     tpl8_name: 'Nature Eco', tpl8_desc: 'Green & natural, for eco-friendly businesses',
     tpl9_name: 'Tech Startup', tpl9_desc: 'Modern SaaS style, for tech companies',
     tpl10_name: 'Freelance', tpl10_desc: 'Playful & personal, great for freelancers',
+
     tpl11_name: 'Bold Typography', tpl11_desc: 'Bold & modern, perfect for creative freelancers',
     tpl12_name: 'Dark Tech', tpl12_desc: 'Dark & futuristic, ideal for tech businesses',
     tpl13_name: 'Editorial Newspaper', tpl13_desc: 'Classic newspaper style, for bold statements',
@@ -87,6 +99,18 @@ const translations = {
     tpl20_name: 'Floral Playful', tpl20_desc: 'Floral & playful design',
     tpl21_name: 'Retro Vintage', tpl21_desc: 'Retro vintage design',
     tpl22_name: 'Neon Bright', tpl22_desc: 'Neon bright design',
+
+
+    tpl23_name: 'Curved Teal', tpl23_desc: 'Curved header, warm feel',
+    tpl24_name: 'Pixel Receipt', tpl24_desc: 'Monospace receipt, jagged edges',
+    tpl25_name: 'Classic Ledger', tpl25_desc: 'Old-school accounting ledger style',
+    tpl26_name: 'Swiss Grid', tpl26_desc: 'Bold grid, Swiss design style',
+    tpl27_name: 'Warm Motif', tpl27_desc: 'Indigo & gold, luxurious feel',
+    tpl28_name: 'Minimal Mono', tpl28_desc: 'Nearly colorless, typography-focused',
+    tpl29_name: 'Black Studio', tpl29_desc: 'Deep black, bold white lines',
+    tpl30_name: 'Brutalist Bracket', tpl30_desc: 'Flat and bold, brutalist style',
+    tpl31_name: 'Red Editorial', tpl31_desc: 'Big red headline, magazine style',
+    tpl32_name: 'Blue Sidebar', tpl32_desc: 'Solid blue sidebar for identity',
 
   },
   es: {

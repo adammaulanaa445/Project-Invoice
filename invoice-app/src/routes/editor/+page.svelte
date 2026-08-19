@@ -21,6 +21,16 @@
   import InvoicePastelPlayful from '$lib/components/invoices/InvoicePastelPlayful.svelte';
   import InvoiceRetroVintage from '$lib/components/invoices/InvoiceRetroVintage.svelte';
   import InvoiceTechSaaS from '$lib/components/invoices/InvoiceTechSaaS.svelte';
+  import InvoiceCurvedTeal from '$lib/components/invoices/InvoiceCurvedTeal.svelte';
+  import InvoicePixelReceipt from '$lib/components/invoices/InvoicePixelReceipt.svelte';
+  import InvoiceLedgerKlasik from '$lib/components/invoices/InvoiceLedgerKlasik.svelte';
+  import InvoiceSwissGrid from '$lib/components/invoices/InvoiceSwissGrid.svelte';
+  import InvoiceMotifWarm from '$lib/components/invoices/InvoiceMotifWarm.svelte';
+  import InvoiceMinimalisMono from '$lib/components/invoices/InvoiceMinimalisMono.svelte';
+  import InvoiceStudioHitam from '$lib/components/invoices/InvoiceStudioHitam.svelte';
+  import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
+  import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
+  import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
   import { page } from '$app/state';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
@@ -50,6 +60,16 @@
     { name: () => `20. ${lang.t('tpl20_name')}`, component: InvoicePastelPlayful },
     { name: () => `21. ${lang.t('tpl21_name')}`, component: InvoiceRetroVintage },
     { name: () => `22. ${lang.t('tpl22_name')}`, component: InvoiceTechSaaS },
+     { name: () => `23. ${lang.t('tpl23_name')}`, component: InvoiceCurvedTeal },
+    { name: () => `24. ${lang.t('tpl24_name')}`, component: InvoicePixelReceipt },
+    { name: () => `25. ${lang.t('tpl25_name')}`, component: InvoiceLedgerKlasik },
+    { name: () => `26. ${lang.t('tpl26_name')}`, component: InvoiceSwissGrid },
+    { name: () => `27. ${lang.t('tpl27_name')}`, component: InvoiceMotifWarm },
+    { name: () => `28. ${lang.t('tpl28_name')}`, component: InvoiceMinimalisMono },
+    { name: () => `29. ${lang.t('tpl29_name')}`, component: InvoiceStudioHitam },
+    { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
+    { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
+    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
   ];
 
   let selected = $state(Number(page.url.searchParams.get('template')) || 0);
