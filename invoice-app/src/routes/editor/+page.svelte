@@ -24,6 +24,7 @@
   import { page } from '$app/state';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
+  import { invoiceStore } from '$lib/invoiceStore.svelte.js';
   import { goto } from '$app/navigation';
 
   const templates = [
@@ -80,7 +81,6 @@
 
     logoError = '';
 
-    // Validasi: harus gambar, maksimal 2MB
     if (!file.type.startsWith('image/')) {
       logoError = 'File harus berupa gambar (PNG/JPG/SVG).';
       return;
@@ -92,7 +92,7 @@
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      invoice.logoUrl = event.target.result; // base64 data URL
+      invoice.logoUrl = event.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -103,7 +103,7 @@
 
   function addItem() {
     invoice.items.push({ description: '', qty: 1, price: 0 });
-    invoice.items = invoice.items; // trigger reactivity
+    invoice.items = invoice.items;
   }
 
   function removeItem(index) {
@@ -134,60 +134,13 @@
   let saving = $state(false);
   let saveMessage = $state('');
 
-  async function saveInvoice() {
+  function saveInvoice() {
     saving = true;
     saveMessage = '';
 
-    const token = localStorage.getItem('auth_token');
-
-    if (!token) {
-      saveMessage = '❌ Silakan login terlebih dahulu.';
-      saving = false;
-      return;
-    }
-
     try {
-      const payload = {
-        template_id: selected + 1,
-        issue_date: invoice.issueDate,
-        due_date: invoice.dueDate,
-        currency: invoice.currency,
-        from_name: invoice.from.name,
-        from_address: invoice.from.address,
-        from_email: invoice.from.email,
-        from_phone: invoice.from.phone,
-        logo_url: invoice.logoUrl || null,
-        to_name: invoice.to.name,
-        to_address: invoice.to.address,
-        to_email: invoice.to.email,
-        tax_percent: invoice.taxPercent,
-        discount_percent: invoice.discountPercent,
-        notes: invoice.notes,
-        status: invoice.status,
-        items: invoice.items.map((i) => ({
-          description: i.description,
-          qty: i.qty,
-          price: i.price
-        }))
-      };
-
-      const res = await fetch('http://localhost:8800/api/invoices', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Gagal menyimpan');
-      }
-
-      const data = await res.json();
-      invoice.invoiceNumber = data.invoice_number;
+      const record = invoiceStore.save(selected + 1, invoice);
+      invoice.invoiceNumber = record.invoiceNumber;
       saveMessage = '✅ Invoice berhasil disimpan!';
     } catch (e) {
       saveMessage = '❌ Gagal menyimpan: ' + e.message;
@@ -200,7 +153,7 @@
   // Fungsi Logout
   async function handleLogout() {
     const token = localStorage.getItem('auth_token');
-    
+
     if (token) {
       await fetch('http://localhost:8800/api/logout', {
         method: 'POST',
@@ -236,8 +189,8 @@
       <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
         {theme.dark ? '☀️' : '🌙'}
       </button>
-      <button 
-        onclick={handleLogout} 
+      <button
+        onclick={handleLogout}
         class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg"
       >
         Logout
