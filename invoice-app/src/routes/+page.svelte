@@ -1,15 +1,23 @@
 <script>
   import { goto } from '$app/navigation';
   import { theme } from '$lib/theme.svelte.js';
-   import { lang } from '$lib/lang.svelte.js';
+  import { lang } from '$lib/lang.svelte.js';
+  import TemplatePreview from '$lib/components/TemplatePreview.svelte';
+
+  import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
+  import Invoice02Corporate from '$lib/components/invoices/Invoice02Corporate.svelte';
+  import Invoice03BoldBand from '$lib/components/invoices/Invoice03BoldBand.svelte';
+  import Invoice04Gradient from '$lib/components/invoices/Invoice04Gradient.svelte';
+  import Invoice05DarkStudio from '$lib/components/invoices/Invoice05DarkStudio.svelte';
+  import Invoice06Luxury from '$lib/components/invoices/Invoice06Luxury.svelte';
 
   const featuredTemplates = [
-    { name: '1. Neat Minimal', id: 0, color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300' },
-    { name: '2. Classic Corporate', id: 1, color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' },
-    { name: '3. Bold Band', id: 2, color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300' },
-    { name: '4. Modern Gradient', id: 3, color: 'bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-300' },
-    { name: '5. Dark Studio', id: 4, color: 'bg-slate-800 text-emerald-400' },
-    { name: '6. Elegant Luxury', id: 5, color: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-300' },
+    { nameKey: 'tpl1_name', component: Invoice01Neat },
+    { nameKey: 'tpl2_name', component: Invoice02Corporate },
+    { nameKey: 'tpl3_name', component: Invoice03BoldBand },
+    { nameKey: 'tpl4_name', component: Invoice04Gradient },
+    { nameKey: 'tpl5_name', component: Invoice05DarkStudio },
+    { nameKey: 'tpl6_name', component: Invoice06Luxury },
   ];
 </script>
 
@@ -43,7 +51,6 @@
   </nav>
 
   <!-- HERO -->
-  <!-- HERO -->
   <section class="max-w-4xl mx-auto text-center px-6 pt-20 pb-16">
     <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
       {lang.t('hero_title')}
@@ -68,9 +75,10 @@
       {#each featuredTemplates as t}
         <button
           onclick={() => goto('/editor')}
-          class="aspect-[3/4] rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 {t.color}"
+          class="rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:shadow-lg transition overflow-hidden bg-white dark:bg-slate-800"
         >
-          <span class="font-semibold">{t.name}</span>
+          <TemplatePreview component={t.component} />
+          <p class="font-semibold text-sm text-center py-3 text-slate-800 dark:text-white">{lang.t(t.nameKey)}</p>
         </button>
       {/each}
     </div>

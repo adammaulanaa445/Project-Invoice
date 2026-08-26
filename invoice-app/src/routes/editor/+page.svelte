@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from 'svelte';
+
   import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
   import Invoice02Corporate from '$lib/components/invoices/Invoice02Corporate.svelte';
   import Invoice03BoldBand from '$lib/components/invoices/Invoice03BoldBand.svelte';
@@ -31,11 +33,17 @@
   import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
   import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
+
   import { page } from '$app/state';
+  import { goto } from '$app/navigation';
+
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
   import { invoiceStore } from '$lib/invoiceStore.svelte.js';
-  import { goto } from '$app/navigation';
+
+  onMount(() => {
+    lang.init();
+  });
 
   const templates = [
     { name: () => `1. ${lang.t('tpl1_name')}`, component: Invoice01Neat },
@@ -60,7 +68,7 @@
     { name: () => `20. ${lang.t('tpl20_name')}`, component: InvoicePastelPlayful },
     { name: () => `21. ${lang.t('tpl21_name')}`, component: InvoiceRetroVintage },
     { name: () => `22. ${lang.t('tpl22_name')}`, component: InvoiceTechSaaS },
-     { name: () => `23. ${lang.t('tpl23_name')}`, component: InvoiceCurvedTeal },
+    { name: () => `23. ${lang.t('tpl23_name')}`, component: InvoiceCurvedTeal },
     { name: () => `24. ${lang.t('tpl24_name')}`, component: InvoicePixelReceipt },
     { name: () => `25. ${lang.t('tpl25_name')}`, component: InvoiceLedgerKlasik },
     { name: () => `26. ${lang.t('tpl26_name')}`, component: InvoiceSwissGrid },
@@ -69,23 +77,41 @@
     { name: () => `29. ${lang.t('tpl29_name')}`, component: InvoiceStudioHitam },
     { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
     { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
-    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
+    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru }
   ];
 
-  let selected = $state(Number(page.url.searchParams.get('template')) || 0);
+  let selected = $state(
+    Number(page.url.searchParams.get('template')) || 0
+  );
 
-  // Data invoice yang bisa diedit lewat form
   let invoice = $state({
     invoiceNumber: 'INV-0001',
     issueDate: '2026-08-14',
     dueDate: '2026-08-28',
     currency: 'IDR',
     logoUrl: '',
-    from: { name: 'PT Contoh Jaya', address: 'Jl. Merdeka No.1, Surabaya', email: 'hello@contoh.co', phone: '08123456789' },
-    to: { name: 'Budi Santoso', address: 'Jl. Sudirman No.5, Jakarta', email: 'budi@klien.com' },
+    from: {
+      name: 'PT Contoh Jaya',
+      address: 'Jl. Merdeka No.1, Surabaya',
+      email: 'hello@contoh.co',
+      phone: '08123456789'
+    },
+    to: {
+      name: 'Budi Santoso',
+      address: 'Jl. Sudirman No.5, Jakarta',
+      email: 'budi@klien.com'
+    },
     items: [
-      { description: 'Jasa Desain Logo', qty: 1, price: 1500000 },
-      { description: 'Jasa Maintenance Website', qty: 2, price: 500000 }
+      {
+        description: 'Jasa Desain Logo',
+        qty: 1,
+        price: 1500000
+      },
+      {
+        description: 'Jasa Maintenance Website',
+        qty: 2,
+        price: 500000
+      }
     ],
     taxPercent: 11,
     discountPercent: 0,
@@ -94,26 +120,34 @@
   });
 
   let logoError = $state('');
+  let previewEl = $state();
+  let downloading = $state(false);
+  let saving = $state(false);
+  let saveMessage = $state('');
 
   function handleLogoUpload(e) {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     logoError = '';
 
     if (!file.type.startsWith('image/')) {
-      logoError = 'File harus berupa gambar (PNG/JPG/SVG).';
+      logoError = lang.t('logo_file_error');
       return;
     }
+
     if (file.size > 2 * 1024 * 1024) {
-      logoError = 'Ukuran gambar maksimal 2MB.';
+      logoError = lang.t('logo_size_error');
       return;
     }
 
     const reader = new FileReader();
+
     reader.onload = (event) => {
       invoice.logoUrl = event.target.result;
     };
+
     reader.readAsDataURL(file);
   }
 
@@ -122,7 +156,12 @@
   }
 
   function addItem() {
-    invoice.items.push({ description: '', qty: 1, price: 0 });
+    invoice.items.push({
+      description: '',
+      qty: 1,
+      price: 0
+    });
+
     invoice.items = invoice.items;
   }
 
@@ -130,247 +169,535 @@
     invoice.items = invoice.items.filter((_, i) => i !== index);
   }
 
-  let previewEl = $state();
-  let downloading = $state(false);
-
   async function downloadPDF() {
+    if (!previewEl) return;
+
     downloading = true;
-    const { default: html2canvas } = await import('html2canvas-pro');
-    const { jsPDF } = await import('jspdf');
 
-    const canvas = await html2canvas(previewEl, { scale: 2 });
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    try {
+      const { default: html2canvas } = await import('html2canvas-pro');
+      const { jsPDF } = await import('jspdf');
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      const canvas = await html2canvas(previewEl, {
+        scale: 2
+      });
 
-    pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, imgHeight);
-    pdf.save(`${invoice.invoiceNumber || 'invoice'}.pdf`);
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-    downloading = false;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+
+      const imgHeight =
+        (canvas.height * pageWidth) / canvas.width;
+
+      pdf.addImage(
+        imgData,
+        'JPEG',
+        0,
+        0,
+        pageWidth,
+        imgHeight
+      );
+
+      pdf.save(
+        `${invoice.invoiceNumber || 'invoice'}.pdf`
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      downloading = false;
+    }
   }
-
-  let saving = $state(false);
-  let saveMessage = $state('');
 
   function saveInvoice() {
     saving = true;
     saveMessage = '';
 
     try {
-      const record = invoiceStore.save(selected + 1, invoice);
+      const record = invoiceStore.save(
+        selected + 1,
+        invoice
+      );
+
       invoice.invoiceNumber = record.invoiceNumber;
-      saveMessage = '✅ Invoice berhasil disimpan!';
+
+      saveMessage = `✅ ${lang.t('save_success')}`;
     } catch (e) {
-      saveMessage = '❌ Gagal menyimpan: ' + e.message;
+      saveMessage =
+        `❌ ${lang.t('save_failed')}: ${e.message}`;
     } finally {
       saving = false;
-      setTimeout(() => (saveMessage = ''), 4000);
+
+      setTimeout(() => {
+        saveMessage = '';
+      }, 4000);
     }
   }
 
-  // Fungsi Logout
   async function handleLogout() {
     const token = localStorage.getItem('auth_token');
 
     if (token) {
-      await fetch('http://localhost:8800/api/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
+      try {
+        await fetch('http://localhost:8800/api/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
+
     goto('/login');
   }
 </script>
 
 <main class="min-h-screen bg-slate-100 dark:bg-slate-900 transition-colors">
 
-  <!-- NAVBAR -->
   <nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 flex justify-between items-center">
-    <a href="/" class="font-bold text-xl text-slate-900 dark:text-white">InvoiceKita</a>
+    <a
+      href="/"
+      class="font-bold text-xl text-slate-900 dark:text-white"
+    >
+      InvoiceKita
+    </a>
+
     <div class="flex gap-4 items-center text-sm">
-      <a href="/templates" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">{lang.t('nav_templates')}</a>
+
+      <a
+        href="/templates"
+        class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+      >
+        {lang.t('nav_templates')}
+      </a>
+
       <select
         value={lang.current}
         onchange={(e) => lang.set(e.target.value)}
         class="bg-transparent text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 dark:text-white"
       >
         {#each Object.entries(lang.options) as [code, label]}
-          <option value={code}>{label}</option>
+          <option value={code}>
+            {label}
+          </option>
         {/each}
       </select>
-      <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
+
+      <button
+        onclick={() => theme.toggle()}
+        class="text-lg"
+        aria-label="Toggle dark mode"
+      >
         {theme.dark ? '☀️' : '🌙'}
       </button>
+
       <button
         onclick={handleLogout}
         class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg"
       >
-        Logout
+        {lang.t('logout')}
       </button>
+
     </div>
   </nav>
 
   <div class="py-8 px-4">
-    <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">{lang.t('et_title')}</h1>
 
-    <div class="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">
+      {lang.t('et_title')}
+    </h1>
+
+    <div class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto">
+
       {#each templates as t, i}
+
         <button
-          class="px-3 py-1.5 rounded-full text-sm border {selected === i ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'}"
+          class="px-3 py-1.5 rounded-full text-sm border {selected === i
+            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'}"
           onclick={() => selected = i}
         >
           {t.name()}
         </button>
+
       {/each}
+
     </div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      <!-- FORM INPUT -->
       <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 space-y-5 h-fit">
 
-        <!-- LOGO UPLOAD -->
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Logo Perusahaan</h2>
+
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+            {lang.t('logo_company')}
+          </h2>
+
           <div class="flex items-center gap-4">
+
             {#if invoice.logoUrl}
-              <img src={invoice.logoUrl} alt="Logo preview" class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-slate-600 bg-white p-1" />
+
+              <img
+                src={invoice.logoUrl}
+                alt={lang.t('logo_company')}
+                class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-slate-600 bg-white p-1"
+              />
+
             {:else}
+
               <div class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs text-center">
-                Belum ada logo
+                {lang.t('logo_empty')}
               </div>
+
             {/if}
+
             <div class="flex-1">
+
               <input
                 type="file"
                 accept="image/*"
                 onchange={handleLogoUpload}
                 class="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-slate-900 dark:file:bg-blue-600 file:text-white file:text-xs"
               />
+
               {#if invoice.logoUrl}
-                <button onclick={removeLogo} class="text-xs text-red-500 mt-1 hover:underline">Hapus logo</button>
+
+                <button
+                  onclick={removeLogo}
+                  class="text-xs text-red-500 mt-1 hover:underline"
+                >
+                  {lang.t('logo_remove')}
+                </button>
+
               {/if}
+
               {#if logoError}
-                <p class="text-xs text-red-500 mt-1">{logoError}</p>
+
+                <p class="text-xs text-red-500 mt-1">
+                  {logoError}
+                </p>
+
               {/if}
+
             </div>
+
           </div>
+
         </div>
 
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_info')}</h2>
+
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+            {lang.t('et_info')}
+          </h2>
+
           <div class="grid grid-cols-2 gap-3">
+
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_invoice_number')}</label>
-              <input bind:value={invoice.invoiceNumber} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
+
+              <label class="text-xs text-slate-500 dark:text-slate-400">
+                {lang.t('et_invoice_number')}
+              </label>
+
+              <input
+                bind:value={invoice.invoiceNumber}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              />
+
             </div>
+
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_status')}</label>
-              <select bind:value={invoice.status} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1">
-                <option value="unpaid">{lang.t('et_status_unpaid')}</option>
-                <option value="paid">{lang.t('et_status_paid')}</option>
-                <option value="overdue">{lang.t('et_status_overdue')}</option>
+
+              <label class="text-xs text-slate-500 dark:text-slate-400">
+                {lang.t('et_status')}
+              </label>
+
+              <select
+                bind:value={invoice.status}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              >
+                <option value="unpaid">
+                  {lang.t('et_status_unpaid')}
+                </option>
+
+                <option value="paid">
+                  {lang.t('et_status_paid')}
+                </option>
+
+                <option value="overdue">
+                  {lang.t('et_status_overdue')}
+                </option>
               </select>
+
             </div>
+
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_issue_date')}</label>
-              <input type="date" bind:value={invoice.issueDate} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
+
+              <label class="text-xs text-slate-500 dark:text-slate-400">
+                {lang.t('et_issue_date')}
+              </label>
+
+              <input
+                type="date"
+                bind:value={invoice.issueDate}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              />
+
             </div>
+
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_due_date')}</label>
-              <input type="date" bind:value={invoice.dueDate} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
+
+              <label class="text-xs text-slate-500 dark:text-slate-400">
+                {lang.t('et_due_date')}
+              </label>
+
+              <input
+                type="date"
+                bind:value={invoice.dueDate}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              />
+
             </div>
+
           </div>
+
         </div>
 
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_from')}</h2>
+
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+            {lang.t('et_from')}
+          </h2>
+
           <div class="space-y-2">
-            <input placeholder={lang.t('et_company_name')} bind:value={invoice.from.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder={lang.t('et_address')} bind:value={invoice.from.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+
+            <input
+              placeholder={lang.t('et_company_name')}
+              bind:value={invoice.from.name}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+            />
+
+            <input
+              placeholder={lang.t('et_address')}
+              bind:value={invoice.from.address}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+            />
+
             <div class="grid grid-cols-2 gap-2">
-              <input placeholder={lang.t('et_email')} bind:value={invoice.from.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-              <input placeholder={lang.t('et_phone')} bind:value={invoice.from.phone} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+
+              <input
+                placeholder={lang.t('et_email')}
+                bind:value={invoice.from.email}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              />
+
+              <input
+                placeholder={lang.t('et_phone')}
+                bind:value={invoice.from.phone}
+                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              />
+
             </div>
+
           </div>
+
         </div>
 
         <div>
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">{lang.t('et_to')}</h2>
+
+          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+            {lang.t('et_to')}
+          </h2>
+
           <div class="space-y-2">
-            <input placeholder={lang.t('et_client_name')} bind:value={invoice.to.name} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder={lang.t('et_address')} bind:value={invoice.to.address} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-            <input placeholder={lang.t('et_email')} bind:value={invoice.to.email} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
+
+            <input
+              placeholder={lang.t('et_client_name')}
+              bind:value={invoice.to.name}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+            />
+
+            <input
+              placeholder={lang.t('et_address')}
+              bind:value={invoice.to.address}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+            />
+
+            <input
+              placeholder={lang.t('et_email')}
+              bind:value={invoice.to.email}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+            />
+
           </div>
+
         </div>
 
         <div>
+
           <div class="flex justify-between items-center mb-3">
-            <h2 class="font-semibold text-slate-800 dark:text-white">{lang.t('et_items')}</h2>
-            <button onclick={addItem} class="text-xs px-2 py-1 bg-slate-900 dark:bg-blue-600 text-white rounded-lg">{lang.t('et_add_item')}</button>
+
+            <h2 class="font-semibold text-slate-800 dark:text-white">
+              {lang.t('et_items')}
+            </h2>
+
+            <button
+              onclick={addItem}
+              class="text-xs px-2 py-1 bg-slate-900 dark:bg-blue-600 text-white rounded-lg"
+            >
+              {lang.t('et_add_item')}
+            </button>
+
           </div>
+
           <div class="space-y-2">
+
             {#each invoice.items as item, i}
+
               <div class="flex gap-2 items-center">
-                <input placeholder={lang.t('et_description')} bind:value={item.description} class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm" />
-                <input type="number" placeholder={lang.t('et_qty')} bind:value={item.qty} class="w-16 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
-                <input type="number" placeholder={lang.t('et_price')} bind:value={item.price} class="w-28 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm" />
-                <button onclick={() => removeItem(i)} class="text-red-500 text-sm px-2">✕</button>
+
+                <input
+                  placeholder={lang.t('et_description')}
+                  bind:value={item.description}
+                  class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+                />
+
+                <input
+                  type="number"
+                  placeholder={lang.t('et_qty')}
+                  bind:value={item.qty}
+                  class="w-16 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm"
+                />
+
+                <input
+                  type="number"
+                  placeholder={lang.t('et_price')}
+                  bind:value={item.price}
+                  class="w-28 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm"
+                />
+
+                <button
+                  onclick={() => removeItem(i)}
+                  class="text-red-500 text-sm px-2"
+                >
+                  ✕
+                </button>
+
               </div>
+
             {/each}
+
           </div>
+
         </div>
 
         <div class="grid grid-cols-2 gap-3">
+
           <div>
-            <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_tax')}</label>
-            <input type="number" bind:value={invoice.taxPercent} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
+
+            <label class="text-xs text-slate-500 dark:text-slate-400">
+              {lang.t('et_tax')}
+            </label>
+
+            <input
+              type="number"
+              bind:value={invoice.taxPercent}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+            />
+
           </div>
+
           <div>
-            <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_discount')}</label>
-            <input type="number" bind:value={invoice.discountPercent} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" />
+
+            <label class="text-xs text-slate-500 dark:text-slate-400">
+              {lang.t('et_discount')}
+            </label>
+
+            <input
+              type="number"
+              bind:value={invoice.discountPercent}
+              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+            />
+
           </div>
+
         </div>
 
         <div>
-          <label class="text-xs text-slate-500 dark:text-slate-400">{lang.t('et_notes')}</label>
-          <textarea bind:value={invoice.notes} class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1" rows="2"></textarea>
+
+          <label class="text-xs text-slate-500 dark:text-slate-400">
+            {lang.t('et_notes')}
+          </label>
+
+          <textarea
+            bind:value={invoice.notes}
+            class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+            rows="2"
+          ></textarea>
+
         </div>
+
       </div>
 
-      <!-- PREVIEW LIVE -->
       <div class="lg:sticky lg:top-6 h-fit">
+
         <div class="flex gap-2 mb-3">
+
           <button
             onclick={saveInvoice}
             disabled={saving}
             class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? 'Menyimpan...' : '💾 Simpan Invoice'}
+            {saving
+              ? lang.t('saving_invoice')
+              : lang.t('save_invoice')}
           </button>
+
           <button
             onclick={downloadPDF}
             disabled={downloading}
             class="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
           >
-            {downloading ? 'Membuat PDF...' : '📄 Download PDF'}
+            {downloading
+              ? lang.t('generating_pdf')
+              : lang.t('download_pdf')}
           </button>
+
         </div>
+
         {#if saveMessage}
-          <p class="text-center text-sm mb-3 {saveMessage.startsWith('✅') ? 'text-emerald-600' : 'text-red-500'}">{saveMessage}</p>
+
+          <p
+            class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
+              ? 'text-emerald-600'
+              : 'text-red-500'}"
+          >
+            {saveMessage}
+          </p>
+
         {/if}
+
         <div bind:this={previewEl}>
-          <svelte:component this={templates[selected].component} {invoice} />
+
+          <svelte:component
+            this={templates[selected].component}
+            {invoice}
+          />
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
 </main>
