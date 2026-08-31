@@ -19,7 +19,7 @@
     { titleKey: 'f1_title', descKey: 'f1_desc' },
     { titleKey: 'f2_title', descKey: 'f2_desc' },
     { titleKey: 'f3_title', descKey: 'f3_desc' },
-    { titleKey: 'f4_title', descKey: 'f4_desc' },
+    { titleKey: 'Cetak Via PDF', descKey: 'f4_desc' },
   ];
 </script>
 
