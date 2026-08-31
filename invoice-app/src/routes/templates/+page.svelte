@@ -69,7 +69,7 @@
     { nameKey: 'tpl29_name', descKey: 'tpl29_desc', component: InvoiceStudioHitam },
     { nameKey: 'tpl30_name', descKey: 'tpl30_desc', component: InvoiceBrutalistBracket },
     { nameKey: 'tpl31_name', descKey: 'tpl31_desc', component: InvoiceEditorialMerah },
-    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru }
+    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru },
   ];
 
   function useTemplate(index) {
@@ -77,69 +77,119 @@
   }
 </script>
 
-<main class="min-h-screen bg-white dark:bg-slate-900 transition-colors">
+<main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
 
-  <!-- NAVBAR -->
-  <nav class="border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
-    <a href="/" class="font-bold text-xl text-slate-900 dark:text-white">InvoiceKita</a>
+  <!-- HERO CARD MELAYANG -->
+  <section class="px-4 pt-4">
+    <div class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors">
 
-    <div class="flex gap-4 items-center text-sm">
-      <a href="/templates" class="text-blue-600 dark:text-blue-400 font-medium">
-        {lang.t('nav_templates')}
-      </a>
+      <!-- NAVBAR -->
+      <nav class="px-6 py-4 flex justify-between items-center">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
+          InvoiceKita
+        </a>
+        <div class="flex gap-4 items-center text-sm">
+          <a href="/templates" class="font-medium" style="color:#8CFF3D">{lang.t('nav_templates')}</a>
+          <select
+            value={lang.current}
+            onchange={(e) => lang.set(e.target.value)}
+            class="bg-transparent text-sm border border-current/20 rounded-lg px-2 py-1"
+          >
+            {#each Object.entries(lang.options) as [code, label]}
+              <option value={code} class="text-slate-900">{label}</option>
+            {/each}
+          </select>
+          <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
+            {theme.dark ? '☀️' : '🌙'}
+          </button>
+          <button
+            onclick={() => goto('/editor')}
+            class="rounded-full px-5 py-2 font-semibold text-black"
+            style="background:#8CFF3D"
+          >
+            {lang.t('nav_create')}
+          </button>
+        </div>
+      </nav>
 
-      <select
-        value={lang.current}
-        onchange={(e) => lang.set(e.target.value)}
-        class="bg-transparent text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 dark:text-white"
-      >
-        {#each Object.entries(lang.options) as [code, label]}
-          <option value={code}>{label}</option>
-        {/each}
-      </select>
-
-      <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
-        {theme.dark ? '☀️' : '🌙'}
-      </button>
-
-      <button
-        onclick={() => goto('/editor')}
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-      >
-        {lang.t('nav_create')}
-      </button>
+      <!-- HERO CONTENT -->
+      <div class="px-6 md:px-12 pb-12 pt-4 text-center">
+        <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
+          {lang.t('tp_title')}
+        </h1>
+        <p class="mt-4 opacity-70 max-w-lg mx-auto">{lang.t('tp_subtitle')}</p>
+      </div>
     </div>
-  </nav>
+  </section>
 
-  <!-- CONTENT -->
-  <div class="max-w-6xl mx-auto px-6 py-12">
+  <!-- STATS BAR -->
+  <section class="max-w-4xl mx-auto px-6 -mt-8 relative z-10">
+    <div class="rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 grid grid-cols-4 divide-x divide-slate-200 dark:divide-white/10 py-6">
+      <div class="text-center px-2">
+        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">32</p>
+        <p class="text-xs opacity-60 mt-1">Template</p>
+      </div>
+      <div class="text-center px-2">
+        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">10</p>
+        <p class="text-xs opacity-60 mt-1">Bahasa</p>
+      </div>
+      <div class="text-center px-2">
+        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">100%</p>
+        <p class="text-xs opacity-60 mt-1">Gratis</p>
+      </div>
+      <div class="text-center px-2">
+        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">24/7</p>
+        <p class="text-xs opacity-60 mt-1">Akses</p>
+      </div>
+    </div>
+  </section>
 
-    <h1 class="text-3xl font-bold text-slate-900 dark:text-white text-center mb-2">
-      {lang.t('tp_title')}
-    </h1>
-
-    <p class="text-center text-slate-500 dark:text-slate-400 mb-10">
-      {lang.t('tp_subtitle')}
-    </p>
-
-    <!-- TEMPLATE GRID -->
+  <!-- GRID TEMPLATE -->
+  <section class="max-w-6xl mx-auto px-6 py-16">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
       {#each templates as t, i}
         <button
           onclick={() => useTemplate(i)}
-          class="group text-left rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:border-blue-400 transition bg-white dark:bg-slate-800"
+          class="group text-left rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition"
         >
-          <TemplatePreview component={t.component} />
-
-          <div class="p-3 bg-white dark:bg-slate-800">
-            <p class="font-semibold text-sm text-slate-800 dark:text-white">{lang.t(t.nameKey)}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{lang.t(t.descKey)}</p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 opacity-0 group-hover:opacity-100 transition">{lang.t('use_template')}</p>
+          <div class="relative bg-white dark:bg-[#0d0d0d]">
+            <span
+              class="absolute top-3 left-3 z-10 text-[10px] font-semibold uppercase px-2 py-1 rounded-full text-black"
+              style="background:#8CFF3D"
+            >{String(i + 1).padStart(2, '0')}</span>
+            <TemplatePreview component={t.component} />
+          </div>
+          <div class="p-3">
+            <p class="font-semibold text-sm">{lang.t(t.nameKey)}</p>
+            <p class="text-xs opacity-50 mt-0.5">{lang.t(t.descKey)}</p>
+            <p class="text-xs font-medium mt-2 opacity-0 group-hover:opacity-100 transition" style="color:#8CFF3D">{lang.t('use_template')} →</p>
           </div>
         </button>
       {/each}
     </div>
+  </section>
 
-  </div>
+  <!-- CTA + FOOTER -->
+  <footer class="px-4 pb-4">
+    <div class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden" style="background:#8CFF3D">
+      <div class="px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6 text-black">
+        <div>
+          <h3 class="text-2xl font-bold">{lang.t('hero_cta')}</h3>
+          <p class="opacity-70 mt-1">{lang.t('hero_subtitle')}</p>
+        </div>
+        <button
+          onclick={() => goto('/editor')}
+          class="rounded-full px-6 py-3 font-semibold bg-black text-white flex-shrink-0"
+        >
+          {lang.t('nav_create')}
+        </button>
+      </div>
+      <div class="border-t border-black/10 px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-3 text-black/70 text-sm">
+        <span class="font-bold text-black">InvoiceKita</span>
+        <span>{lang.t('footer')}</span>
+      </div>
+    </div>
+  </footer>
 
 </main>
