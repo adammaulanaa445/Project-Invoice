@@ -4,6 +4,7 @@
   import { lang } from '$lib/lang.svelte.js';
   import TemplatePreview from '$lib/components/TemplatePreview.svelte';
 
+  import InvoiceBoldTypography from '$lib/components/invoices/InvoiceBoldTypography.svelte';
   import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
   import Invoice05DarkStudio from '$lib/components/invoices/Invoice05DarkStudio.svelte';
 
@@ -76,7 +77,7 @@
         </div>
         <div class="w-full md:w-80 flex-shrink-0">
           <div class="rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5">
-            <TemplatePreview component={Invoice01Neat} />
+            <TemplatePreview component={InvoiceBoldTypography} />
           </div>
         </div>
       </div>
