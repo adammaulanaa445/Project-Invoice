@@ -151,9 +151,9 @@
       {#each templates as t, i}
         <button
           onclick={() => useTemplate(i)}
-          class="group text-left rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition"
+          class="group text-left rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition cursor-pointer transition duration-300 hover:-translate-y-4"
         >
-          <div class="relative bg-white dark:bg-[#0d0d0d]">
+          <div class="relative bg-white dark:bg-[#0d0d0d]"> 
             <span
               class="absolute top-3 left-3 z-10 text-[10px] font-semibold uppercase px-2 py-1 rounded-full text-black"
               style="background:#8CFF3D"
