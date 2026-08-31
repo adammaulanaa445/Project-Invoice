@@ -43,15 +43,20 @@
   }
 </script>
 
-<main class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md space-y-6">
+<main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white flex items-center justify-center p-4 transition-colors">
+  <div class="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] p-8 w-full max-w-md space-y-6">
+
     <div class="text-center">
-      <h1 class="text-2xl font-bold text-slate-800">Masuk ke InvoiceKita</h1>
-      <p class="text-xs text-slate-500 mt-1">Pilih metode masuk untuk melanjutkan</p>
+      <a href="/" class="inline-flex items-center gap-2 font-bold text-lg mb-4">
+        <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
+        InvoiceKita
+      </a>
+      <h1 class="text-2xl font-bold">Masuk ke InvoiceKita</h1>
+      <p class="text-xs opacity-60 mt-1">Pilih metode masuk untuk melanjutkan</p>
     </div>
 
     {#if errorMsg}
-      <div class="bg-red-100 border border-red-200 text-red-600 text-sm p-3 rounded-lg text-center">
+      <div class="bg-red-500/10 border border-red-500/30 text-red-500 text-sm p-3 rounded-lg text-center">
         {errorMsg}
       </div>
     {/if}
@@ -60,7 +65,7 @@
     <button
       onclick={loginWithGoogle}
       type="button"
-      class="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-xl transition-colors shadow-sm"
+      class="w-full flex items-center justify-center gap-3 bg-white dark:bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-full transition-colors shadow-sm"
     >
       <svg class="w-5 h-5" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -72,42 +77,49 @@
     </button>
 
     <div class="relative flex py-1 items-center">
-      <div class="flex-grow border-t border-slate-200"></div>
-      <span class="flex-shrink mx-4 text-xs text-slate-400">atau email</span>
-      <div class="flex-grow border-t border-slate-200"></div>
+      <div class="flex-grow border-t border-slate-200 dark:border-white/10"></div>
+      <span class="flex-shrink mx-4 text-xs opacity-50">atau email</span>
+      <div class="flex-grow border-t border-slate-200 dark:border-white/10"></div>
     </div>
 
     <!-- Form Manual (Email & Password) -->
     <form onsubmit={handleLogin} class="space-y-4">
       <div>
-        <label for="email" class="block text-xs text-slate-600 mb-1">Email</label>
+        <label for="email" class="block text-xs opacity-60 mb-1">Email</label>
         <input
           id="email"
           type="email"
           bind:value={email}
           required
-          class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2"
+          style="--tw-ring-color:#8CFF3D"
         />
       </div>
 
       <div>
-        <label for="password" class="block text-xs text-slate-600 mb-1">Password</label>
+        <label for="password" class="block text-xs opacity-60 mb-1">Password</label>
         <input
           id="password"
           type="password"
           bind:value={password}
           required
-          class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2"
+          style="--tw-ring-color:#8CFF3D"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
+        class="w-full text-black font-semibold py-2.5 rounded-full transition-colors text-sm disabled:opacity-50"
+        style="background:#8CFF3D"
       >
         {loading ? 'Memproses...' : 'Masuk'}
       </button>
     </form>
+
+    <p class="text-center text-xs opacity-60">
+      Belum punya akun? <a href="/register" class="font-medium hover:underline" style="color:#8CFF3D">Daftar di sini</a>
+    </p>
   </div>
 </main>
