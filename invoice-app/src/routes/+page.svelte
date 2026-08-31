@@ -19,7 +19,8 @@
     { titleKey: 'f1_title', descKey: 'f1_desc' },
     { titleKey: 'f2_title', descKey: 'f2_desc' },
     { titleKey: 'f3_title', descKey: 'f3_desc' },
-    { titleKey: 'f4_title', descKey: 'f4_desc' },
+    { titleKey: 'Cetak Via PDF', descKey: 'Cetak Via PDF' }
+    
   ];
 </script>
 
@@ -69,8 +70,7 @@
             </button>
             <a
               href="/templates"
-              class="rounded-full px-6 py-3 font-semibold border border-current/30"
-            >
+              class="rounded-full px-6 py-3 font-semibold border border-current/30 cursor-pointer">
               {lang.t('see_all')}
             </a>
           </div>
@@ -141,7 +141,7 @@
           </div>
           <div class="rounded-xl p-5 text-black" style="background:#8CFF3D">
             <p class="text-sm mb-2 opacity-80">Siap membuat invoice pertamamu?</p>
-            <button onclick={() => goto('/editor')} class="font-semibold flex items-center gap-1">{lang.t('hero_cta')} <span>→</span></button>
+            <button onclick={() => goto('/editor')} class="font-semibold flex items-center gap-1 cursor-pointer">{lang.t('hero_cta')} <span>→</span></button>
           </div>
         </div>
       </div>
@@ -165,8 +165,7 @@
         </div>
         <button
           onclick={() => goto('/editor')}
-          class="rounded-full px-6 py-3 font-semibold bg-black text-white flex-shrink-0"
-        >
+          class="rounded-full px-6 py-3 font-semibold bg-black text-white flex-shrink-0 cursor-pointer">
           {lang.t('nav_create')}
         </button>
       </div>
