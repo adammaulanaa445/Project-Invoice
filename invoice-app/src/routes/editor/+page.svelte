@@ -259,13 +259,14 @@
   }
 </script>
 
-<main class="min-h-screen bg-slate-100 dark:bg-slate-900 transition-colors">
+<main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
 
-  <nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 flex justify-between items-center">
+  <nav class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center">
     <a
       href="/"
-      class="font-bold text-xl text-slate-900 dark:text-white"
+      class="flex items-center gap-2 font-bold text-lg"
     >
+      <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
       InvoiceKita
     </a>
 
@@ -273,7 +274,7 @@
 
       <a
         href="/templates"
-        class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+        class="opacity-70 hover:opacity-100 transition"
       >
         {lang.t('nav_templates')}
       </a>
@@ -281,10 +282,10 @@
       <select
         value={lang.current}
         onchange={(e) => lang.set(e.target.value)}
-        class="bg-transparent text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 dark:text-white"
+        class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
       >
         {#each Object.entries(lang.options) as [code, label]}
-          <option value={code}>
+          <option value={code} class="text-slate-900">
             {label}
           </option>
         {/each}
@@ -300,7 +301,7 @@
 
       <button
         onclick={handleLogout}
-        class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg"
+        class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-full"
       >
         {lang.t('logout')}
       </button>
@@ -310,7 +311,7 @@
 
   <div class="py-8 px-4">
 
-    <h1 class="text-2xl font-bold text-center text-slate-800 dark:text-white mb-6">
+    <h1 class="text-2xl font-bold text-center mb-6">
       {lang.t('et_title')}
     </h1>
 
@@ -319,9 +320,8 @@
       {#each templates as t, i}
 
         <button
-          class="px-3 py-1.5 rounded-full text-sm border {selected === i
-            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'}"
+          class="px-3 py-1.5 rounded-full text-sm border transition {selected === i ? '' : 'border-slate-300 dark:border-white/10 opacity-70'}"
+          style={selected === i ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;' : ''}
           onclick={() => selected = i}
         >
           {t.name()}
@@ -333,11 +333,11 @@
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 space-y-5 h-fit">
+      <div class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit">
 
         <div>
 
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+          <h2 class="font-semibold mb-3">
             {lang.t('logo_company')}
           </h2>
 
@@ -348,12 +348,12 @@
               <img
                 src={invoice.logoUrl}
                 alt={lang.t('logo_company')}
-                class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-slate-600 bg-white p-1"
+                class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-white/10 bg-white p-1"
               />
 
             {:else}
 
-              <div class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs text-center">
+              <div class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center">
                 {lang.t('logo_empty')}
               </div>
 
@@ -365,7 +365,7 @@
                 type="file"
                 accept="image/*"
                 onchange={handleLogoUpload}
-                class="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-slate-900 dark:file:bg-blue-600 file:text-white file:text-xs"
+                class="w-full text-xs opacity-80 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:font-semibold file:text-black file:bg-[#8CFF3D] text-current"
               />
 
               {#if invoice.logoUrl}
@@ -395,7 +395,7 @@
 
         <div>
 
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+          <h2 class="font-semibold mb-3">
             {lang.t('et_info')}
           </h2>
 
@@ -403,26 +403,26 @@
 
             <div>
 
-              <label class="text-xs text-slate-500 dark:text-slate-400">
+              <label class="text-xs opacity-60">
                 {lang.t('et_invoice_number')}
               </label>
 
               <input
                 bind:value={invoice.invoiceNumber}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
 
             </div>
 
             <div>
 
-              <label class="text-xs text-slate-500 dark:text-slate-400">
+              <label class="text-xs opacity-60">
                 {lang.t('et_status')}
               </label>
 
               <select
                 bind:value={invoice.status}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               >
                 <option value="unpaid">
                   {lang.t('et_status_unpaid')}
@@ -441,28 +441,28 @@
 
             <div>
 
-              <label class="text-xs text-slate-500 dark:text-slate-400">
+              <label class="text-xs opacity-60">
                 {lang.t('et_issue_date')}
               </label>
 
               <input
                 type="date"
                 bind:value={invoice.issueDate}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
 
             </div>
 
             <div>
 
-              <label class="text-xs text-slate-500 dark:text-slate-400">
+              <label class="text-xs opacity-60">
                 {lang.t('et_due_date')}
               </label>
 
               <input
                 type="date"
                 bind:value={invoice.dueDate}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
 
             </div>
@@ -473,7 +473,7 @@
 
         <div>
 
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+          <h2 class="font-semibold mb-3">
             {lang.t('et_from')}
           </h2>
 
@@ -482,13 +482,13 @@
             <input
               placeholder={lang.t('et_company_name')}
               bind:value={invoice.from.name}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
               placeholder={lang.t('et_address')}
               bind:value={invoice.from.address}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <div class="grid grid-cols-2 gap-2">
@@ -496,13 +496,13 @@
               <input
                 placeholder={lang.t('et_email')}
                 bind:value={invoice.from.email}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
               <input
                 placeholder={lang.t('et_phone')}
                 bind:value={invoice.from.phone}
-                class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
             </div>
@@ -513,7 +513,7 @@
 
         <div>
 
-          <h2 class="font-semibold text-slate-800 dark:text-white mb-3">
+          <h2 class="font-semibold mb-3">
             {lang.t('et_to')}
           </h2>
 
@@ -522,19 +522,19 @@
             <input
               placeholder={lang.t('et_client_name')}
               bind:value={invoice.to.name}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
               placeholder={lang.t('et_address')}
               bind:value={invoice.to.address}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
               placeholder={lang.t('et_email')}
               bind:value={invoice.to.email}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
           </div>
@@ -545,13 +545,14 @@
 
           <div class="flex justify-between items-center mb-3">
 
-            <h2 class="font-semibold text-slate-800 dark:text-white">
+            <h2 class="font-semibold">
               {lang.t('et_items')}
             </h2>
 
             <button
               onclick={addItem}
-              class="text-xs px-2 py-1 bg-slate-900 dark:bg-blue-600 text-white rounded-lg"
+              class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+              style="background:#8CFF3D"
             >
               {lang.t('et_add_item')}
             </button>
@@ -567,21 +568,21 @@
                 <input
                   placeholder={lang.t('et_description')}
                   bind:value={item.description}
-                  class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm"
+                  class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                 />
 
                 <input
                   type="number"
                   placeholder={lang.t('et_qty')}
                   bind:value={item.qty}
-                  class="w-16 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm"
+                  class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                 />
 
                 <input
                   type="number"
                   placeholder={lang.t('et_price')}
                   bind:value={item.price}
-                  class="w-28 border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-2 py-1.5 text-sm"
+                  class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                 />
 
                 <button
@@ -603,28 +604,28 @@
 
           <div>
 
-            <label class="text-xs text-slate-500 dark:text-slate-400">
+            <label class="text-xs opacity-60">
               {lang.t('et_tax')}
             </label>
 
             <input
               type="number"
               bind:value={invoice.taxPercent}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
             />
 
           </div>
 
           <div>
 
-            <label class="text-xs text-slate-500 dark:text-slate-400">
+            <label class="text-xs opacity-60">
               {lang.t('et_discount')}
             </label>
 
             <input
               type="number"
               bind:value={invoice.discountPercent}
-              class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
             />
 
           </div>
@@ -633,13 +634,13 @@
 
         <div>
 
-          <label class="text-xs text-slate-500 dark:text-slate-400">
+          <label class="text-xs opacity-60">
             {lang.t('et_notes')}
           </label>
 
           <textarea
             bind:value={invoice.notes}
-            class="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-3 py-1.5 text-sm mt-1"
+            class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
             rows="2"
           ></textarea>
 
@@ -654,7 +655,8 @@
           <button
             onclick={saveInvoice}
             disabled={saving}
-            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+            class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
+            style="background:#8CFF3D"
           >
             {saving
               ? lang.t('saving_invoice')
@@ -664,7 +666,8 @@
           <button
             onclick={downloadPDF}
             disabled={downloading}
-            class="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+            class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
+            style="border-color:#8CFF3D; color:#8CFF3D;"
           >
             {downloading
               ? lang.t('generating_pdf')
@@ -677,7 +680,7 @@
 
           <p
             class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
-              ? 'text-emerald-600'
+              ? 'text-emerald-500'
               : 'text-red-500'}"
           >
             {saveMessage}
@@ -685,7 +688,7 @@
 
         {/if}
 
-        <div bind:this={previewEl}>
+        <div bind:this={previewEl} class="rounded-2xl overflow-hidden">
 
           <svelte:component
             this={templates[selected].component}
