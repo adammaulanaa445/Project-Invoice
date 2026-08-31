@@ -38,6 +38,7 @@
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
 
   const templates = [
+<<<<<<< HEAD
     { component: Invoice01Neat },
     { component: Invoice02Corporate },
     { component: Invoice03BoldBand },
@@ -71,6 +72,41 @@
     { component: InvoiceEditorialMerah },
     { component: InvoiceSidebarBiru },
 ];
+=======
+    { nameKey: 'tpl1_name', descKey: '', component: Invoice01Neat },
+    { nameKey: 'tpl2_name', descKey: '', component: Invoice02Corporate },
+    { nameKey: 'tpl3_name', descKey: '', component: Invoice03BoldBand },
+    { nameKey: 'tpl4_name', descKey: '', component: Invoice04Gradient },
+    { nameKey: 'tpl5_name', descKey: '', component: Invoice05DarkStudio },
+    { nameKey: 'tpl6_name', descKey: '', component: Invoice06Luxury },
+    { nameKey: 'tpl7_name', descKey: '', component: Invoice07Asymmetric },
+    { nameKey: 'tpl8_name', descKey: '', component: Invoice08NatureEco },
+    { nameKey: 'tpl9_name', descKey: '', component: Invoice09TechStartup },
+    { nameKey: 'tpl10_name', descKey: '', component: Invoice10Freelance },
+    { nameKey: 'tpl11_name', descKey: '', component: InvoiceBoldTypography },
+    { nameKey: 'tpl12_name', descKey: '', component: InvoiceDarkTech },
+    { nameKey: 'tpl13_name', descKey: '', component: InvoiceEditorialKoran },
+    { nameKey: 'tpl14_name', descKey: '', component: InvoiceEleganEmas },
+    { nameKey: 'tpl15_name', descKey: '', component: InvoiceGradientVibrant },
+    { nameKey: 'tpl16_name', descKey: '', component: InvoiceKlasikFormal },
+    { nameKey: 'tpl17_name', descKey: '', component: InvoiceKorporatBiru },
+    { nameKey: 'tpl18_name', descKey: '', component: InvoiceModernMinimalis },
+    { nameKey: 'tpl19_name', descKey: '', component: InvoiceNordicEarthy },
+    { nameKey: 'tpl20_name', descKey: '', component: InvoicePastelPlayful },
+    { nameKey: 'tpl21_name', descKey: '', component: InvoiceRetroVintage },
+    { nameKey: 'tpl22_name', descKey: '', component: InvoiceTechSaaS },
+    { nameKey: 'tpl23_name', descKey: '', component: InvoiceCurvedTeal },
+    { nameKey: 'tpl24_name', descKey: '', component: InvoicePixelReceipt },
+    { nameKey: 'tpl25_name', descKey: '', component: InvoiceLedgerKlasik },
+    { nameKey: 'tpl26_name', descKey: '', component: InvoiceSwissGrid },
+    { nameKey: 'tpl27_name', descKey: '', component: InvoiceMotifWarm },
+    { nameKey: 'tpl28_name', descKey: '', component: InvoiceMinimalisMono },
+    { nameKey: 'tpl29_name', descKey: '', component: InvoiceStudioHitam },
+    { nameKey: 'tpl30_name', descKey: '', component: InvoiceBrutalistBracket },
+    { nameKey: 'tpl31_name', descKey: '', component: InvoiceEditorialMerah },
+    { nameKey: 'tpl32_name', descKey: '', component: InvoiceSidebarBiru },
+  ];
+>>>>>>> c66233687037262708a59f4839bd4c07f29cdc4f
 
   function useTemplate(index) {
     goto(`/editor?template=${index}`);
