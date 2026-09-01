@@ -104,6 +104,11 @@
           <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
             {theme.dark ? '☀️' : '🌙'}
           </button>
+          <a href="/login"
+            class="rounded-full px-4 py-2 font-semibold border border-current/30 hover:opacity-80 transition"
+          >
+            Login
+          </a>
           <button
             onclick={() => goto('/editor')}
             class="rounded-full px-5 py-2 font-semibold text-black"
