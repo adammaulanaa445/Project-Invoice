@@ -14,7 +14,7 @@
 
     try {
       await authStore.login(email, password);
-      goto('/editor');
+      goto('/');
     } catch (err) {
       errorMsg = err.message;
     } finally {

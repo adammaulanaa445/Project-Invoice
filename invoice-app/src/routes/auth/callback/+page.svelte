@@ -44,8 +44,8 @@
       );
 
 
-      // Masuk ke editor
-      goto('/editor');
+      // Masuk ke page
+      goto('/');
 
     } catch (error) {
 
