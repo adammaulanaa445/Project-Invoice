@@ -22,9 +22,9 @@
     }
   }
 
-  function loginWithGoogle() {
-    errorMsg = 'Login dengan Google belum tersedia di versi ini (perlu server backend). Silakan pakai email & password.';
-  }
+ function loginWithGoogle() {
+  authStore.loginWithGoogle();
+}
 </script>
 
 <main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white flex items-center justify-center p-4 transition-colors">

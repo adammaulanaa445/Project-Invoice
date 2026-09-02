@@ -11,6 +11,10 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    // =========================
+    // REGISTER
+    // =========================
+
     public function register(Request $request)
     {
         $request->validate([
@@ -34,6 +38,11 @@ class AuthController extends Controller
         ], 201);
     }
 
+
+    // =========================
+    // LOGIN MANUAL
+    // =========================
+
     public function login(Request $request)
     {
         $request->validate([
@@ -43,7 +52,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Email atau password salah.'],
             ]);
@@ -58,45 +67,106 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Berhasil logout']);
+    // =========================
+    // GOOGLE - REDIRECT
+    // =========================
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')
+            ->stateless()
+            ->with([
+                'prompt' => 'select_account'
+            ])
+            ->redirect();
     }
 
-    // Direct user ke halaman otorisasi Google
-   public function redirectToGoogle()
-{
-    return Socialite::driver('google')
-        ->stateless()
-        ->with(['prompt' => 'select_account'])
-        ->redirect();
-}
 
-    // Tangani callback respon dari Google
+    // =========================
+    // GOOGLE - CALLBACK
+    // =========================
+
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $user = User::updateOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
-                    'name' => $googleUser->getName(),
+            $googleUser = Socialite::driver('google')
+                ->stateless()
+                ->user();
+
+
+            // Cari user berdasarkan email
+            $user = User::where(
+                'email',
+                $googleUser->getEmail()
+            )->first();
+
+
+            // Kalau belum ada → buat user baru
+            if (!$user) {
+
+                $user = User::create([
+                    'name' => $googleUser->getName() ?: 'Google User',
+                    'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'password' => Hash::make(Str::random(16)),
-                ]
+                    'password' => Hash::make(Str::random(32)),
+                ]);
+
+            } else {
+
+                // Kalau user sudah ada → update google_id
+                $user->update([
+                    'google_id' => $googleUser->getId(),
+                ]);
+
+            }
+
+
+            // Buat token Sanctum
+            $token = $user
+                ->createToken('auth_token')
+                ->plainTextToken;
+
+
+            // Kirim user + token ke Svelte
+            $query = http_build_query([
+                'token' => $token,
+                'user' => json_encode([
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ]),
+            ]);
+
+
+            return redirect(
+                "http://localhost:5173/auth/callback?$query"
             );
 
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            return redirect("http://localhost:5173/auth/callback?token={$token}");
-
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal login Google: ' . $e->getMessage()
-            ], 500);
+
+            return redirect(
+                'http://localhost:5173/login?error=' .
+                urlencode($e->getMessage())
+            );
+
         }
+    }
+
+
+    // =========================
+    // LOGOUT
+    // =========================
+
+    public function logout(Request $request)
+    {
+        $request->user()
+            ->currentAccessToken()
+            ->delete();
+
+        return response()->json([
+            'message' => 'Berhasil logout'
+        ]);
     }
 }
