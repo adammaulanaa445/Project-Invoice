@@ -8,14 +8,14 @@
   let errorMsg = $state('');
   let loading = $state(false);
 
-    function handleRegister(e) {
+    async function handleRegister(e) {
     e.preventDefault();
     loading = true;
     errorMsg = '';
 
     try {
-      authStore.register(name, email, password);
-      authStore.logout(); // jangan langsung login otomatis
+      await authStore.register(name, email, password);
+      await authStore.logout(); // supaya tidak otomatis login, harus login manual dulu
       goto('/login?registered=1');
     } catch (err) {
       errorMsg = err.message;

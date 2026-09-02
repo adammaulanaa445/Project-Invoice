@@ -7,13 +7,13 @@
   let errorMsg = $state('');
   let loading = $state(false);
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     loading = true;
     errorMsg = '';
 
     try {
-      authStore.login(email, password);
+      await authStore.login(email, password);
       goto('/editor');
     } catch (err) {
       errorMsg = err.message;

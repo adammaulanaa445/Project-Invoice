@@ -210,28 +210,19 @@
     }
   }
 
-  function saveInvoice() {
+    async function saveInvoice() {
     saving = true;
     saveMessage = '';
 
     try {
-      const record = invoiceStore.save(
-        selected + 1,
-        invoice
-      );
-
+      const record = await invoiceStore.save(selected + 1, invoice);
       invoice.invoiceNumber = record.invoiceNumber;
-
-      saveMessage = `✅ ${lang.t('save_success')}`;
+      saveMessage = '✅ Invoice berhasil disimpan!';
     } catch (e) {
-      saveMessage =
-        `❌ ${lang.t('save_failed')}: ${e.message}`;
+      saveMessage = '❌ Gagal menyimpan: ' + e.message;
     } finally {
       saving = false;
-
-      setTimeout(() => {
-        saveMessage = '';
-      }, 4000);
+      setTimeout(() => (saveMessage = ''), 4000);
     }
   }
 

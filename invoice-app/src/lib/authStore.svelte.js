@@ -1,22 +1,4 @@
-const USERS_KEY = 'invoicekita_users';
-
-function loadUsers() {
-  if (typeof localStorage === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(list) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(list));
-}
-
-function generateToken() {
-  return 'tok_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
-}
+const API_BASE = 'http://localhost:8800/api';
 
 function saveSession(user, token) {
   localStorage.setItem('auth_token', token);
@@ -24,37 +6,48 @@ function saveSession(user, token) {
 }
 
 export const authStore = {
-  // Daftar akun baru. Lempar Error kalau email sudah dipakai.
-  register(name, email, password) {
-    const users = loadUsers();
-    const exists = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (exists) {
-      throw new Error('Email sudah terdaftar. Silakan login.');
+  async register(name, email, password) {
+    const res = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data.message || data.errors?.email?.[0] || 'Registrasi gagal';
+      throw new Error(msg);
     }
-
-    const newUser = { id: 'usr_' + Date.now(), name, email, password };
-    users.push(newUser);
-    saveUsers(users);
-
-    const publicUser = { id: newUser.id, name: newUser.name, email: newUser.email };
-    saveSession(publicUser, generateToken());
-    return publicUser;
+    saveSession(data.user, data.access_token);
+    return data.user;
   },
 
-  // Login. Lempar Error kalau email/password salah.
-  login(email, password) {
-    const users = loadUsers();
-    const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!found || found.password !== password) {
-      throw new Error('Email atau password salah.');
+  async login(email, password) {
+    const res = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data.message || data.errors?.email?.[0] || 'Login gagal';
+      throw new Error(msg);
     }
-
-    const publicUser = { id: found.id, name: found.name, email: found.email };
-    saveSession(publicUser, generateToken());
-    return publicUser;
+    saveSession(data.user, data.access_token);
+    return data.user;
   },
 
-  logout() {
+  async logout() {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+      } catch {
+        // abaikan kalau gagal, tetap hapus sesi lokal
+      }
+    }
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
   },
@@ -66,5 +59,9 @@ export const authStore = {
     } catch {
       return null;
     }
+  },
+
+  getToken() {
+    return localStorage.getItem('auth_token');
   },
 };
