@@ -1,5 +1,6 @@
 <script>
   import { goto } from '$app/navigation';
+  import { authStore } from '$lib/authStore.svelte.js';
 
   let email = $state('');
   let password = $state('');
@@ -12,24 +13,8 @@
     errorMsg = '';
 
     try {
-      const res = await fetch('http://localhost:8800/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Gagal login');
-      }
-
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      goto('/editor');
+      await authStore.login(email, password);
+      goto('/');
     } catch (err) {
       errorMsg = err.message;
     } finally {
@@ -37,10 +22,9 @@
     }
   }
 
-  // Redirect ke endpoint OAuth backend
-  function loginWithGoogle() {
-    window.location.href = 'http://localhost:8800/api/auth/google';
-  }
+ function loginWithGoogle() {
+  authStore.loginWithGoogle();
+}
 </script>
 
 <main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white flex items-center justify-center p-4 transition-colors">

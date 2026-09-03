@@ -2,6 +2,9 @@
   import { goto } from '$app/navigation';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
+  import { authStore } from '$lib/authStore.svelte.js';
+  import { onMount } from 'svelte';
+
   import TemplatePreview from '$lib/components/TemplatePreview.svelte';
 
   import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
@@ -37,7 +40,12 @@
   import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
 
- const templates = [
+
+  // =========================
+  // DATA TEMPLATE
+  // =========================
+
+  const templates = [
     { nameKey: 'tpl1_name', descKey: 'tpl1_desc', component: Invoice01Neat },
     { nameKey: 'tpl2_name', descKey: 'tpl2_desc', component: Invoice02Corporate },
     { nameKey: 'tpl3_name', descKey: 'tpl3_desc', component: Invoice03BoldBand },
@@ -69,132 +77,409 @@
     { nameKey: 'tpl29_name', descKey: 'tpl29_desc', component: InvoiceStudioHitam },
     { nameKey: 'tpl30_name', descKey: 'tpl30_desc', component: InvoiceBrutalistBracket },
     { nameKey: 'tpl31_name', descKey: 'tpl31_desc', component: InvoiceEditorialMerah },
-    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru },
+    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru }
   ];
 
+
+  // =========================
+  // AUTH USER
+  // =========================
+
+  let currentUser = $state(null);
+  let showMenu = $state(false);
+
+
+  onMount(() => {
+    currentUser = authStore.getCurrentUser();
+  });
+
+
+  function handleLogout() {
+    authStore.logout();
+    currentUser = null;
+    showMenu = false;
+    goto('/');
+  }
+
+
+  // =========================
+  // PILIH TEMPLATE
+  // =========================
 
   function useTemplate(index) {
     goto(`/editor?template=${index}`);
   }
 </script>
 
+
 <main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
 
   <!-- HERO CARD MELAYANG -->
   <section class="px-4 pt-4">
-    <div class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors">
 
-      <!-- NAVBAR -->
+    <div
+      class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors"
+    >
+
+      <!-- =========================
+           NAVBAR
+      ========================== -->
       <nav class="px-6 py-4 flex justify-between items-center">
-        <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
+
+        <!-- LOGO -->
+        <a
+          href="/"
+          class="flex items-center gap-2 font-bold text-lg"
+        >
+          <span
+            class="w-3 h-3 rounded-full"
+            style="background:#8CFF3D"
+          ></span>
+
           InvoiceKita
         </a>
+
+
+        <!-- NAVIGATION -->
         <div class="flex gap-4 items-center text-sm">
-          <a href="/templates" class="font-medium" style="color:#8CFF3D">{lang.t('nav_templates')}</a>
+
+          <!-- TEMPLATE -->
+          <a
+            href="/templates"
+            class="font-medium"
+            style="color:#8CFF3D"
+          >
+            {lang.t('nav_templates')}
+          </a>
+
+
+          <!-- LANGUAGE -->
           <select
             value={lang.current}
             onchange={(e) => lang.set(e.target.value)}
             class="bg-transparent text-sm border border-current/20 rounded-lg px-2 py-1"
           >
             {#each Object.entries(lang.options) as [code, label]}
-              <option value={code} class="text-slate-900">{label}</option>
+              <option
+                value={code}
+                class="text-slate-900"
+              >
+                {label}
+              </option>
             {/each}
           </select>
-          <button onclick={() => theme.toggle()} class="text-lg" aria-label="Toggle dark mode">
+
+
+          <!-- DARK MODE -->
+          <button
+            onclick={() => theme.toggle()}
+            class="text-lg"
+            aria-label="Toggle dark mode"
+          >
             {theme.dark ? '☀️' : '🌙'}
           </button>
-          <a href="/login"
-            class="rounded-full px-4 py-2 font-semibold border border-current/30 hover:opacity-80 transition"
-          >
-            Login
-          </a>
-          <button
-            onclick={() => goto('/editor')}
-            class="rounded-full px-5 py-2 font-semibold text-black"
-            style="background:#8CFF3D"
-          >
-            {lang.t('nav_create')}
-          </button>
+
+
+          <!-- =========================
+               JIKA SUDAH LOGIN
+          ========================== -->
+          {#if currentUser}
+
+            <div class="relative">
+
+              <!-- USER BUTTON -->
+              <button
+                onclick={() => showMenu = !showMenu}
+                class="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 border border-current/30 hover:opacity-80 transition"
+              >
+
+                <!-- AVATAR -->
+                <span
+                  class="w-6 h-6 rounded-full flex items-center justify-center text-black text-xs font-bold"
+                  style="background:#8CFF3D"
+                >
+                  {currentUser.name?.charAt(0).toUpperCase() ?? '?'}
+                </span>
+
+
+                <!-- USER NAME -->
+                <span class="font-medium max-w-[100px] truncate">
+                  {currentUser.name}
+                </span>
+
+              </button>
+
+
+              <!-- DROPDOWN -->
+              {#if showMenu}
+
+                <div
+                  class="absolute right-0 mt-2 w-52 rounded-xl bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-lg overflow-hidden z-20 text-slate-900 dark:text-white"
+                >
+
+                  <!-- USER INFO -->
+                  <div
+                    class="px-4 py-3 border-b border-slate-100 dark:border-white/10"
+                  >
+
+                    <p class="text-sm font-semibold truncate">
+                      {currentUser.name}
+                    </p>
+
+                    <p class="text-xs opacity-60 truncate">
+                      {currentUser.email}
+                    </p>
+
+                  </div>
+
+
+                  <!-- LOGOUT -->
+                  <button
+                    onclick={handleLogout}
+                    class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  >
+                    Logout
+                  </button>
+
+                </div>
+
+              {/if}
+
+            </div>
+
+
+          {:else}
+
+            <!-- =========================
+                 JIKA BELUM LOGIN
+            ========================== -->
+
+            <!-- LOGIN -->
+            <a
+              href="/login"
+              class="rounded-full px-4 py-2 font-semibold border border-current/30 hover:opacity-80 transition"
+            >
+              Login
+            </a>
+
+
+            <!-- BUAT INVOICE -->
+            <button
+              onclick={() => goto('/editor')}
+              class="rounded-full px-5 py-2 font-semibold text-black"
+              style="background:#8CFF3D"
+            >
+              {lang.t('nav_create')}
+            </button>
+
+          {/if}
+
         </div>
       </nav>
 
-      <!-- HERO CONTENT -->
+
+      <!-- =========================
+           HERO CONTENT
+      ========================== -->
+
       <div class="px-6 md:px-12 pb-12 pt-4 text-center">
+
         <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
           {lang.t('tp_title')}
         </h1>
-        <p class="mt-4 opacity-70 max-w-lg mx-auto">{lang.t('tp_subtitle')}</p>
+
+        <p class="mt-4 opacity-70 max-w-lg mx-auto">
+          {lang.t('tp_subtitle')}
+        </p>
+
       </div>
+
     </div>
   </section>
 
-  <!-- STATS BAR -->
+
+  <!-- =========================
+       STATS BAR
+  ========================== -->
+
   <section class="max-w-4xl mx-auto px-6 -mt-8 relative z-10">
-    <div class="rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 grid grid-cols-4 divide-x divide-slate-200 dark:divide-white/10 py-6">
+
+    <div
+      class="rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 grid grid-cols-4 divide-x divide-slate-200 dark:divide-white/10 py-6"
+    >
+
       <div class="text-center px-2">
-        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">32</p>
-        <p class="text-xs opacity-60 mt-1">Template</p>
+        <p
+          class="text-2xl md:text-3xl font-bold"
+          style="color:#8CFF3D"
+        >
+          32
+        </p>
+
+        <p class="text-xs opacity-60 mt-1">
+          Template
+        </p>
       </div>
+
+
       <div class="text-center px-2">
-        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">10</p>
-        <p class="text-xs opacity-60 mt-1">Bahasa</p>
+        <p
+          class="text-2xl md:text-3xl font-bold"
+          style="color:#8CFF3D"
+        >
+          10
+        </p>
+
+        <p class="text-xs opacity-60 mt-1">
+          Bahasa
+        </p>
       </div>
+
+
       <div class="text-center px-2">
-        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">100%</p>
-        <p class="text-xs opacity-60 mt-1">Gratis</p>
+        <p
+          class="text-2xl md:text-3xl font-bold"
+          style="color:#8CFF3D"
+        >
+          100%
+        </p>
+
+        <p class="text-xs opacity-60 mt-1">
+          Gratis
+        </p>
       </div>
+
+
       <div class="text-center px-2">
-        <p class="text-2xl md:text-3xl font-bold" style="color:#8CFF3D">24/7</p>
-        <p class="text-xs opacity-60 mt-1">Akses</p>
+        <p
+          class="text-2xl md:text-3xl font-bold"
+          style="color:#8CFF3D"
+        >
+          24/7
+        </p>
+
+        <p class="text-xs opacity-60 mt-1">
+          Akses
+        </p>
       </div>
+
     </div>
   </section>
 
-  <!-- GRID TEMPLATE -->
+
+  <!-- =========================
+       GRID TEMPLATE
+  ========================== -->
+
   <section class="max-w-6xl mx-auto px-6 py-16">
+
     <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+
       {#each templates as t, i}
+
         <button
           onclick={() => useTemplate(i)}
-          class="group text-left rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition cursor-pointer transition duration-300 hover:-translate-y-4"
+          class="group text-left rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition duration-300 hover:-translate-y-4"
         >
-          <div class="relative bg-white dark:bg-[#0d0d0d]"> 
+
+          <div class="relative bg-white dark:bg-[#0d0d0d]">
+
+            <!-- NOMOR TEMPLATE -->
             <span
               class="absolute top-3 left-3 z-10 text-[10px] font-semibold uppercase px-2 py-1 rounded-full text-black"
               style="background:#8CFF3D"
-            >{String(i + 1).padStart(2, '0')}</span>
+            >
+              {String(i + 1).padStart(2, '0')}
+            </span>
+
+
+            <!-- PREVIEW -->
             <TemplatePreview component={t.component} />
+
           </div>
+
+
+          <!-- TEMPLATE NAME -->
           <div class="p-3">
-            <p class="font-semibold text-sm">{lang.t(t.nameKey)}</p>
-            <p class="text-xs font-medium mt-2 opacity-0 group-hover:opacity-100 transition" style="color:#8CFF3D">{lang.t('use_template')} →</p>
+
+            <p class="font-semibold text-sm">
+              {lang.t(t.nameKey)}
+            </p>
+
+
+            <p
+              class="text-xs font-medium mt-2 opacity-0 group-hover:opacity-100 transition"
+              style="color:#8CFF3D"
+            >
+              {lang.t('use_template')} →
+            </p>
+
           </div>
+
         </button>
+
       {/each}
+
     </div>
+
   </section>
 
-  <!-- CTA + FOOTER -->
+
+  <!-- =========================
+       CTA + FOOTER
+  ========================== -->
+
   <footer class="px-4 pb-4">
-    <div class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden" style="background:#8CFF3D">
-      <div class="px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6 text-black">
+
+    <div
+      class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden"
+      style="background:#8CFF3D"
+    >
+
+      <div
+        class="px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6 text-black"
+      >
+
         <div>
-          <h3 class="text-2xl font-bold">{lang.t('hero_cta')}</h3>
-          <p class="opacity-70 mt-1">{lang.t('hero_subtitle')}</p>
+
+          <h3 class="text-2xl font-bold">
+            {lang.t('hero_cta')}
+          </h3>
+
+          <p class="opacity-70 mt-1">
+            {lang.t('hero_subtitle')}
+          </p>
+
         </div>
+
+
         <button
           onclick={() => goto('/editor')}
           class="rounded-full px-6 py-3 font-semibold bg-black text-white flex-shrink-0"
         >
           {lang.t('nav_create')}
         </button>
+
       </div>
-      <div class="border-t border-black/10 px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-3 text-black/70 text-sm">
-        <span class="font-bold text-black">InvoiceKita</span>
-        <span>{lang.t('footer')}</span>
+
+
+      <!-- FOOTER BOTTOM -->
+      <div
+        class="border-t border-black/10 px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-3 text-black/70 text-sm"
+      >
+
+        <span class="font-bold text-black">
+          InvoiceKita
+        </span>
+
+        <span>
+          {lang.t('footer')}
+        </span>
+
       </div>
+
     </div>
+
   </footer>
 
 </main>

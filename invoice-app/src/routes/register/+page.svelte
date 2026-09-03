@@ -1,31 +1,22 @@
 <script>
   import { goto } from '$app/navigation';
+  import { authStore } from '$lib/authStore.svelte.js';
+
   let name = $state('');
   let email = $state('');
   let password = $state('');
   let errorMsg = $state('');
   let loading = $state(false);
-  async function handleRegister(e) {
+
+    async function handleRegister(e) {
     e.preventDefault();
     loading = true;
     errorMsg = '';
+
     try {
-      const res = await fetch('http://localhost:8800/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ name, email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Registrasi gagal');
-      }
-      // Simpan token otomatis setelah register
-      localStorage.setItem('auth_token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      goto('/editor');
+      await authStore.register(name, email, password);
+      await authStore.logout(); // supaya tidak otomatis login, harus login manual dulu
+      goto('/login?registered=1');
     } catch (err) {
       errorMsg = err.message;
     } finally {
@@ -76,6 +67,7 @@
           type="password"
           bind:value={password}
           required
+          minlength="6"
           class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2"
           style="--tw-ring-color:#8CFF3D"
         />

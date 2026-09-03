@@ -1,56 +1,64 @@
-const STORAGE_KEY = 'invoicekita_invoices';
+const API_BASE = 'http://localhost:8800/api';
 
-function loadAll() {
-  if (typeof localStorage === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function persist(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-
-function generateId() {
-  return 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-}
-
-function generateInvoiceNumber() {
-  return 'INV-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+function getToken() {
+  return localStorage.getItem('auth_token');
 }
 
 export const invoiceStore = {
-  // Simpan invoice baru, kembalikan invoice_number yang dibuat
-  save(templateId, invoiceData) {
-    const list = loadAll();
-    const record = {
-      id: generateId(),
-      templateId,
-      invoiceNumber: invoiceData.invoiceNumber || generateInvoiceNumber(),
-      data: invoiceData,
-      createdAt: new Date().toISOString(),
+  async save(templateId, invoiceData) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login dulu untuk menyimpan invoice.');
+
+    const payload = {
+      template_id: templateId,
+      issue_date: invoiceData.issueDate,
+      due_date: invoiceData.dueDate,
+      currency: invoiceData.currency,
+      from_name: invoiceData.from.name,
+      from_address: invoiceData.from.address,
+      from_email: invoiceData.from.email,
+      from_phone: invoiceData.from.phone,
+      logo_url: invoiceData.logoUrl || null,
+      to_name: invoiceData.to.name,
+      to_address: invoiceData.to.address,
+      to_email: invoiceData.to.email,
+      tax_percent: invoiceData.taxPercent,
+      discount_percent: invoiceData.discountPercent,
+      notes: invoiceData.notes,
+      status: invoiceData.status,
+      items: invoiceData.items.map((i) => ({
+        description: i.description,
+        qty: i.qty,
+        price: i.price
+      }))
     };
-    list.unshift(record); // yang terbaru di paling atas
-    persist(list);
-    return record;
+
+    const res = await fetch(`${API_BASE}/invoices`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Gagal menyimpan invoice');
+    }
+    return { id: data.id, invoiceNumber: data.invoice_number, raw: data };
   },
 
-  // Ambil semua invoice tersimpan
-  getAll() {
-    return loadAll();
-  },
+  async getAll() {
+    const token = getToken();
+    if (!token) return [];
 
-  // Ambil 1 invoice by id
-  getById(id) {
-    return loadAll().find((r) => r.id === id) || null;
-  },
-
-  // Hapus 1 invoice
-  remove(id) {
-    const list = loadAll().filter((r) => r.id !== id);
-    persist(list);
+    const res = await fetch(`${API_BASE}/invoices`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data ?? json; // Laravel paginate() bungkus hasil dalam field "data"
   },
 };
