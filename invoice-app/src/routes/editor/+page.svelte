@@ -33,6 +33,9 @@
   import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
   import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
+  import Invoice33DarkWave from '$lib/components/invoices/Invoice33DarkWave.svelte';
+  import Invoice34ModernBlue from '$lib/components/invoices/Invoice34ModernBlue.svelte';
+  import Invoice35ElegantPurple from '$lib/components/invoices/Invoice35ElegantPurple.svelte';
 
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
@@ -76,8 +79,11 @@
     { name: () => `28. ${lang.t('tpl28_name')}`, component: InvoiceMinimalisMono },
     { name: () => `29. ${lang.t('tpl29_name')}`, component: InvoiceStudioHitam },
     { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
-    { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
-    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru }
+   { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
+    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
+    { name: () => `33. Dark Wave`, component: Invoice33DarkWave },
+    { name: () => `34. Modern Blue`, component: Invoice34ModernBlue },
+    { name: () => `35. Elegant Purple`, component: Invoice35ElegantPurple }
   ];
 
   let selected = $state(
