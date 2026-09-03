@@ -41,9 +41,16 @@
   import { lang } from '$lib/lang.svelte.js';
   import { invoiceStore } from '$lib/invoiceStore.svelte.js';
 
-  onMount(() => {
-    lang.init();
-  });
+  // =====================================================
+  // API
+  // =====================================================
+
+  const API_BASE = 'http://localhost:8800/api';
+  const STORAGE_BASE = 'http://localhost:8800/storage';
+
+  // =====================================================
+  // TEMPLATE
+  // =====================================================
 
   const templates = [
     { name: () => `1. ${lang.t('tpl1_name')}`, component: Invoice01Neat },
@@ -84,23 +91,30 @@
     Number(page.url.searchParams.get('template')) || 0
   );
 
+  // =====================================================
+  // INVOICE DATA
+  // =====================================================
+
   let invoice = $state({
     invoiceNumber: 'INV-0001',
     issueDate: '2026-08-14',
     dueDate: '2026-08-28',
     currency: 'IDR',
     logoUrl: '',
+
     from: {
       name: 'PT Contoh Jaya',
       address: 'Jl. Merdeka No.1, Surabaya',
       email: 'hello@contoh.co',
       phone: '08123456789'
     },
+
     to: {
       name: 'Budi Santoso',
       address: 'Jl. Sudirman No.5, Jakarta',
       email: 'budi@klien.com'
     },
+
     items: [
       {
         description: 'Jasa Desain Logo',
@@ -113,17 +127,129 @@
         price: 500000
       }
     ],
+
     taxPercent: 11,
     discountPercent: 0,
-    notes: 'Pembayaran via transfer BCA 1234567890 a.n PT Contoh Jaya',
+
+    notes:
+      'Pembayaran via transfer BCA 1234567890 a.n PT Contoh Jaya',
+
     status: 'unpaid'
   });
 
   let logoError = $state('');
   let previewEl = $state();
+
   let downloading = $state(false);
   let saving = $state(false);
+
   let saveMessage = $state('');
+
+  // Email
+  let sendingEmail = $state(false);
+  let showEmailModal = $state(false);
+  let emailMessage = $state('');
+  let recipientEmail = $state('');
+
+  // ID invoice yang sudah tersimpan di database
+  let savedInvoiceId = $state(null);
+
+  // =====================================================
+  // LOAD COMPANY PROFILE
+  // =====================================================
+
+  async function loadCompanyProfile() {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      if (!token) {
+        goto('/login');
+        return;
+      }
+
+      const response = await fetch(
+        `${API_BASE}/company-profile`,
+        {
+          method: 'GET',
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json'
+          }
+        }
+      );
+
+      // =================================================
+      // TOKEN EXPIRED / UNAUTHORIZED
+      // =================================================
+
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+
+        goto('/login');
+
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          'Gagal mengambil profile perusahaan.'
+        );
+      }
+
+      const profile = await response.json();
+
+      // =================================================
+      // DATA PERUSAHAAN
+      // =================================================
+
+      if (profile.company_name) {
+        invoice.from.name = profile.company_name;
+      }
+
+      if (profile.address) {
+        invoice.from.address = profile.address;
+      }
+
+      if (profile.email) {
+        invoice.from.email = profile.email;
+      }
+
+      if (profile.phone) {
+        invoice.from.phone = profile.phone;
+      }
+
+      // =================================================
+      // LOGO PERUSAHAAN
+      // =================================================
+
+      if (profile.logo_path) {
+        invoice.logoUrl =
+          `${STORAGE_BASE}/${profile.logo_path}`;
+      }
+
+    } catch (error) {
+      console.error(
+        'Load company profile error:',
+        error
+      );
+    }
+  }
+
+  // =====================================================
+  // ON MOUNT
+  // =====================================================
+
+  onMount(async () => {
+    lang.init();
+
+    await loadCompanyProfile();
+  });
+
+  // =====================================================
+  // LOGO UPLOAD
+  // =====================================================
 
   function handleLogoUpload(e) {
     const file = e.target.files?.[0];
@@ -151,9 +277,17 @@
     reader.readAsDataURL(file);
   }
 
+  // =====================================================
+  // REMOVE LOGO
+  // =====================================================
+
   function removeLogo() {
     invoice.logoUrl = '';
   }
+
+  // =====================================================
+  // ADD ITEM
+  // =====================================================
 
   function addItem() {
     invoice.items.push({
@@ -165,32 +299,72 @@
     invoice.items = invoice.items;
   }
 
+  // =====================================================
+  // REMOVE ITEM
+  // =====================================================
+
   function removeItem(index) {
-    invoice.items = invoice.items.filter((_, i) => i !== index);
+    invoice.items = invoice.items.filter(
+      (_, i) => i !== index
+    );
   }
 
-  async function downloadPDF() {
-    if (!previewEl) return;
+  // =====================================================
+  // GENERATE PDF
+  // =====================================================
 
-    downloading = true;
+  async function generatePDF() {
+    if (!previewEl) {
+      throw new Error(
+        'Preview invoice tidak ditemukan.'
+      );
+    }
 
-    try {
-      const { default: html2canvas } = await import('html2canvas-pro');
-      const { jsPDF } = await import('jspdf');
+    const { default: html2canvas } =
+      await import('html2canvas-pro');
 
-      const canvas = await html2canvas(previewEl, {
-        scale: 2
-      });
+    const { jsPDF } =
+      await import('jspdf');
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const canvas =
+      await html2canvas(
+        previewEl,
+        {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff'
+        }
+      );
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgData =
+      canvas.toDataURL(
+        'image/jpeg',
+        0.98
+      );
 
-      const pageWidth = pdf.internal.pageSize.getWidth();
+    const pdf =
+      new jsPDF(
+        'p',
+        'mm',
+        'a4'
+      );
 
-      const imgHeight =
-        (canvas.height * pageWidth) / canvas.width;
+    const pageWidth =
+      pdf.internal.pageSize.getWidth();
 
+    const pageHeight =
+      pdf.internal.pageSize.getHeight();
+
+    const imgHeight =
+      (canvas.height * pageWidth) /
+      canvas.width;
+
+    // =================================================
+    // 1 PAGE
+    // =================================================
+
+    if (imgHeight <= pageHeight) {
       pdf.addImage(
         imgData,
         'JPEG',
@@ -199,70 +373,365 @@
         pageWidth,
         imgHeight
       );
+    }
+
+    // =================================================
+    // MULTI PAGE
+    // =================================================
+
+    else {
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(
+        imgData,
+        'JPEG',
+        0,
+        position,
+        pageWidth,
+        imgHeight
+      );
+
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position -= pageHeight;
+
+        pdf.addPage();
+
+        pdf.addImage(
+          imgData,
+          'JPEG',
+          0,
+          position,
+          pageWidth,
+          imgHeight
+        );
+
+        heightLeft -= pageHeight;
+      }
+    }
+
+    return pdf;
+  }
+
+  // =====================================================
+  // DOWNLOAD PDF
+  // =====================================================
+
+  async function downloadPDF() {
+    downloading = true;
+
+    try {
+      const pdf =
+        await generatePDF();
 
       pdf.save(
         `${invoice.invoiceNumber || 'invoice'}.pdf`
       );
+
     } catch (error) {
-      console.error(error);
+      console.error(
+        'Generate PDF error:',
+        error
+      );
+
+      saveMessage =
+        '❌ Gagal membuat PDF.';
+
+      setTimeout(() => {
+        saveMessage = '';
+      }, 4000);
+
     } finally {
       downloading = false;
     }
   }
 
-    async function saveInvoice() {
+  // =====================================================
+  // SAVE INVOICE
+  // =====================================================
+
+  async function saveInvoice() {
     saving = true;
     saveMessage = '';
 
     try {
-      const record = await invoiceStore.save(selected + 1, invoice);
-      invoice.invoiceNumber = record.invoiceNumber;
-      saveMessage = '✅ Invoice berhasil disimpan!';
+      const record =
+        await invoiceStore.save(
+          selected + 1,
+          invoice
+        );
+
+      savedInvoiceId = record.id;
+
+      if (record.invoiceNumber) {
+        invoice.invoiceNumber =
+          record.invoiceNumber;
+      }
+
+      saveMessage =
+        '✅ Invoice berhasil disimpan!';
+
     } catch (e) {
-      saveMessage = '❌ Gagal menyimpan: ' + e.message;
+      console.error(
+        'Save invoice error:',
+        e
+      );
+
+      saveMessage =
+        '❌ Gagal menyimpan: ' +
+        (e.message || 'Terjadi kesalahan.');
+
     } finally {
       saving = false;
-      setTimeout(() => (saveMessage = ''), 4000);
+
+      setTimeout(() => {
+        saveMessage = '';
+      }, 4000);
     }
   }
 
+  // =====================================================
+  // OPEN EMAIL MODAL
+  // =====================================================
+
+  function openEmailModal() {
+    recipientEmail =
+      invoice.to.email || '';
+
+    emailMessage = '';
+
+    showEmailModal = true;
+  }
+
+  // =====================================================
+  // SEND EMAIL
+  // =====================================================
+
+  async function sendEmail() {
+    if (!recipientEmail.trim()) {
+      emailMessage =
+        '❌ Masukkan email penerima.';
+
+      return;
+    }
+
+    sendingEmail = true;
+    emailMessage = '';
+
+    try {
+      const token =
+        localStorage.getItem(
+          'auth_token'
+        );
+
+      if (!token) {
+        throw new Error(
+          'Kamu harus login terlebih dahulu.'
+        );
+      }
+
+      // =================================================
+      // JIKA BELUM DISIMPAN
+      // =================================================
+
+      if (!savedInvoiceId) {
+        const record =
+          await invoiceStore.save(
+            selected + 1,
+            invoice
+          );
+
+        savedInvoiceId =
+          record.id;
+
+        if (record.invoiceNumber) {
+          invoice.invoiceNumber =
+            record.invoiceNumber;
+        }
+      }
+
+      // =================================================
+      // GENERATE PDF
+      // =================================================
+
+      const pdf =
+        await generatePDF();
+
+      const pdfBlob =
+        pdf.output('blob');
+
+      // =================================================
+      // FORM DATA
+      // =================================================
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        'email',
+        recipientEmail.trim()
+      );
+
+      formData.append(
+        'pdf',
+        pdfBlob,
+        `Invoice-${invoice.invoiceNumber || 'invoice'}.pdf`
+      );
+
+      // =================================================
+      // REQUEST KE LARAVEL
+      // =================================================
+
+      const response =
+        await fetch(
+          `${API_BASE}/invoices/${savedInvoiceId}/send-email`,
+          {
+            method: 'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              Accept:
+                'application/json'
+            },
+
+            body: formData
+          }
+        );
+
+      let result = {};
+
+      try {
+        result =
+          await response.json();
+      } catch {
+        result = {};
+      }
+
+      // =================================================
+      // TOKEN EXPIRED
+      // =================================================
+
+      if (response.status === 401) {
+        localStorage.removeItem(
+          'auth_token'
+        );
+
+        localStorage.removeItem(
+          'user'
+        );
+
+        goto('/login');
+
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+          'Gagal mengirim email.'
+        );
+      }
+
+      emailMessage =
+        '✅ Invoice berhasil dikirim!';
+
+      // =================================================
+      // CLOSE MODAL
+      // =================================================
+
+      setTimeout(() => {
+        showEmailModal = false;
+        emailMessage = '';
+      }, 2500);
+
+    } catch (error) {
+      console.error(
+        'Send email error:',
+        error
+      );
+
+      emailMessage =
+        '❌ ' +
+        (
+          error.message ||
+          'Gagal mengirim email.'
+        );
+
+    } finally {
+      sendingEmail = false;
+    }
+  }
+
+  // =====================================================
+  // LOGOUT
+  // =====================================================
+
   async function handleLogout() {
-    const token = localStorage.getItem('auth_token');
+    const token =
+      localStorage.getItem(
+        'auth_token'
+      );
 
     if (token) {
       try {
-        await fetch('http://localhost:8800/api/logout', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json'
+        await fetch(
+          `${API_BASE}/logout`,
+          {
+            method: 'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              Accept:
+                'application/json'
+            }
           }
-        });
+        );
       } catch (error) {
         console.error(error);
       }
     }
 
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem(
+      'auth_token'
+    );
+
+    localStorage.removeItem(
+      'user'
+    );
 
     goto('/login');
   }
 </script>
 
-<main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
+<main
+  class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors"
+>
+  <!-- NAVBAR -->
 
-  <nav class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center">
+  <nav
+    class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center"
+  >
     <a
       href="/"
       class="flex items-center gap-2 font-bold text-lg"
     >
-      <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
+      <span
+        class="w-3 h-3 rounded-full"
+        style="background:#8CFF3D"
+      ></span>
+
       InvoiceKita
     </a>
 
-    <div class="flex gap-4 items-center text-sm">
-
+    <div
+      class="flex gap-4 items-center text-sm"
+    >
       <a
         href="/templates"
         class="opacity-70 hover:opacity-100 transition"
@@ -272,11 +741,15 @@
 
       <select
         value={lang.current}
-        onchange={(e) => lang.set(e.target.value)}
+        onchange={(e) =>
+          lang.set(e.target.value)}
         class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
       >
         {#each Object.entries(lang.options) as [code, label]}
-          <option value={code} class="text-slate-900">
+          <option
+            value={code}
+            class="text-slate-900"
+          >
             {label}
           </option>
         {/each}
@@ -296,44 +769,66 @@
       >
         {lang.t('logout')}
       </button>
-
     </div>
   </nav>
 
+  <!-- CONTENT -->
+
   <div class="py-8 px-4">
 
-    <h1 class="text-2xl font-bold text-center mb-6">
+    <h1
+      class="text-2xl font-bold text-center mb-6"
+    >
       {lang.t('et_title')}
     </h1>
 
-    <div class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto">
+    <!-- TEMPLATE SELECTOR -->
 
+    <div
+      class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto"
+    >
       {#each templates as t, i}
 
         <button
-          class="px-3 py-1.5 rounded-full text-sm border transition {selected === i ? '' : 'border-slate-300 dark:border-white/10 opacity-70'}"
-          style={selected === i ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;' : ''}
-          onclick={() => selected = i}
+          class="px-3 py-1.5 rounded-full text-sm border transition {selected === i
+            ? ''
+            : 'border-slate-300 dark:border-white/10 opacity-70'}"
+          style={selected === i
+            ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;'
+            : ''}
+          onclick={() =>
+            selected = i}
         >
           {t.name()}
         </button>
 
       {/each}
-
     </div>
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- MAIN GRID -->
 
-      <div class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
+    >
+
+      <!-- FORM -->
+
+      <div
+        class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
+      >
+
+        <!-- LOGO -->
 
         <div>
-
-          <h2 class="font-semibold mb-3">
+          <h2
+            class="font-semibold mb-3"
+          >
             {lang.t('logo_company')}
           </h2>
 
-          <div class="flex items-center gap-4">
-
+          <div
+            class="flex items-center gap-4"
+          >
             {#if invoice.logoUrl}
 
               <img
@@ -344,7 +839,9 @@
 
             {:else}
 
-              <div class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center">
+              <div
+                class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center"
+              >
                 {lang.t('logo_empty')}
               </div>
 
@@ -372,42 +869,50 @@
 
               {#if logoError}
 
-                <p class="text-xs text-red-500 mt-1">
+                <p
+                  class="text-xs text-red-500 mt-1"
+                >
                   {logoError}
                 </p>
 
               {/if}
 
             </div>
-
           </div>
-
         </div>
 
-        <div>
+        <!-- INVOICE INFO -->
 
-          <h2 class="font-semibold mb-3">
+        <div>
+          <h2
+            class="font-semibold mb-3"
+          >
             {lang.t('et_info')}
           </h2>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div
+            class="grid grid-cols-2 gap-3"
+          >
 
             <div>
-
-              <label class="text-xs opacity-60">
-                {lang.t('et_invoice_number')}
+              <label
+                class="text-xs opacity-60"
+              >
+                {lang.t(
+                  'et_invoice_number'
+                )}
               </label>
 
               <input
                 bind:value={invoice.invoiceNumber}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
-
             </div>
 
             <div>
-
-              <label class="text-xs opacity-60">
+              <label
+                class="text-xs opacity-60"
+              >
                 {lang.t('et_status')}
               </label>
 
@@ -416,24 +921,32 @@
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               >
                 <option value="unpaid">
-                  {lang.t('et_status_unpaid')}
+                  {lang.t(
+                    'et_status_unpaid'
+                  )}
                 </option>
 
                 <option value="paid">
-                  {lang.t('et_status_paid')}
+                  {lang.t(
+                    'et_status_paid'
+                  )}
                 </option>
 
                 <option value="overdue">
-                  {lang.t('et_status_overdue')}
+                  {lang.t(
+                    'et_status_overdue'
+                  )}
                 </option>
               </select>
-
             </div>
 
             <div>
-
-              <label class="text-xs opacity-60">
-                {lang.t('et_issue_date')}
+              <label
+                class="text-xs opacity-60"
+              >
+                {lang.t(
+                  'et_issue_date'
+                )}
               </label>
 
               <input
@@ -441,13 +954,15 @@
                 bind:value={invoice.issueDate}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
-
             </div>
 
             <div>
-
-              <label class="text-xs opacity-60">
-                {lang.t('et_due_date')}
+              <label
+                class="text-xs opacity-60"
+              >
+                {lang.t(
+                  'et_due_date'
+                )}
               </label>
 
               <input
@@ -455,88 +970,112 @@
                 bind:value={invoice.dueDate}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
-
             </div>
 
           </div>
-
         </div>
 
-        <div>
+        <!-- FROM -->
 
-          <h2 class="font-semibold mb-3">
+        <div>
+          <h2
+            class="font-semibold mb-3"
+          >
             {lang.t('et_from')}
           </h2>
 
           <div class="space-y-2">
 
             <input
-              placeholder={lang.t('et_company_name')}
+              placeholder={lang.t(
+                'et_company_name'
+              )}
               bind:value={invoice.from.name}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
-              placeholder={lang.t('et_address')}
+              placeholder={lang.t(
+                'et_address'
+              )}
               bind:value={invoice.from.address}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
-            <div class="grid grid-cols-2 gap-2">
+            <div
+              class="grid grid-cols-2 gap-2"
+            >
 
               <input
-                placeholder={lang.t('et_email')}
+                placeholder={lang.t(
+                  'et_email'
+                )}
                 bind:value={invoice.from.email}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
               <input
-                placeholder={lang.t('et_phone')}
+                placeholder={lang.t(
+                  'et_phone'
+                )}
                 bind:value={invoice.from.phone}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
             </div>
-
           </div>
-
         </div>
 
-        <div>
+        <!-- TO -->
 
-          <h2 class="font-semibold mb-3">
+        <div>
+          <h2
+            class="font-semibold mb-3"
+          >
             {lang.t('et_to')}
           </h2>
 
           <div class="space-y-2">
 
             <input
-              placeholder={lang.t('et_client_name')}
+              placeholder={lang.t(
+                'et_client_name'
+              )}
               bind:value={invoice.to.name}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
-              placeholder={lang.t('et_address')}
+              placeholder={lang.t(
+                'et_address'
+              )}
               bind:value={invoice.to.address}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
             <input
-              placeholder={lang.t('et_email')}
+              type="email"
+              placeholder={lang.t(
+                'et_email'
+              )}
               bind:value={invoice.to.email}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
             />
 
           </div>
-
         </div>
+
+        <!-- ITEMS -->
 
         <div>
 
-          <div class="flex justify-between items-center mb-3">
+          <div
+            class="flex justify-between items-center mb-3"
+          >
 
-            <h2 class="font-semibold">
+            <h2
+              class="font-semibold"
+            >
               {lang.t('et_items')}
             </h2>
 
@@ -545,7 +1084,9 @@
               class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
               style="background:#8CFF3D"
             >
-              {lang.t('et_add_item')}
+              {lang.t(
+                'et_add_item'
+              )}
             </button>
 
           </div>
@@ -554,30 +1095,39 @@
 
             {#each invoice.items as item, i}
 
-              <div class="flex gap-2 items-center">
+              <div
+                class="flex gap-2 items-center"
+              >
 
                 <input
-                  placeholder={lang.t('et_description')}
+                  placeholder={lang.t(
+                    'et_description'
+                  )}
                   bind:value={item.description}
                   class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                 />
 
                 <input
                   type="number"
-                  placeholder={lang.t('et_qty')}
+                  placeholder={lang.t(
+                    'et_qty'
+                  )}
                   bind:value={item.qty}
                   class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                 />
 
                 <input
                   type="number"
-                  placeholder={lang.t('et_price')}
+                  placeholder={lang.t(
+                    'et_price'
+                  )}
                   bind:value={item.price}
                   class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                 />
 
                 <button
-                  onclick={() => removeItem(i)}
+                  onclick={() =>
+                    removeItem(i)}
                   class="text-red-500 text-sm px-2"
                 >
                   ✕
@@ -588,14 +1138,18 @@
             {/each}
 
           </div>
-
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <!-- TAX & DISCOUNT -->
+
+        <div
+          class="grid grid-cols-2 gap-3"
+        >
 
           <div>
-
-            <label class="text-xs opacity-60">
+            <label
+              class="text-xs opacity-60"
+            >
               {lang.t('et_tax')}
             </label>
 
@@ -604,13 +1158,15 @@
               bind:value={invoice.taxPercent}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
             />
-
           </div>
 
           <div>
-
-            <label class="text-xs opacity-60">
-              {lang.t('et_discount')}
+            <label
+              class="text-xs opacity-60"
+            >
+              {lang.t(
+                'et_discount'
+              )}
             </label>
 
             <input
@@ -618,14 +1174,17 @@
               bind:value={invoice.discountPercent}
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
             />
-
           </div>
 
         </div>
 
+        <!-- NOTES -->
+
         <div>
 
-          <label class="text-xs opacity-60">
+          <label
+            class="text-xs opacity-60"
+          >
             {lang.t('et_notes')}
           </label>
 
@@ -639,38 +1198,82 @@
 
       </div>
 
-      <div class="lg:sticky lg:top-6 h-fit">
+      <!-- PREVIEW -->
+
+      <div
+        class="lg:sticky lg:top-6 h-fit"
+      >
+
+        <!-- ACTION BUTTONS -->
 
         <div class="flex gap-2 mb-3">
 
+          <!-- SAVE -->
+
           <button
             onclick={saveInvoice}
-            disabled={saving}
+            disabled={saving || sendingEmail}
             class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
             style="background:#8CFF3D"
           >
             {saving
-              ? lang.t('saving_invoice')
-              : lang.t('save_invoice')}
+              ? lang.t(
+                  'saving_invoice'
+                )
+              : lang.t(
+                  'save_invoice'
+                )}
           </button>
+
+          <!-- DOWNLOAD -->
 
           <button
             onclick={downloadPDF}
-            disabled={downloading}
+            disabled={
+              downloading ||
+              sendingEmail
+            }
             class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
             style="border-color:#8CFF3D; color:#8CFF3D;"
           >
             {downloading
-              ? lang.t('generating_pdf')
-              : lang.t('download_pdf')}
+              ? lang.t(
+                  'generating_pdf'
+                )
+              : lang.t(
+                  'download_pdf'
+                )}
           </button>
 
         </div>
 
+        <!-- EMAIL BUTTON -->
+
+        <div class="mb-3">
+
+          <button
+            onclick={openEmailModal}
+            disabled={
+              saving ||
+              downloading ||
+              sendingEmail
+            }
+            class="w-full px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
+            style="border-color:#8CFF3D; color:#8CFF3D;"
+          >
+            📧 Kirim Email
+          </button>
+
+        </div>
+
+        <!-- SAVE MESSAGE -->
+
         {#if saveMessage}
 
           <p
-            class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
+            class="text-center text-sm mb-3 {saveMessage.startsWith(
+              '✅'
+            )
               ? 'text-emerald-500'
               : 'text-red-500'}"
           >
@@ -679,10 +1282,18 @@
 
         {/if}
 
-        <div bind:this={previewEl} class="rounded-2xl overflow-hidden">
+        <!-- PREVIEW -->
+
+        <div
+          bind:this={previewEl}
+          class="rounded-2xl overflow-hidden"
+        >
 
           <svelte:component
-            this={templates[selected].component}
+            this={
+              templates[selected]
+                .component
+            }
             {invoice}
           />
 
@@ -691,7 +1302,143 @@
       </div>
 
     </div>
-
   </div>
+
+  <!-- ================================================= -->
+  <!-- EMAIL MODAL -->
+  <!-- ================================================= -->
+
+  {#if showEmailModal}
+
+    <div
+      class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+      onclick={(e) => {
+        if (
+          e.target ===
+            e.currentTarget &&
+          !sendingEmail
+        ) {
+          showEmailModal = false;
+          emailMessage = '';
+        }
+      }}
+    >
+
+      <div
+        class="w-full max-w-md bg-white dark:bg-[#111] text-slate-900 dark:text-white rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-white/10"
+      >
+
+        <!-- TITLE -->
+
+        <div
+          class="flex items-center justify-between mb-2"
+        >
+
+          <h2
+            class="text-xl font-bold"
+          >
+            📧 Kirim Invoice
+          </h2>
+
+          <button
+            onclick={() => {
+              if (!sendingEmail) {
+                showEmailModal = false;
+                emailMessage = '';
+              }
+            }}
+            disabled={sendingEmail}
+            class="text-xl opacity-60 hover:opacity-100 disabled:opacity-30"
+          >
+            ✕
+          </button>
+
+        </div>
+
+        <p
+          class="text-sm opacity-60 mb-5"
+        >
+          Masukkan email pelanggan
+          untuk mengirim invoice.
+        </p>
+
+        <!-- EMAIL -->
+
+        <label
+          class="text-sm font-medium"
+          for="recipient-email"
+        >
+          Email penerima
+        </label>
+
+        <input
+          id="recipient-email"
+          type="email"
+          bind:value={recipientEmail}
+          placeholder="contoh@email.com"
+          class="w-full mt-2 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+          disabled={sendingEmail}
+          onkeydown={(e) => {
+            if (
+              e.key === 'Enter' &&
+              !sendingEmail
+            ) {
+              sendEmail();
+            }
+          }}
+        />
+
+        <!-- MESSAGE -->
+
+        {#if emailMessage}
+
+          <p
+            class="text-sm mt-3 {emailMessage.startsWith(
+              '✅'
+            )
+              ? 'text-emerald-500'
+              : 'text-red-500'}"
+          >
+            {emailMessage}
+          </p>
+
+        {/if}
+
+        <!-- BUTTONS -->
+
+        <div class="flex gap-2 mt-6">
+
+          <button
+            onclick={() => {
+              showEmailModal = false;
+              emailMessage = '';
+            }}
+            disabled={sendingEmail}
+            class="flex-1 px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 disabled:opacity-50"
+          >
+            Batal
+          </button>
+
+          <button
+            onclick={sendEmail}
+            disabled={
+              sendingEmail ||
+              !recipientEmail.trim()
+            }
+            class="flex-1 px-4 py-2 rounded-full font-semibold text-black disabled:opacity-50"
+            style="background:#8CFF3D"
+          >
+            {sendingEmail
+              ? 'Mengirim...'
+              : 'Kirim Invoice'}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  {/if}
 
 </main>

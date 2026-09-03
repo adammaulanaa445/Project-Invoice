@@ -37,25 +37,39 @@
     showMenu = false;
     goto('/');
   }
+
+  function openProfile() {
+    showMenu = false;
+    goto('/profile');
+  }
 </script>
+
 
 <main class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
 
   <!-- HERO CARD MELAYANG -->
   <section class="px-4 pt-4">
-    <div class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors">
+
+    <div
+      class="max-w-6xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors"
+    >
 
       <!-- NAVBAR -->
       <nav class="px-6 py-4 flex justify-between items-center">
 
         <!-- LOGO -->
-        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+        <a
+          href="/"
+          class="flex items-center gap-2 font-bold text-lg"
+        >
           <span
             class="w-3 h-3 rounded-full"
             style="background:#8CFF3D"
           ></span>
+
           InvoiceKita
         </a>
+
 
         <div class="flex gap-4 items-center text-sm">
 
@@ -67,6 +81,7 @@
             {lang.t('nav_templates')}
           </a>
 
+
           <!-- LANGUAGE -->
           <select
             value={lang.current}
@@ -74,11 +89,15 @@
             class="bg-transparent text-sm border border-current/20 rounded-lg px-2 py-1"
           >
             {#each Object.entries(lang.options) as [code, label]}
-              <option value={code} class="text-slate-900">
+              <option
+                value={code}
+                class="text-slate-900"
+              >
                 {label}
               </option>
             {/each}
           </select>
+
 
           <!-- DARK MODE -->
           <button
@@ -89,16 +108,19 @@
             {theme.dark ? '☀️' : '🌙'}
           </button>
 
+
           <!-- AUTH -->
           {#if currentUser}
 
             <!-- USER MENU -->
             <div class="relative">
 
+              <!-- USER BUTTON -->
               <button
                 onclick={() => showMenu = !showMenu}
                 class="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 border border-current/30 hover:opacity-80 transition"
               >
+
                 <span
                   class="w-6 h-6 rounded-full flex items-center justify-center text-black text-xs font-bold"
                   style="background:#8CFF3D"
@@ -109,13 +131,21 @@
                 <span class="font-medium max-w-[100px] truncate">
                   {currentUser.name}
                 </span>
+
               </button>
 
+
+              <!-- DROPDOWN -->
               {#if showMenu}
+
                 <div
-                  class="absolute right-0 mt-2 w-52 rounded-xl bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-lg overflow-hidden z-20 text-slate-900 dark:text-white"
+                  class="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-lg overflow-hidden z-50 text-slate-900 dark:text-white"
                 >
-                  <div class="px-4 py-3 border-b border-slate-100 dark:border-white/10">
+
+                  <!-- USER INFO -->
+                  <div
+                    class="px-4 py-3 border-b border-slate-100 dark:border-white/10"
+                  >
 
                     <p class="text-sm font-semibold truncate">
                       {currentUser.name}
@@ -127,14 +157,30 @@
 
                   </div>
 
+
+                  <!-- PROFILE & COMPANY SETTINGS -->
                   <button
-                    onclick={handleLogout}
-                    class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    type="button"
+                    onclick={openProfile}
+                    class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-white/5 transition"
                   >
+                    <span class="mr-2">⚙️</span>
+                    Profile & Company Settings
+                  </button>
+
+
+                  <!-- LOGOUT -->
+                  <button
+                    type="button"
+                    onclick={handleLogout}
+                    class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
+                  >
+                    <span class="mr-2">↪</span>
                     Logout
                   </button>
 
                 </div>
+
               {/if}
 
             </div>
@@ -152,23 +198,33 @@
           {/if}
 
         </div>
+
       </nav>
 
 
       <!-- HERO CONTENT -->
-      <div class="px-6 md:px-12 pb-14 pt-6 flex flex-col md:flex-row items-center gap-10">
+      <div
+        class="px-6 md:px-12 pb-14 pt-6 flex flex-col md:flex-row items-center gap-10"
+      >
 
         <div class="flex-1 text-center md:text-left">
 
-          <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+          <h1
+            class="text-4xl md:text-5xl font-bold tracking-tight leading-tight"
+          >
             {lang.t('hero_title')}
           </h1>
 
-          <p class="mt-4 opacity-70 max-w-md mx-auto md:mx-0">
+          <p
+            class="mt-4 opacity-70 max-w-md mx-auto md:mx-0"
+          >
             {lang.t('hero_subtitle')}
           </p>
 
-          <div class="mt-8 flex gap-3 justify-center md:justify-start">
+
+          <div
+            class="mt-8 flex gap-3 justify-center md:justify-start"
+          >
 
             <!-- CREATE INVOICE -->
             <button
@@ -179,6 +235,7 @@
               {lang.t('hero_cta')}
             </button>
 
+
             <!-- SEE ALL -->
             <a
               href="/templates"
@@ -188,25 +245,34 @@
             </a>
 
           </div>
+
         </div>
 
 
         <!-- TEMPLATE PREVIEW -->
         <div class="w-full md:w-80 flex-shrink-0">
 
-          <div class="rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5">
-            <TemplatePreview component={InvoiceBoldTypography} />
+          <div
+            class="rounded-2xl overflow-hidden bg-black/5 dark:bg-white/5"
+          >
+            <TemplatePreview
+              component={InvoiceBoldTypography}
+            />
           </div>
 
         </div>
 
       </div>
+
     </div>
+
   </section>
 
 
   <!-- STATS BAR -->
-  <section class="max-w-4xl mx-auto px-6 -mt-8 relative z-10">
+  <section
+    class="max-w-4xl mx-auto px-6 -mt-8 relative z-10"
+  >
 
     <div
       class="rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-200 dark:divide-white/10 py-6"
@@ -232,6 +298,7 @@
       {/each}
 
     </div>
+
   </section>
 
 
@@ -259,7 +326,9 @@
         class="relative rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10"
       >
 
-        <TemplatePreview component={Invoice01Neat} />
+        <TemplatePreview
+          component={Invoice01Neat}
+        />
 
         <span
           class="absolute bottom-3 left-3 z-10 text-[10px] font-semibold uppercase px-2 py-1 rounded-full text-black"
@@ -275,7 +344,9 @@
         class="relative rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 mt-8"
       >
 
-        <TemplatePreview component={Invoice05DarkStudio} />
+        <TemplatePreview
+          component={Invoice05DarkStudio}
+        />
 
         <span
           class="absolute bottom-3 left-3 z-10 text-[10px] font-semibold uppercase px-2 py-1 rounded-full text-black"
@@ -299,21 +370,27 @@
     <div class="max-w-6xl mx-auto">
 
       <h2 class="text-3xl font-bold mb-2">
+
         Our
+
         <span
           class="px-2 rounded-lg text-black"
           style="background:#8CFF3D"
         >
           Services
         </span>
+
       </h2>
+
 
       <p class="opacity-60 mb-10 max-w-md">
         {lang.t('gallery_subtitle')}
       </p>
 
 
-      <div class="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-8">
+      <div
+        class="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-8"
+      >
 
         <div class="space-y-3">
 
@@ -393,6 +470,7 @@
         </div>
 
       </div>
+
     </div>
 
   </section>
@@ -401,7 +479,9 @@
   <!-- TEKS BESAR PEMISAH -->
   <section class="py-16 text-center">
 
-    <h2 class="text-3xl md:text-5xl font-black tracking-tight">
+    <h2
+      class="text-3xl md:text-5xl font-black tracking-tight"
+    >
 
       Buat
       <span style="color:#8CFF3D">✦</span>
