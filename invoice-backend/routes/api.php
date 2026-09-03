@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CompanyProfileController;
 
 // =========================
 // PUBLIC ROUTES
@@ -29,5 +30,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::apiResource('invoices', InvoiceController::class);
+
+    Route::post('/invoices/{invoice}/send-email', [InvoiceController::class, 'sendEmail']);
+
+    Route::get('/company-profile', [CompanyProfileController::class, 'show']);
+
+    Route::post('/company-profile', [CompanyProfileController::class, 'update']);
 
 });
