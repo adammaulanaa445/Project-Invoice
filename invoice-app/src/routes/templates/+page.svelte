@@ -39,6 +39,16 @@
   import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
   import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
+  import InvoiceAuroraNight from '$lib/components/invoices/InvoiceAuroraNight.svelte';
+  import InvoiceCreamMonogramme from '$lib/components/invoices/InvoiceCreamMonogramme.svelte';
+  import InvoiceDottedBlueWave from '$lib/components/invoices/InvoiceDottedBlueWave.svelte';
+  import InvoiceIndigoSwirl from '$lib/components/invoices/InvoiceIndigoSwirl.svelte';
+  import InvoiceCrimsonVAT from '$lib/components/invoices/InvoiceCrimsonVAT.svelte';
+  import InvoicePillRowsIndigo from '$lib/components/invoices/InvoicePillRowsIndigo.svelte';
+  import InvoiceSignatureCream from '$lib/components/invoices/InvoiceSignatureCream.svelte';
+  import InvoiceLavenderSoft from '$lib/components/invoices/InvoiceLavenderSoft.svelte';
+  import InvoiceCoralGradientBar from '$lib/components/invoices/InvoiceCoralGradientBar.svelte';
+  import InvoiceSlateCorporate from '$lib/components/invoices/InvoiceSlateCorporate.svelte';
 
 
   // =========================
@@ -77,7 +87,17 @@
     { nameKey: 'tpl29_name', descKey: 'tpl29_desc', component: InvoiceStudioHitam },
     { nameKey: 'tpl30_name', descKey: 'tpl30_desc', component: InvoiceBrutalistBracket },
     { nameKey: 'tpl31_name', descKey: 'tpl31_desc', component: InvoiceEditorialMerah },
-    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru }
+    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru },
+    { nameKey: 'tpl33_name', descKey: 'tpl33_desc', component: InvoiceAuroraNight },
+    { nameKey: 'tpl34_name', descKey: 'tpl34_desc', component: InvoiceCreamMonogramme },
+    { nameKey: 'tpl35_name', descKey: 'tpl35_desc', component: InvoiceDottedBlueWave },
+    { nameKey: 'tpl36_name', descKey: 'tpl36_desc', component: InvoiceIndigoSwirl },
+    { nameKey: 'tpl37_name', descKey: 'tpl37_desc', component: InvoiceCrimsonVAT },
+    { nameKey: 'tpl38_name', descKey: 'tpl38_desc', component: InvoicePillRowsIndigo },
+    { nameKey: 'tpl39_name', descKey: 'tpl39_desc', component: InvoiceSignatureCream },
+    { nameKey: 'tpl40_name', descKey: 'tpl40_desc', component: InvoiceLavenderSoft },
+    { nameKey: 'tpl41_name', descKey: 'tpl41_desc', component: InvoiceCoralGradientBar },
+    { nameKey: 'tpl42_name', descKey: 'tpl42_desc', component: InvoiceSlateCorporate },
   ];
 
 
@@ -313,7 +333,7 @@
           class="text-2xl md:text-3xl font-bold"
           style="color:#8CFF3D"
         >
-          32
+          42
         </p>
 
         <p class="text-xs opacity-60 mt-1">

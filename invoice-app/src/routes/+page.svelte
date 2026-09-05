@@ -11,7 +11,7 @@
   import Invoice05DarkStudio from '$lib/components/invoices/Invoice05DarkStudio.svelte';
 
   const stats = [
-    { value: '32+', label: 'Template' },
+    { value: '42+', label: 'Template' },
     { value: '10', label: 'Bahasa' },
     { value: '100%', label: 'Gratis' },
     { value: '24/7', label: 'Akses' },
