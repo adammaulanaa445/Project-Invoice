@@ -33,6 +33,17 @@
   import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
   import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
   import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
+  import InvoiceAuroraNight from '$lib/components/invoices/InvoiceAuroraNight.svelte';
+  import InvoiceCreamMonogramme from '$lib/components/invoices/InvoiceCreamMonogramme.svelte';
+  import InvoiceDottedBlueWave from '$lib/components/invoices/InvoiceDottedBlueWave.svelte';
+  import InvoiceIndigoSwirl from '$lib/components/invoices/InvoiceIndigoSwirl.svelte';
+  import InvoiceCrimsonVAT from '$lib/components/invoices/InvoiceCrimsonVAT.svelte';
+  import InvoicePillRowsIndigo from '$lib/components/invoices/InvoicePillRowsIndigo.svelte';
+  import InvoiceSignatureCream from '$lib/components/invoices/InvoiceSignatureCream.svelte';
+  import InvoiceLavenderSoft from '$lib/components/invoices/InvoiceLavenderSoft.svelte';
+  import InvoiceCoralGradientBar from '$lib/components/invoices/InvoiceCoralGradientBar.svelte';
+  import InvoiceSlateCorporate from '$lib/components/invoices/InvoiceSlateCorporate.svelte';
+  
 
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
@@ -84,7 +95,17 @@
     { name: () => `29. ${lang.t('tpl29_name')}`, component: InvoiceStudioHitam },
     { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
     { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
-    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru }
+    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
+    { name: () => `33. Aurora Night`, component: InvoiceAuroraNight },
+    { name: () => `34. Cream Monogramme`, component: InvoiceCreamMonogramme },
+    { name: () => `35. Dotted Blue Wave`, component: InvoiceDottedBlueWave },
+    { name: () => `36. Indigo Swirl`, component: InvoiceIndigoSwirl },
+    { name: () => `37. Crimson VAT`, component: InvoiceCrimsonVAT },
+    { name: () => `38. Pill Rows Indigo`, component: InvoicePillRowsIndigo },
+    { name: () => `39. Signature Cream`, component: InvoiceSignatureCream },
+    { name: () => `40. Lavender Soft`, component: InvoiceLavenderSoft },
+    { name: () => `41. Coral Gradient Bar`, component: InvoiceCoralGradientBar },
+    { name: () => `42. Slate Corporate`, component: InvoiceSlateCorporate },
   ];
 
   let selected = $state(
