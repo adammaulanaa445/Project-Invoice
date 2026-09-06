@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8800/api';
+const API_BASE = 'https://app-inv.xo.je';
 
 function getToken() {
   return localStorage.getItem('auth_token');
