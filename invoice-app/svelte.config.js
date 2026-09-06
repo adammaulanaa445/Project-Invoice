@@ -1,5 +1,5 @@
 import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 // Konfigurasi utama SvelteKit. Adapter WAJIB didefinisikan di sini
 // (bukan di vite.config.js), supaya SvelteKit tahu harus build project
