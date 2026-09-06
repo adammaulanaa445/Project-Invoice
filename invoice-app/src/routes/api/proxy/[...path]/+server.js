@@ -15,7 +15,8 @@
 
 // Ganti sesuai domain backend Laravel kamu di InfinityFree
 // PENTING: route API Laravel-nya ada di prefix /api (bukan langsung di root)
-const BACKEND_URL = 'https://app-inv.xo.je/api';
+// Di development, pakai VITE_BACKEND_URL dari .env, atau fallback ke localhost
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000/api';
 
 /**
  * Fungsi umum untuk meneruskan (forward) request apapun ke backend Laravel.
@@ -25,7 +26,7 @@ async function forwardRequest(event, method) {
 	const { params, request, url } = event;
 
 	// Gabungkan path yang diminta frontend + query string asli
-	// Contoh: /api/proxy/login -> diteruskan ke https://app-inv.xo.je/login
+	// Contoh: /api/proxy/login -> diteruskan ke http://localhost:8000/api/login (dev) atau domain production
 	const targetUrl = `${BACKEND_URL}/${params.path}${url.search}`;
 
 	// Ambil body request kalau method-nya bukan GET/HEAD

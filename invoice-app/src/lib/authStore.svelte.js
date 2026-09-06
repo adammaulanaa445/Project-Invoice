@@ -5,7 +5,8 @@ const API_BASE = '/api/proxy';
 // Dipakai KHUSUS untuk redirect halaman penuh (window.location.href),
 // seperti login Google. Ini BUKAN fetch(), jadi CORS browser tidak berlaku
 // di sini — jadi tetap arahkan langsung ke domain backend asli.
-const API_BASE_DIRECT = 'https://app-inv.xo.je/api';
+// Di development, fallback ke localhost:8000
+const API_BASE_DIRECT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
 
 
 
@@ -118,7 +119,7 @@ export const authStore = {
   loginWithGoogle() {
 
     window.location.href =
-      `${API_BASE_DIRECT}/api/auth/google`;
+      `${API_BASE_DIRECT}/auth/google`;
   },
 
 
