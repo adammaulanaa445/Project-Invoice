@@ -114,7 +114,7 @@ export const authStore = {
   // =========================
   // Catatan: ini sengaja tetap pakai API_BASE_DIRECT (bukan proxy),
   // karena ini redirect halaman penuh, bukan fetch(). CORS tidak
-  // relevan di sini, jadi biarkan browser langsung menuju InfinityFree.
+
 
   loginWithGoogle() {
 

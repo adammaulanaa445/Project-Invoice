@@ -183,6 +183,12 @@
   let savedInvoiceId = $state(null);
 
   // =====================================================
+  // SIDEBAR
+  // =====================================================
+
+  let sidebarOpen = $state(false);
+
+  // =====================================================
   // SIDEBAR ACTIVE SECTION
   // =====================================================
 
@@ -235,7 +241,14 @@
       activeSection = '';
     }, 1500);
   }
+  //
 
+
+  function closeSidebar() {
+    sidebarOpen = false;
+  }
+
+  
   // =====================================================
   // LOAD COMPANY PROFILE
   // =====================================================
@@ -880,28 +893,47 @@
 >
   <!-- SIDEBAR -->
 
-  <AppSidebar />
+  <AppSidebar
+    sidebarOpen={sidebarOpen}
+    onClose={closeSidebar}
+  />
 
   <!-- MAIN CONTENT -->
 
-  <main class="ml-64 min-h-screen">
+  <main class="min-h-screen transition-all duration-300 {sidebarOpen ? 'ml-64' : 'ml-0'}">
 
     <!-- NAVBAR -->
 
     <nav
-      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center"
+      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-4 py-4 flex justify-between items-center"
     >
-      <a
-        href="/"
-        class="flex items-center gap-2 font-bold text-lg"
-      >
+      <div class="flex items-center gap-3">
+        <!-- HAMBURGER TOGGLE -->
+        <button
+          type="button"
+          onclick={() => sidebarOpen = !sidebarOpen}
+          aria-label="Toggle sidebar"
+          class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
+            <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
+            <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <a
+          href="/"
+          class="flex items-center gap-2 font-bold text-lg"
+        >
         <span
           class="w-3 h-3 rounded-full"
           style="background:#8CFF3D"
         ></span>
 
-        InvoiceKita
-      </a>
+          InvoiceKita
+        </a>
+      </div>
 
       <div
         class="flex gap-4 items-center text-sm"
