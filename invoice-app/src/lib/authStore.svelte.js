@@ -11,7 +11,7 @@ function saveSession(user, token) {
 export const authStore = {
 
   // =========================
-  // REGISTER
+  // REGISTER 
   // =========================
 
   async register(name, email, password) {
