@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import AppSidebar from '$lib/components/AppSidebar.svelte';
 
   import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
   import Invoice02Corporate from '$lib/components/invoices/Invoice02Corporate.svelte';
@@ -43,7 +44,6 @@
   import InvoiceLavenderSoft from '$lib/components/invoices/InvoiceLavenderSoft.svelte';
   import InvoiceCoralGradientBar from '$lib/components/invoices/InvoiceCoralGradientBar.svelte';
   import InvoiceSlateCorporate from '$lib/components/invoices/InvoiceSlateCorporate.svelte';
-  
 
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
@@ -96,6 +96,7 @@
     { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
     { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
     { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
+
     { name: () => `33. Aurora Night`, component: InvoiceAuroraNight },
     { name: () => `34. Cream Monogramme`, component: InvoiceCreamMonogramme },
     { name: () => `35. Dotted Blue Wave`, component: InvoiceDottedBlueWave },
@@ -105,7 +106,7 @@
     { name: () => `39. Signature Cream`, component: InvoiceSignatureCream },
     { name: () => `40. Lavender Soft`, component: InvoiceLavenderSoft },
     { name: () => `41. Coral Gradient Bar`, component: InvoiceCoralGradientBar },
-    { name: () => `42. Slate Corporate`, component: InvoiceSlateCorporate },
+    { name: () => `42. Slate Corporate`, component: InvoiceSlateCorporate }
   ];
 
   let selected = $state(
@@ -166,14 +167,74 @@
 
   let saveMessage = $state('');
 
-  // Email
+  // =====================================================
+  // EMAIL
+  // =====================================================
+
   let sendingEmail = $state(false);
   let showEmailModal = $state(false);
   let emailMessage = $state('');
   let recipientEmail = $state('');
 
-  // ID invoice yang sudah tersimpan di database
+  // =====================================================
+  // SAVED INVOICE ID
+  // =====================================================
+
   let savedInvoiceId = $state(null);
+
+  // =====================================================
+  // SIDEBAR ACTIVE SECTION
+  // =====================================================
+
+  let activeSection = $state('');
+
+  let highlightTimer;
+
+  function handleInvoiceSection(event) {
+    const section = event.detail;
+
+    if (!section) return;
+
+    activeSection = section;
+
+    clearTimeout(highlightTimer);
+
+    highlightTimer = setTimeout(() => {
+      activeSection = '';
+    }, 1500);
+  }
+
+  // =====================================================
+  // HASH NAVIGATION
+  // =====================================================
+
+  function scrollToHash() {
+    const hash = window.location.hash;
+
+    if (!hash) return;
+
+    const section = decodeURIComponent(
+      hash.replace('#', '')
+    );
+
+    const element =
+      document.getElementById(section);
+
+    if (!element) return;
+
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    activeSection = section;
+
+    clearTimeout(highlightTimer);
+
+    highlightTimer = setTimeout(() => {
+      activeSection = '';
+    }, 1500);
+  }
 
   // =====================================================
   // LOAD COMPANY PROFILE
@@ -181,32 +242,42 @@
 
   async function loadCompanyProfile() {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token =
+        localStorage.getItem('auth_token');
 
       if (!token) {
         goto('/login');
         return;
       }
 
-      const response = await fetch(
-        `${API_BASE}/company-profile`,
-        {
-          method: 'GET',
+      const response =
+        await fetch(
+          `${API_BASE}/company-profile`,
+          {
+            method: 'GET',
 
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json'
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              Accept:
+                'application/json'
+            }
           }
-        }
-      );
+        );
 
       // =================================================
       // TOKEN EXPIRED / UNAUTHORIZED
       // =================================================
 
       if (response.status === 401) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
+        localStorage.removeItem(
+          'auth_token'
+        );
+
+        localStorage.removeItem(
+          'user'
+        );
 
         goto('/login');
 
@@ -219,26 +290,31 @@
         );
       }
 
-      const profile = await response.json();
+      const profile =
+        await response.json();
 
       // =================================================
       // DATA PERUSAHAAN
       // =================================================
 
       if (profile.company_name) {
-        invoice.from.name = profile.company_name;
+        invoice.from.name =
+          profile.company_name;
       }
 
       if (profile.address) {
-        invoice.from.address = profile.address;
+        invoice.from.address =
+          profile.address;
       }
 
       if (profile.email) {
-        invoice.from.email = profile.email;
+        invoice.from.email =
+          profile.email;
       }
 
       if (profile.phone) {
-        invoice.from.phone = profile.phone;
+        invoice.from.phone =
+          profile.phone;
       }
 
       // =================================================
@@ -265,7 +341,26 @@
   onMount(async () => {
     lang.init();
 
+    window.addEventListener(
+      'invoice-section',
+      handleInvoiceSection
+    );
+
     await loadCompanyProfile();
+
+    // Tunggu DOM selesai dirender
+    setTimeout(() => {
+      scrollToHash();
+    }, 100);
+
+    return () => {
+      window.removeEventListener(
+        'invoice-section',
+        handleInvoiceSection
+      );
+
+      clearTimeout(highlightTimer);
+    };
   });
 
   // =====================================================
@@ -273,26 +368,36 @@
   // =====================================================
 
   function handleLogoUpload(e) {
-    const file = e.target.files?.[0];
+    const file =
+      e.target.files?.[0];
 
     if (!file) return;
 
     logoError = '';
 
     if (!file.type.startsWith('image/')) {
-      logoError = lang.t('logo_file_error');
+      logoError =
+        lang.t('logo_file_error');
+
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      logoError = lang.t('logo_size_error');
+    if (
+      file.size >
+      2 * 1024 * 1024
+    ) {
+      logoError =
+        lang.t('logo_size_error');
+
       return;
     }
 
-    const reader = new FileReader();
+    const reader =
+      new FileReader();
 
     reader.onload = (event) => {
-      invoice.logoUrl = event.target.result;
+      invoice.logoUrl =
+        event.target.result;
     };
 
     reader.readAsDataURL(file);
@@ -317,7 +422,8 @@
       price: 0
     });
 
-    invoice.items = invoice.items;
+    invoice.items =
+      invoice.items;
   }
 
   // =====================================================
@@ -325,9 +431,10 @@
   // =====================================================
 
   function removeItem(index) {
-    invoice.items = invoice.items.filter(
-      (_, i) => i !== index
-    );
+    invoice.items =
+      invoice.items.filter(
+        (_, i) => i !== index
+      );
   }
 
   // =====================================================
@@ -342,7 +449,9 @@
     }
 
     const { default: html2canvas } =
-      await import('html2canvas-pro');
+      await import(
+        'html2canvas-pro'
+      );
 
     const { jsPDF } =
       await import('jspdf');
@@ -354,7 +463,8 @@
           scale: 2,
           useCORS: true,
           allowTaint: false,
-          backgroundColor: '#ffffff'
+          backgroundColor:
+            '#ffffff'
         }
       );
 
@@ -378,14 +488,18 @@
       pdf.internal.pageSize.getHeight();
 
     const imgHeight =
-      (canvas.height * pageWidth) /
+      (canvas.height *
+        pageWidth) /
       canvas.width;
 
     // =================================================
     // 1 PAGE
     // =================================================
 
-    if (imgHeight <= pageHeight) {
+    if (
+      imgHeight <=
+      pageHeight
+    ) {
       pdf.addImage(
         imgData,
         'JPEG',
@@ -401,7 +515,9 @@
     // =================================================
 
     else {
-      let heightLeft = imgHeight;
+      let heightLeft =
+        imgHeight;
+
       let position = 0;
 
       pdf.addImage(
@@ -413,10 +529,14 @@
         imgHeight
       );
 
-      heightLeft -= pageHeight;
+      heightLeft -=
+        pageHeight;
 
-      while (heightLeft > 0) {
-        position -= pageHeight;
+      while (
+        heightLeft > 0
+      ) {
+        position -=
+          pageHeight;
 
         pdf.addPage();
 
@@ -429,7 +549,8 @@
           imgHeight
         );
 
-        heightLeft -= pageHeight;
+        heightLeft -=
+          pageHeight;
       }
     }
 
@@ -448,7 +569,10 @@
         await generatePDF();
 
       pdf.save(
-        `${invoice.invoiceNumber || 'invoice'}.pdf`
+        `${
+          invoice.invoiceNumber ||
+          'invoice'
+        }.pdf`
       );
 
     } catch (error) {
@@ -484,9 +608,12 @@
           invoice
         );
 
-      savedInvoiceId = record.id;
+      savedInvoiceId =
+        record.id;
 
-      if (record.invoiceNumber) {
+      if (
+        record.invoiceNumber
+      ) {
         invoice.invoiceNumber =
           record.invoiceNumber;
       }
@@ -502,7 +629,10 @@
 
       saveMessage =
         '❌ Gagal menyimpan: ' +
-        (e.message || 'Terjadi kesalahan.');
+        (
+          e.message ||
+          'Terjadi kesalahan.'
+        );
 
     } finally {
       saving = false;
@@ -531,7 +661,9 @@
   // =====================================================
 
   async function sendEmail() {
-    if (!recipientEmail.trim()) {
+    if (
+      !recipientEmail.trim()
+    ) {
       emailMessage =
         '❌ Masukkan email penerima.';
 
@@ -567,7 +699,9 @@
         savedInvoiceId =
           record.id;
 
-        if (record.invoiceNumber) {
+        if (
+          record.invoiceNumber
+        ) {
           invoice.invoiceNumber =
             record.invoiceNumber;
         }
@@ -598,7 +732,10 @@
       formData.append(
         'pdf',
         pdfBlob,
-        `Invoice-${invoice.invoiceNumber || 'invoice'}.pdf`
+        `Invoice-${
+          invoice.invoiceNumber ||
+          'invoice'
+        }.pdf`
       );
 
       // =================================================
@@ -636,7 +773,9 @@
       // TOKEN EXPIRED
       // =================================================
 
-      if (response.status === 401) {
+      if (
+        response.status === 401
+      ) {
         localStorage.removeItem(
           'auth_token'
         );
@@ -665,7 +804,9 @@
       // =================================================
 
       setTimeout(() => {
-        showEmailModal = false;
+        showEmailModal =
+          false;
+
         emailMessage = '';
       }, 2500);
 
@@ -730,736 +871,828 @@
   }
 </script>
 
-<main
+<!-- ===================================================== -->
+<!-- MAIN LAYOUT + SIDEBAR -->
+<!-- ===================================================== -->
+
+<div
   class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors"
 >
-  <!-- NAVBAR -->
+  <!-- SIDEBAR -->
 
-  <nav
-    class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center"
-  >
-    <a
-      href="/"
-      class="flex items-center gap-2 font-bold text-lg"
-    >
-      <span
-        class="w-3 h-3 rounded-full"
-        style="background:#8CFF3D"
-      ></span>
+  <AppSidebar />
 
-      InvoiceKita
-    </a>
+  <!-- MAIN CONTENT -->
 
-    <div
-      class="flex gap-4 items-center text-sm"
+  <main class="ml-64 min-h-screen">
+
+    <!-- NAVBAR -->
+
+    <nav
+      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-6 py-4 flex justify-between items-center"
     >
       <a
-        href="/templates"
-        class="opacity-70 hover:opacity-100 transition"
+        href="/"
+        class="flex items-center gap-2 font-bold text-lg"
       >
-        {lang.t('nav_templates')}
+        <span
+          class="w-3 h-3 rounded-full"
+          style="background:#8CFF3D"
+        ></span>
+
+        InvoiceKita
       </a>
 
-      <select
-        value={lang.current}
-        onchange={(e) =>
-          lang.set(e.target.value)}
-        class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
+      <div
+        class="flex gap-4 items-center text-sm"
       >
-        {#each Object.entries(lang.options) as [code, label]}
-          <option
-            value={code}
-            class="text-slate-900"
-          >
-            {label}
-          </option>
-        {/each}
-      </select>
+        <a
+          href="/templates"
+          class="opacity-70 hover:opacity-100 transition"
+        >
+          {lang.t('nav_templates')}
+        </a>
 
-      <button
-        onclick={() => theme.toggle()}
-        class="text-lg"
-        aria-label="Toggle dark mode"
-      >
-        {theme.dark ? '☀️' : '🌙'}
-      </button>
-
-      <button
-        onclick={handleLogout}
-        class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-full"
-      >
-        {lang.t('logout')}
-      </button>
-    </div>
-  </nav>
-
-  <!-- CONTENT -->
-
-  <div class="py-8 px-4">
-
-    <h1
-      class="text-2xl font-bold text-center mb-6"
-    >
-      {lang.t('et_title')}
-    </h1>
-
-    <!-- TEMPLATE SELECTOR -->
-
-    <div
-      class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto"
-    >
-      {#each templates as t, i}
+        <select
+          value={lang.current}
+          onchange={(e) =>
+            lang.set(e.target.value)}
+          class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
+        >
+          {#each Object.entries(lang.options) as [code, label]}
+            <option
+              value={code}
+              class="text-slate-900"
+            >
+              {label}
+            </option>
+          {/each}
+        </select>
 
         <button
-          class="px-3 py-1.5 rounded-full text-sm border transition {selected === i
-            ? ''
-            : 'border-slate-300 dark:border-white/10 opacity-70'}"
-          style={selected === i
-            ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;'
-            : ''}
-          onclick={() =>
-            selected = i}
+          onclick={() => theme.toggle()}
+          class="text-lg"
+          aria-label="Toggle dark mode"
         >
-          {t.name()}
+          {theme.dark ? '☀️' : '🌙'}
         </button>
 
-      {/each}
-    </div>
+        <button
+          onclick={handleLogout}
+          class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-full"
+        >
+          {lang.t('logout')}
+        </button>
+      </div>
+    </nav>
 
-    <!-- MAIN GRID -->
+    <!-- CONTENT -->
 
-    <div
-      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
-    >
+    <div class="py-8 px-4">
 
-      <!-- FORM -->
+      <h1
+        class="text-2xl font-bold text-center mb-6"
+      >
+        {lang.t('et_title')}
+      </h1>
+
+      <!-- TEMPLATE SELECTOR -->
 
       <div
-        class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
+        class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto"
+      >
+        {#each templates as t, i}
+
+          <button
+            class="px-3 py-1.5 rounded-full text-sm border transition {selected === i
+              ? ''
+              : 'border-slate-300 dark:border-white/10 opacity-70'}"
+            style={selected === i
+              ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;'
+              : ''}
+            onclick={() =>
+              selected = i}
+          >
+            {t.name()}
+          </button>
+
+        {/each}
+      </div>
+
+      <!-- MAIN GRID -->
+
+      <div
+        class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
 
-        <!-- LOGO -->
+        <!-- FORM -->
 
-        <div>
-          <h2
-            class="font-semibold mb-3"
-          >
-            {lang.t('logo_company')}
-          </h2>
+        <div
+          class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
+        >
+
+          <!-- ================================================= -->
+          <!-- COMPANY + LOGO -->
+          <!-- ================================================= -->
 
           <div
-            class="flex items-center gap-4"
+            id="company"
+            class:section-highlight={activeSection === 'company'}
+            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-            {#if invoice.logoUrl}
 
-              <img
-                src={invoice.logoUrl}
-                alt={lang.t('logo_company')}
-                class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-white/10 bg-white p-1"
-              />
+            <!-- LOGO -->
 
-            {:else}
+            <div>
+              <h2
+                class="font-semibold mb-3"
+              >
+                {lang.t('logo_company')}
+              </h2>
 
               <div
-                class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center"
+                class="flex items-center gap-4"
               >
-                {lang.t('logo_empty')}
+                {#if invoice.logoUrl}
+
+                  <img
+                    src={invoice.logoUrl}
+                    alt={lang.t(
+                      'logo_company'
+                    )}
+                    class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-white/10 bg-white p-1"
+                  />
+
+                {:else}
+
+                  <div
+                    class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center"
+                  >
+                    {lang.t(
+                      'logo_empty'
+                    )}
+                  </div>
+
+                {/if}
+
+                <div class="flex-1">
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onchange={handleLogoUpload}
+                    class="w-full text-xs opacity-80 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:font-semibold file:text-black file:bg-[#8CFF3D] text-current"
+                  />
+
+                  {#if invoice.logoUrl}
+
+                    <button
+                      onclick={removeLogo}
+                      class="text-xs text-red-500 mt-1 hover:underline"
+                    >
+                      {lang.t(
+                        'logo_remove'
+                      )}
+                    </button>
+
+                  {/if}
+
+                  {#if logoError}
+
+                    <p
+                      class="text-xs text-red-500 mt-1"
+                    >
+                      {logoError}
+                    </p>
+
+                  {/if}
+
+                </div>
               </div>
-
-            {/if}
-
-            <div class="flex-1">
-
-              <input
-                type="file"
-                accept="image/*"
-                onchange={handleLogoUpload}
-                class="w-full text-xs opacity-80 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:font-semibold file:text-black file:bg-[#8CFF3D] text-current"
-              />
-
-              {#if invoice.logoUrl}
-
-                <button
-                  onclick={removeLogo}
-                  class="text-xs text-red-500 mt-1 hover:underline"
-                >
-                  {lang.t('logo_remove')}
-                </button>
-
-              {/if}
-
-              {#if logoError}
-
-                <p
-                  class="text-xs text-red-500 mt-1"
-                >
-                  {logoError}
-                </p>
-
-              {/if}
-
             </div>
+
+            <!-- FROM / COMPANY DATA -->
+
+            <div class="mt-5">
+
+              <h2
+                class="font-semibold mb-3"
+              >
+                {lang.t('et_from')}
+              </h2>
+
+              <div class="space-y-2">
+
+                <input
+                  placeholder={lang.t(
+                    'et_company_name'
+                  )}
+                  bind:value={invoice.from.name}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                />
+
+                <input
+                  placeholder={lang.t(
+                    'et_address'
+                  )}
+                  bind:value={invoice.from.address}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                />
+
+                <div
+                  class="grid grid-cols-2 gap-2"
+                >
+
+                  <input
+                    placeholder={lang.t(
+                      'et_email'
+                    )}
+                    bind:value={invoice.from.email}
+                    class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                  />
+
+                  <input
+                    placeholder={lang.t(
+                      'et_phone'
+                    )}
+                    bind:value={invoice.from.phone}
+                    class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                  />
+
+                </div>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <!-- INVOICE INFO -->
-
-        <div>
-          <h2
-            class="font-semibold mb-3"
-          >
-            {lang.t('et_info')}
-          </h2>
+          <!-- ================================================= -->
+          <!-- INVOICE INFO -->
+          <!-- ================================================= -->
 
           <div
-            class="grid grid-cols-2 gap-3"
-          >
-
-            <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t(
-                  'et_invoice_number'
-                )}
-              </label>
-
-              <input
-                bind:value={invoice.invoiceNumber}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t('et_status')}
-              </label>
-
-              <select
-                bind:value={invoice.status}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-              >
-                <option value="unpaid">
-                  {lang.t(
-                    'et_status_unpaid'
-                  )}
-                </option>
-
-                <option value="paid">
-                  {lang.t(
-                    'et_status_paid'
-                  )}
-                </option>
-
-                <option value="overdue">
-                  {lang.t(
-                    'et_status_overdue'
-                  )}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t(
-                  'et_issue_date'
-                )}
-              </label>
-
-              <input
-                type="date"
-                bind:value={invoice.issueDate}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t(
-                  'et_due_date'
-                )}
-              </label>
-
-              <input
-                type="date"
-                bind:value={invoice.dueDate}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-              />
-            </div>
-
-          </div>
-        </div>
-
-        <!-- FROM -->
-
-        <div>
-          <h2
-            class="font-semibold mb-3"
-          >
-            {lang.t('et_from')}
-          </h2>
-
-          <div class="space-y-2">
-
-            <input
-              placeholder={lang.t(
-                'et_company_name'
-              )}
-              bind:value={invoice.from.name}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-            />
-
-            <input
-              placeholder={lang.t(
-                'et_address'
-              )}
-              bind:value={invoice.from.address}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-            />
-
-            <div
-              class="grid grid-cols-2 gap-2"
-            >
-
-              <input
-                placeholder={lang.t(
-                  'et_email'
-                )}
-                bind:value={invoice.from.email}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-              />
-
-              <input
-                placeholder={lang.t(
-                  'et_phone'
-                )}
-                bind:value={invoice.from.phone}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-              />
-
-            </div>
-          </div>
-        </div>
-
-        <!-- TO -->
-
-        <div>
-          <h2
-            class="font-semibold mb-3"
-          >
-            {lang.t('et_to')}
-          </h2>
-
-          <div class="space-y-2">
-
-            <input
-              placeholder={lang.t(
-                'et_client_name'
-              )}
-              bind:value={invoice.to.name}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-            />
-
-            <input
-              placeholder={lang.t(
-                'et_address'
-              )}
-              bind:value={invoice.to.address}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-            />
-
-            <input
-              type="email"
-              placeholder={lang.t(
-                'et_email'
-              )}
-              bind:value={invoice.to.email}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-            />
-
-          </div>
-        </div>
-
-        <!-- ITEMS -->
-
-        <div>
-
-          <div
-            class="flex justify-between items-center mb-3"
+            id="invoice"
+            class:section-highlight={activeSection === 'invoice'}
+            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
 
             <h2
-              class="font-semibold"
+              class="font-semibold mb-3"
             >
-              {lang.t('et_items')}
+              {lang.t('et_info')}
             </h2>
 
+            <div
+              class="grid grid-cols-2 gap-3"
+            >
+
+              <div>
+                <label
+                  class="text-xs opacity-60"
+                >
+                  {lang.t(
+                    'et_invoice_number'
+                  )}
+                </label>
+
+                <input
+                  bind:value={invoice.invoiceNumber}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-xs opacity-60"
+                >
+                  {lang.t('et_status')}
+                </label>
+
+                <select
+                  bind:value={invoice.status}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                >
+                  <option value="unpaid">
+                    {lang.t(
+                      'et_status_unpaid'
+                    )}
+                  </option>
+
+                  <option value="paid">
+                    {lang.t(
+                      'et_status_paid'
+                    )}
+                  </option>
+
+                  <option value="overdue">
+                    {lang.t(
+                      'et_status_overdue'
+                    )}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  class="text-xs opacity-60"
+                >
+                  {lang.t(
+                    'et_issue_date'
+                  )}
+                </label>
+
+                <input
+                  type="date"
+                  bind:value={invoice.issueDate}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-xs opacity-60"
+                >
+                  {lang.t(
+                    'et_due_date'
+                  )}
+                </label>
+
+                <input
+                  type="date"
+                  bind:value={invoice.dueDate}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                />
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ================================================= -->
+          <!-- CUSTOMER -->
+          <!-- ================================================= -->
+
+          <div
+            id="customer"
+            class:section-highlight={activeSection === 'customer'}
+            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+          >
+
+            <h2
+              class="font-semibold mb-3"
+            >
+              {lang.t('et_to')}
+            </h2>
+
+            <div class="space-y-2">
+
+              <input
+                placeholder={lang.t(
+                  'et_client_name'
+                )}
+                bind:value={invoice.to.name}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+              />
+
+              <input
+                placeholder={lang.t(
+                  'et_address'
+                )}
+                bind:value={invoice.to.address}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+              />
+
+              <input
+                type="email"
+                placeholder={lang.t(
+                  'et_email'
+                )}
+                bind:value={invoice.to.email}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+              />
+
+            </div>
+          </div>
+
+          <!-- ================================================= -->
+          <!-- ITEMS -->
+          <!-- ================================================= -->
+
+          <div
+            id="items"
+            class:section-highlight={activeSection === 'items'}
+            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+          >
+
+            <div
+              class="flex justify-between items-center mb-3"
+            >
+
+              <h2
+                class="font-semibold"
+              >
+                {lang.t('et_items')}
+              </h2>
+
+              <button
+                onclick={addItem}
+                class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+                style="background:#8CFF3D"
+              >
+                {lang.t(
+                  'et_add_item'
+                )}
+              </button>
+
+            </div>
+
+            <div class="space-y-2">
+
+              {#each invoice.items as item, i}
+
+                <div
+                  class="flex gap-2 items-center"
+                >
+
+                  <input
+                    placeholder={lang.t(
+                      'et_description'
+                    )}
+                    bind:value={item.description}
+                    class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder={lang.t(
+                      'et_qty'
+                    )}
+                    bind:value={item.qty}
+                    class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder={lang.t(
+                      'et_price'
+                    )}
+                    bind:value={item.price}
+                    class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
+                  />
+
+                  <button
+                    onclick={() =>
+                      removeItem(i)}
+                    class="text-red-500 text-sm px-2"
+                  >
+                    ✕
+                  </button>
+
+                </div>
+
+              {/each}
+
+            </div>
+          </div>
+
+          <!-- ================================================= -->
+          <!-- TAX & DISCOUNT -->
+          <!-- ================================================= -->
+
+          <div
+            id="tax"
+            class:section-highlight={activeSection === 'tax'}
+            class="grid grid-cols-2 gap-3 scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+          >
+
+            <div>
+              <label
+                class="text-xs opacity-60"
+              >
+                {lang.t('et_tax')}
+              </label>
+
+              <input
+                type="number"
+                bind:value={invoice.taxPercent}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+              />
+            </div>
+
+            <div>
+              <label
+                class="text-xs opacity-60"
+              >
+                {lang.t(
+                  'et_discount'
+                )}
+              </label>
+
+              <input
+                type="number"
+                bind:value={invoice.discountPercent}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+              />
+            </div>
+
+          </div>
+
+          <!-- ================================================= -->
+          <!-- NOTES -->
+          <!-- ================================================= -->
+
+          <div
+            id="notes"
+            class:section-highlight={activeSection === 'notes'}
+            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+          >
+
+            <label
+              class="text-xs opacity-60"
+            >
+              {lang.t('et_notes')}
+            </label>
+
+            <textarea
+              bind:value={invoice.notes}
+              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+              rows="2"
+            ></textarea>
+
+          </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- PREVIEW -->
+        <!-- ================================================= -->
+
+        <div
+          class="lg:sticky lg:top-6 h-fit"
+        >
+
+          <!-- ACTION BUTTONS -->
+
+          <div class="flex gap-2 mb-3">
+
+            <!-- SAVE -->
+
             <button
-              onclick={addItem}
-              class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+              onclick={saveInvoice}
+              disabled={
+                saving ||
+                sendingEmail
+              }
+              class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
               style="background:#8CFF3D"
             >
-              {lang.t(
-                'et_add_item'
-              )}
+              {saving
+                ? lang.t(
+                    'saving_invoice'
+                  )
+                : lang.t(
+                    'save_invoice'
+                  )}
+            </button>
+
+            <!-- DOWNLOAD -->
+
+            <button
+              onclick={downloadPDF}
+              disabled={
+                downloading ||
+                sendingEmail
+              }
+              class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
+              style="border-color:#8CFF3D; color:#8CFF3D;"
+            >
+              {downloading
+                ? lang.t(
+                    'generating_pdf'
+                  )
+                : lang.t(
+                    'download_pdf'
+                  )}
             </button>
 
           </div>
 
-          <div class="space-y-2">
+          <!-- EMAIL BUTTON -->
 
-            {#each invoice.items as item, i}
+          <div class="mb-3">
 
-              <div
-                class="flex gap-2 items-center"
-              >
-
-                <input
-                  placeholder={lang.t(
-                    'et_description'
-                  )}
-                  bind:value={item.description}
-                  class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-                />
-
-                <input
-                  type="number"
-                  placeholder={lang.t(
-                    'et_qty'
-                  )}
-                  bind:value={item.qty}
-                  class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
-                />
-
-                <input
-                  type="number"
-                  placeholder={lang.t(
-                    'et_price'
-                  )}
-                  bind:value={item.price}
-                  class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
-                />
-
-                <button
-                  onclick={() =>
-                    removeItem(i)}
-                  class="text-red-500 text-sm px-2"
-                >
-                  ✕
-                </button>
-
-              </div>
-
-            {/each}
+            <button
+              onclick={openEmailModal}
+              disabled={
+                saving ||
+                downloading ||
+                sendingEmail
+              }
+              class="w-full px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
+              style="border-color:#8CFF3D; color:#8CFF3D;"
+            >
+              📧 Kirim Email
+            </button>
 
           </div>
+
+          <!-- SAVE MESSAGE -->
+
+          {#if saveMessage}
+
+            <p
+              class="text-center text-sm mb-3 {saveMessage.startsWith(
+                '✅'
+              )
+                ? 'text-emerald-500'
+                : 'text-red-500'}"
+            >
+              {saveMessage}
+            </p>
+
+          {/if}
+
+          <!-- PREVIEW -->
+
+          <div
+            bind:this={previewEl}
+            class="rounded-2xl overflow-hidden"
+          >
+
+            <svelte:component
+              this={
+                templates[selected]
+                  .component
+              }
+              {invoice}
+            />
+
+          </div>
+
         </div>
 
-        <!-- TAX & DISCOUNT -->
+      </div>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- EMAIL MODAL -->
+    <!-- ================================================= -->
+
+    {#if showEmailModal}
+
+      <div
+        class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+        onclick={(e) => {
+          if (
+            e.target ===
+              e.currentTarget &&
+            !sendingEmail
+          ) {
+            showEmailModal =
+              false;
+
+            emailMessage = '';
+          }
+        }}
+      >
 
         <div
-          class="grid grid-cols-2 gap-3"
+          class="w-full max-w-md bg-white dark:bg-[#111] text-slate-900 dark:text-white rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-white/10"
         >
 
-          <div>
-            <label
-              class="text-xs opacity-60"
-            >
-              {lang.t('et_tax')}
-            </label>
+          <!-- TITLE -->
 
-            <input
-              type="number"
-              bind:value={invoice.taxPercent}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-            />
+          <div
+            class="flex items-center justify-between mb-2"
+          >
+
+            <h2
+              class="text-xl font-bold"
+            >
+              📧 Kirim Invoice
+            </h2>
+
+            <button
+              onclick={() => {
+                if (!sendingEmail) {
+                  showEmailModal =
+                    false;
+
+                  emailMessage = '';
+                }
+              }}
+              disabled={sendingEmail}
+              class="text-xl opacity-60 hover:opacity-100 disabled:opacity-30"
+            >
+              ✕
+            </button>
+
           </div>
 
-          <div>
-            <label
-              class="text-xs opacity-60"
-            >
-              {lang.t(
-                'et_discount'
-              )}
-            </label>
+          <p
+            class="text-sm opacity-60 mb-5"
+          >
+            Masukkan email pelanggan
+            untuk mengirim invoice.
+          </p>
 
-            <input
-              type="number"
-              bind:value={invoice.discountPercent}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-            />
-          </div>
-
-        </div>
-
-        <!-- NOTES -->
-
-        <div>
+          <!-- EMAIL -->
 
           <label
-            class="text-xs opacity-60"
+            class="text-sm font-medium"
+            for="recipient-email"
           >
-            {lang.t('et_notes')}
+            Email penerima
           </label>
 
-          <textarea
-            bind:value={invoice.notes}
-            class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-            rows="2"
-          ></textarea>
-
-        </div>
-
-      </div>
-
-      <!-- PREVIEW -->
-
-      <div
-        class="lg:sticky lg:top-6 h-fit"
-      >
-
-        <!-- ACTION BUTTONS -->
-
-        <div class="flex gap-2 mb-3">
-
-          <!-- SAVE -->
-
-          <button
-            onclick={saveInvoice}
-            disabled={saving || sendingEmail}
-            class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
-            style="background:#8CFF3D"
-          >
-            {saving
-              ? lang.t(
-                  'saving_invoice'
-                )
-              : lang.t(
-                  'save_invoice'
-                )}
-          </button>
-
-          <!-- DOWNLOAD -->
-
-          <button
-            onclick={downloadPDF}
-            disabled={
-              downloading ||
-              sendingEmail
-            }
-            class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
-            style="border-color:#8CFF3D; color:#8CFF3D;"
-          >
-            {downloading
-              ? lang.t(
-                  'generating_pdf'
-                )
-              : lang.t(
-                  'download_pdf'
-                )}
-          </button>
-
-        </div>
-
-        <!-- EMAIL BUTTON -->
-
-        <div class="mb-3">
-
-          <button
-            onclick={openEmailModal}
-            disabled={
-              saving ||
-              downloading ||
-              sendingEmail
-            }
-            class="w-full px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
-            style="border-color:#8CFF3D; color:#8CFF3D;"
-          >
-            📧 Kirim Email
-          </button>
-
-        </div>
-
-        <!-- SAVE MESSAGE -->
-
-        {#if saveMessage}
-
-          <p
-            class="text-center text-sm mb-3 {saveMessage.startsWith(
-              '✅'
-            )
-              ? 'text-emerald-500'
-              : 'text-red-500'}"
-          >
-            {saveMessage}
-          </p>
-
-        {/if}
-
-        <!-- PREVIEW -->
-
-        <div
-          bind:this={previewEl}
-          class="rounded-2xl overflow-hidden"
-        >
-
-          <svelte:component
-            this={
-              templates[selected]
-                .component
-            }
-            {invoice}
-          />
-
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ================================================= -->
-  <!-- EMAIL MODAL -->
-  <!-- ================================================= -->
-
-  {#if showEmailModal}
-
-    <div
-      class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
-      onclick={(e) => {
-        if (
-          e.target ===
-            e.currentTarget &&
-          !sendingEmail
-        ) {
-          showEmailModal = false;
-          emailMessage = '';
-        }
-      }}
-    >
-
-      <div
-        class="w-full max-w-md bg-white dark:bg-[#111] text-slate-900 dark:text-white rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-white/10"
-      >
-
-        <!-- TITLE -->
-
-        <div
-          class="flex items-center justify-between mb-2"
-        >
-
-          <h2
-            class="text-xl font-bold"
-          >
-            📧 Kirim Invoice
-          </h2>
-
-          <button
-            onclick={() => {
-              if (!sendingEmail) {
-                showEmailModal = false;
-                emailMessage = '';
+          <input
+            id="recipient-email"
+            type="email"
+            bind:value={recipientEmail}
+            placeholder="contoh@email.com"
+            class="w-full mt-2 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+            disabled={sendingEmail}
+            onkeydown={(e) => {
+              if (
+                e.key === 'Enter' &&
+                !sendingEmail
+              ) {
+                sendEmail();
               }
             }}
-            disabled={sendingEmail}
-            class="text-xl opacity-60 hover:opacity-100 disabled:opacity-30"
-          >
-            ✕
-          </button>
+          />
 
-        </div>
+          <!-- MESSAGE -->
 
-        <p
-          class="text-sm opacity-60 mb-5"
-        >
-          Masukkan email pelanggan
-          untuk mengirim invoice.
-        </p>
+          {#if emailMessage}
 
-        <!-- EMAIL -->
+            <p
+              class="text-sm mt-3 {emailMessage.startsWith(
+                '✅'
+              )
+                ? 'text-emerald-500'
+                : 'text-red-500'}"
+            >
+              {emailMessage}
+            </p>
 
-        <label
-          class="text-sm font-medium"
-          for="recipient-email"
-        >
-          Email penerima
-        </label>
+          {/if}
 
-        <input
-          id="recipient-email"
-          type="email"
-          bind:value={recipientEmail}
-          placeholder="contoh@email.com"
-          class="w-full mt-2 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-          disabled={sendingEmail}
-          onkeydown={(e) => {
-            if (
-              e.key === 'Enter' &&
-              !sendingEmail
-            ) {
-              sendEmail();
-            }
-          }}
-        />
+          <!-- BUTTONS -->
 
-        <!-- MESSAGE -->
+          <div class="flex gap-2 mt-6">
 
-        {#if emailMessage}
+            <button
+              onclick={() => {
+                showEmailModal =
+                  false;
 
-          <p
-            class="text-sm mt-3 {emailMessage.startsWith(
-              '✅'
-            )
-              ? 'text-emerald-500'
-              : 'text-red-500'}"
-          >
-            {emailMessage}
-          </p>
+                emailMessage = '';
+              }}
+              disabled={sendingEmail}
+              class="flex-1 px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 disabled:opacity-50"
+            >
+              Batal
+            </button>
 
-        {/if}
+            <button
+              onclick={sendEmail}
+              disabled={
+                sendingEmail ||
+                !recipientEmail.trim()
+              }
+              class="flex-1 px-4 py-2 rounded-full font-semibold text-black disabled:opacity-50"
+              style="background:#8CFF3D"
+            >
+              {sendingEmail
+                ? 'Mengirim...'
+                : 'Kirim Invoice'}
+            </button>
 
-        <!-- BUTTONS -->
-
-        <div class="flex gap-2 mt-6">
-
-          <button
-            onclick={() => {
-              showEmailModal = false;
-              emailMessage = '';
-            }}
-            disabled={sendingEmail}
-            class="flex-1 px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 disabled:opacity-50"
-          >
-            Batal
-          </button>
-
-          <button
-            onclick={sendEmail}
-            disabled={
-              sendingEmail ||
-              !recipientEmail.trim()
-            }
-            class="flex-1 px-4 py-2 rounded-full font-semibold text-black disabled:opacity-50"
-            style="background:#8CFF3D"
-          >
-            {sendingEmail
-              ? 'Mengirim...'
-              : 'Kirim Invoice'}
-          </button>
+          </div>
 
         </div>
 
       </div>
 
-    </div>
+    {/if}
 
-  {/if}
+  </main>
 
-</main>
+</div>
+
+<!-- ===================================================== -->
+<!-- SECTION HIGHLIGHT STYLE -->
+<!-- ===================================================== -->
+
+<style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
+  .section-highlight {
+    background: rgba(140, 255, 61, 0.08);
+
+    box-shadow:
+      0 0 0 2px rgba(140, 255, 61, 0.45),
+      0 0 25px rgba(140, 255, 61, 0.12);
+  }
+</style>  
