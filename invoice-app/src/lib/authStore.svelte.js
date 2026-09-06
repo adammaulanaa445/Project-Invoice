@@ -118,7 +118,7 @@ export const authStore = {
   loginWithGoogle() {
 
     window.location.href =
-      `${API_BASE_DIRECT}/auth/google`;
+      `${API_BASE_DIRECT}/api/auth/google`;
   },
 
 
