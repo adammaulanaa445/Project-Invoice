@@ -1,4 +1,11 @@
-const API_BASE = 'https://app-inv.xo.je';
+// Dipakai untuk semua fetch() biasa (login, register, logout, dll)
+// Request lewat proxy SvelteKit ini supaya tidak kena masalah CORS di InfinityFree
+const API_BASE = '/api/proxy';
+
+// Dipakai KHUSUS untuk redirect halaman penuh (window.location.href),
+// seperti login Google. Ini BUKAN fetch(), jadi CORS browser tidak berlaku
+// di sini — jadi tetap arahkan langsung ke domain backend asli.
+const API_BASE_DIRECT = 'https://app-inv.xo.je';
 
 
 
@@ -104,11 +111,14 @@ export const authStore = {
   // =========================
   // GOOGLE LOGIN
   // =========================
+  // Catatan: ini sengaja tetap pakai API_BASE_DIRECT (bukan proxy),
+  // karena ini redirect halaman penuh, bukan fetch(). CORS tidak
+  // relevan di sini, jadi biarkan browser langsung menuju InfinityFree.
 
   loginWithGoogle() {
 
     window.location.href =
-      `${API_BASE}/auth/google`;
+      `${API_BASE_DIRECT}/auth/google`;
   },
 
 
