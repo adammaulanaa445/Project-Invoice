@@ -23,7 +23,12 @@
   ];
 
   // props: bisa dioverride dari halaman yang memakai AppSidebar
-  let { menuItems = defaultMenuItems, menuLabel = 'Invoice' } = $props();
+  let {
+    menuItems = defaultMenuItems,
+    menuLabel = 'Invoice',
+    sidebarOpen = true,
+    onClose = () => {}
+  } = $props();
 
   $effect(() => {
     currentUser = authStore.getCurrentUser();
@@ -44,6 +49,8 @@
   function handleItemClick(item) {
     if (item.href) {
       goto(item.href);
+      // sidebar ditutup otomatis setelah pindah halaman
+      onClose();
       return;
     }
     if (item.section) {
@@ -75,6 +82,9 @@
     } else {
       goto(`/editor#${section}`);
     }
+
+    // sidebar ditutup otomatis setelah pilih section
+    onClose();
   }
 
   async function handleLogout() {
@@ -84,8 +94,24 @@
 
   function openProfile() {
     goto('/profile');
+    onClose();
   }
 </script>
+
+<!--
+  BACKDROP / OVERLAY GELAP
+  cuma muncul saat sidebar terbuka (di SEMUA ukuran layar, termasuk desktop)
+  klik di area ini akan menutup sidebar lewat onClose()
+  z-index sengaja di bawah <aside> (z-40) supaya sidebar tetap di atasnya
+-->
+{#if sidebarOpen}
+  <button
+    type="button"
+    aria-label="Tutup sidebar"
+    onclick={onClose}
+    class="fixed inset-0 z-30 bg-black/40 transition-opacity"
+  ></button>
+{/if}
 
 <aside
   class="
@@ -101,10 +127,14 @@
     text-white
     border-r
     border-white/10
+    transition-transform
+    duration-300
+    ease-in-out
+    {sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
   "
 >
-  <!-- LOGO -->
-  <div class="px-6 py-6">
+  <!-- LOGO + CLOSE BUTTON -->
+  <div class="px-6 py-6 flex items-center justify-between">
     <button
       type="button"
       onclick={() => goto('/')}
@@ -118,6 +148,16 @@
       <span class="text-lg font-bold">
         InvoiceKita
       </span>
+    </button>
+
+    <!-- CLOSE BUTTON -->
+    <button
+      type="button"
+      onclick={onClose}
+      aria-label="Tutup sidebar"
+      class="w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition"
+    >
+      ✕
     </button>
   </div>
 
