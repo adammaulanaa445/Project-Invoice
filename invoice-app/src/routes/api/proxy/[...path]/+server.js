@@ -14,7 +14,8 @@
 // bukan langsung dari JavaScript di browser.
 
 // Ganti sesuai domain backend Laravel kamu di InfinityFree
-const BACKEND_URL = 'https://app-inv.xo.je';
+// PENTING: route API Laravel-nya ada di prefix /api (bukan langsung di root)
+const BACKEND_URL = 'https://app-inv.xo.je/api';
 
 /**
  * Fungsi umum untuk meneruskan (forward) request apapun ke backend Laravel.
