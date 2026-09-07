@@ -6,7 +6,7 @@ const API_BASE = '/api/proxy';
 // seperti login Google. Ini BUKAN fetch(), jadi CORS browser tidak berlaku
 // di sini — jadi tetap arahkan langsung ke domain backend asli.
 // Di development, fallback ke localhost:8000
-const API_BASE_DIRECT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
+const API_BASE_DIRECT = 'http://localhost:8000/api';
 
 
 
