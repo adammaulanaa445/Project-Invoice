@@ -1,6 +1,6 @@
 // Dipakai untuk semua fetch() biasa (login, register, logout, dll)
 // Request lewat proxy SvelteKit ini supaya tidak kena masalah CORS di InfinityFree
-const API_BASE = '/api/proxy';
+const API_BASE = 'https://app-inv.xo.je/api';
 
 // Dipakai KHUSUS untuk redirect halaman penuh (window.location.href),
 // seperti login Google. Ini BUKAN fetch(), jadi CORS browser tidak berlaku
