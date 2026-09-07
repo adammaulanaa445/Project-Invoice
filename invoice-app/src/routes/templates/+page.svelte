@@ -51,52 +51,52 @@
 
 
   // =========================
-  // DATA TEMPLATE (tidak diubah)
+  // DATA TEMPLATE (tidak diubah dari sebelumnya, termasuk field category)
   // =========================
 
   const templates = [
-    { nameKey: 'tpl1_name', descKey: 'tpl1_desc', component: Invoice01Neat },
-    { nameKey: 'tpl2_name', descKey: 'tpl2_desc', component: Invoice02Corporate },
-    { nameKey: 'tpl3_name', descKey: 'tpl3_desc', component: Invoice03BoldBand },
-    { nameKey: 'tpl4_name', descKey: 'tpl4_desc', component: Invoice04Gradient },
-    { nameKey: 'tpl5_name', descKey: 'tpl5_desc', component: Invoice05DarkStudio },
-    { nameKey: 'tpl6_name', descKey: 'tpl6_desc', component: Invoice06Luxury },
-    { nameKey: 'tpl7_name', descKey: 'tpl7_desc', component: Invoice07Asymmetric },
-    { nameKey: 'tpl8_name', descKey: 'tpl8_desc', component: Invoice08NatureEco },
-    { nameKey: 'tpl9_name', descKey: 'tpl9_desc', component: Invoice09TechStartup },
-    { nameKey: 'tpl10_name', descKey: 'tpl10_desc', component: Invoice10Freelance },
-    { nameKey: 'tpl11_name', descKey: 'tpl11_desc', component: InvoiceBoldTypography },
-    { nameKey: 'tpl12_name', descKey: 'tpl12_desc', component: InvoiceDarkTech },
-    { nameKey: 'tpl13_name', descKey: 'tpl13_desc', component: InvoiceEditorialKoran },
-    { nameKey: 'tpl14_name', descKey: 'tpl14_desc', component: InvoiceEleganEmas },
-    { nameKey: 'tpl15_name', descKey: 'tpl15_desc', component: InvoiceGradientVibrant },
-    { nameKey: 'tpl16_name', descKey: 'tpl16_desc', component: InvoiceKlasikFormal },
-    { nameKey: 'tpl17_name', descKey: 'tpl17_desc', component: InvoiceKorporatBiru },
-    { nameKey: 'tpl18_name', descKey: 'tpl18_desc', component: InvoiceModernMinimalis },
-    { nameKey: 'tpl19_name', descKey: 'tpl19_desc', component: InvoiceNordicEarthy },
-    { nameKey: 'tpl20_name', descKey: 'tpl20_desc', component: InvoicePastelPlayful },
-    { nameKey: 'tpl21_name', descKey: 'tpl21_desc', component: InvoiceRetroVintage },
-    { nameKey: 'tpl22_name', descKey: 'tpl22_desc', component: InvoiceTechSaaS },
-    { nameKey: 'tpl23_name', descKey: 'tpl23_desc', component: InvoiceCurvedTeal },
-    { nameKey: 'tpl24_name', descKey: 'tpl24_desc', component: InvoicePixelReceipt },
-    { nameKey: 'tpl25_name', descKey: 'tpl25_desc', component: InvoiceLedgerKlasik },
-    { nameKey: 'tpl26_name', descKey: 'tpl26_desc', component: InvoiceSwissGrid },
-    { nameKey: 'tpl27_name', descKey: 'tpl27_desc', component: InvoiceMotifWarm },
-    { nameKey: 'tpl28_name', descKey: 'tpl28_desc', component: InvoiceMinimalisMono },
-    { nameKey: 'tpl29_name', descKey: 'tpl29_desc', component: InvoiceStudioHitam },
-    { nameKey: 'tpl30_name', descKey: 'tpl30_desc', component: InvoiceBrutalistBracket },
-    { nameKey: 'tpl31_name', descKey: 'tpl31_desc', component: InvoiceEditorialMerah },
-    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru },
-    { nameKey: 'tpl33_name', descKey: 'tpl33_desc', component: InvoiceAuroraNight },
-    { nameKey: 'tpl34_name', descKey: 'tpl34_desc', component: InvoiceCreamMonogramme },
-    { nameKey: 'tpl35_name', descKey: 'tpl35_desc', component: InvoiceDottedBlueWave },
-    { nameKey: 'tpl36_name', descKey: 'tpl36_desc', component: InvoiceIndigoSwirl },
-    { nameKey: 'tpl37_name', descKey: 'tpl37_desc', component: InvoiceCrimsonVAT },
-    { nameKey: 'tpl38_name', descKey: 'tpl38_desc', component: InvoicePillRowsIndigo },
-    { nameKey: 'tpl39_name', descKey: 'tpl39_desc', component: InvoiceSignatureCream },
-    { nameKey: 'tpl40_name', descKey: 'tpl40_desc', component: InvoiceLavenderSoft },
-    { nameKey: 'tpl41_name', descKey: 'tpl41_desc', component: InvoiceCoralGradientBar },
-    { nameKey: 'tpl42_name', descKey: 'tpl42_desc', component: InvoiceSlateCorporate },
+    { nameKey: 'tpl1_name', descKey: 'tpl1_desc', component: Invoice01Neat, category: 'Minimalis' },
+    { nameKey: 'tpl2_name', descKey: 'tpl2_desc', component: Invoice02Corporate, category: 'Korporat' },
+    { nameKey: 'tpl3_name', descKey: 'tpl3_desc', component: Invoice03BoldBand, category: 'Modern' },
+    { nameKey: 'tpl4_name', descKey: 'tpl4_desc', component: Invoice04Gradient, category: 'Modern' },
+    { nameKey: 'tpl5_name', descKey: 'tpl5_desc', component: Invoice05DarkStudio, category: 'Modern' },
+    { nameKey: 'tpl6_name', descKey: 'tpl6_desc', component: Invoice06Luxury, category: 'Elegan' },
+    { nameKey: 'tpl7_name', descKey: 'tpl7_desc', component: Invoice07Asymmetric, category: 'Kreatif' },
+    { nameKey: 'tpl8_name', descKey: 'tpl8_desc', component: Invoice08NatureEco, category: 'Kreatif' },
+    { nameKey: 'tpl9_name', descKey: 'tpl9_desc', component: Invoice09TechStartup, category: 'Modern' },
+    { nameKey: 'tpl10_name', descKey: 'tpl10_desc', component: Invoice10Freelance, category: 'Minimalis' },
+    { nameKey: 'tpl11_name', descKey: 'tpl11_desc', component: InvoiceBoldTypography, category: 'Kreatif' },
+    { nameKey: 'tpl12_name', descKey: 'tpl12_desc', component: InvoiceDarkTech, category: 'Modern' },
+    { nameKey: 'tpl13_name', descKey: 'tpl13_desc', component: InvoiceEditorialKoran, category: 'Kreatif' },
+    { nameKey: 'tpl14_name', descKey: 'tpl14_desc', component: InvoiceEleganEmas, category: 'Elegan' },
+    { nameKey: 'tpl15_name', descKey: 'tpl15_desc', component: InvoiceGradientVibrant, category: 'Modern' },
+    { nameKey: 'tpl16_name', descKey: 'tpl16_desc', component: InvoiceKlasikFormal, category: 'Korporat' },
+    { nameKey: 'tpl17_name', descKey: 'tpl17_desc', component: InvoiceKorporatBiru, category: 'Korporat' },
+    { nameKey: 'tpl18_name', descKey: 'tpl18_desc', component: InvoiceModernMinimalis, category: 'Minimalis' },
+    { nameKey: 'tpl19_name', descKey: 'tpl19_desc', component: InvoiceNordicEarthy, category: 'Minimalis' },
+    { nameKey: 'tpl20_name', descKey: 'tpl20_desc', component: InvoicePastelPlayful, category: 'Kreatif' },
+    { nameKey: 'tpl21_name', descKey: 'tpl21_desc', component: InvoiceRetroVintage, category: 'Kreatif' },
+    { nameKey: 'tpl22_name', descKey: 'tpl22_desc', component: InvoiceTechSaaS, category: 'Modern' },
+    { nameKey: 'tpl23_name', descKey: 'tpl23_desc', component: InvoiceCurvedTeal, category: 'Modern' },
+    { nameKey: 'tpl24_name', descKey: 'tpl24_desc', component: InvoicePixelReceipt, category: 'Kreatif' },
+    { nameKey: 'tpl25_name', descKey: 'tpl25_desc', component: InvoiceLedgerKlasik, category: 'Korporat' },
+    { nameKey: 'tpl26_name', descKey: 'tpl26_desc', component: InvoiceSwissGrid, category: 'Minimalis' },
+    { nameKey: 'tpl27_name', descKey: 'tpl27_desc', component: InvoiceMotifWarm, category: 'Kreatif' },
+    { nameKey: 'tpl28_name', descKey: 'tpl28_desc', component: InvoiceMinimalisMono, category: 'Minimalis' },
+    { nameKey: 'tpl29_name', descKey: 'tpl29_desc', component: InvoiceStudioHitam, category: 'Modern' },
+    { nameKey: 'tpl30_name', descKey: 'tpl30_desc', component: InvoiceBrutalistBracket, category: 'Kreatif' },
+    { nameKey: 'tpl31_name', descKey: 'tpl31_desc', component: InvoiceEditorialMerah, category: 'Kreatif' },
+    { nameKey: 'tpl32_name', descKey: 'tpl32_desc', component: InvoiceSidebarBiru, category: 'Korporat' },
+    { nameKey: 'tpl33_name', descKey: 'tpl33_desc', component: InvoiceAuroraNight, category: 'Modern' },
+    { nameKey: 'tpl34_name', descKey: 'tpl34_desc', component: InvoiceCreamMonogramme, category: 'Elegan' },
+    { nameKey: 'tpl35_name', descKey: 'tpl35_desc', component: InvoiceDottedBlueWave, category: 'Modern' },
+    { nameKey: 'tpl36_name', descKey: 'tpl36_desc', component: InvoiceIndigoSwirl, category: 'Modern' },
+    { nameKey: 'tpl37_name', descKey: 'tpl37_desc', component: InvoiceCrimsonVAT, category: 'Korporat' },
+    { nameKey: 'tpl38_name', descKey: 'tpl38_desc', component: InvoicePillRowsIndigo, category: 'Modern' },
+    { nameKey: 'tpl39_name', descKey: 'tpl39_desc', component: InvoiceSignatureCream, category: 'Elegan' },
+    { nameKey: 'tpl40_name', descKey: 'tpl40_desc', component: InvoiceLavenderSoft, category: 'Minimalis' },
+    { nameKey: 'tpl41_name', descKey: 'tpl41_desc', component: InvoiceCoralGradientBar, category: 'Modern' },
+    { nameKey: 'tpl42_name', descKey: 'tpl42_desc', component: InvoiceSlateCorporate, category: 'Korporat' },
   ];
 
 
@@ -121,6 +121,13 @@
 
 
   // =========================
+  // BARU: state buka/tutup sidebar
+  // =========================
+
+  let sidebarOpen = $state(true);
+
+
+  // =========================
   // UI-ONLY: search & filter tampilan
   // (tidak menyentuh data/backend, hanya memfilter tampilan di client)
   // =========================
@@ -132,6 +139,7 @@
   let filteredTemplates = $derived(
     templates
       .map((t, i) => ({ ...t, index: i }))
+      .filter((t) => activeCategory === 'Semua' || t.category === activeCategory)
       .filter((t) => lang.t(t.nameKey).toLowerCase().includes(searchQuery.toLowerCase()))
   );
 </script>
@@ -139,17 +147,38 @@
 
 <div class="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white transition-colors">
 
-  <AppSidebar menuItems={dashboardMenuItems} menuLabel="Menu" />
+  <AppSidebar
+    menuItems={dashboardMenuItems}
+    menuLabel="Menu"
+    {sidebarOpen}
+    onClose={() => sidebarOpen = false}
+  />
 
-  <!-- MAIN CONTENT (diberi jarak kiri selebar AppSidebar yang fixed, w-64) -->
-  <div class="lg:pl-64">
+  <!-- MAIN CONTENT: jarak kiri (pl-64) cuma dipasang kalau sidebar sedang terbuka DAN layar besar -->
+  <div class={sidebarOpen ? 'lg:pl-64' : ''}>
 
     <div class="p-6 md:p-10">
 
       <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-bold">Pilih Template Invoice</h1>
-          <p class="text-sm opacity-60 mt-1">Temukan desain invoice yang cocok untuk bisnis kamu.</p>
+        <div class="flex items-center gap-3">
+
+          <!-- TOMBOL BUKA SIDEBAR (cuma tampil kalau sidebar sedang tertutup) -->
+          {#if !sidebarOpen}
+            <button
+              type="button"
+              onclick={() => sidebarOpen = true}
+              aria-label="Buka sidebar"
+              class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition text-lg shrink-0"
+            >
+              ☰
+            </button>
+          {/if}
+
+          <div>
+            <h1 class="text-2xl font-bold">Pilih Template Invoice</h1>
+            <p class="text-sm opacity-60 mt-1">Temukan desain invoice yang cocok untuk bisnis kamu.</p>
+          </div>
+
         </div>
 
         <button
@@ -173,7 +202,7 @@
         />
       </div>
 
-      <!-- CATEGORY FILTER (tampilan saja, template belum punya data kategori) -->
+      <!-- CATEGORY FILTER -->
       <div class="flex flex-wrap gap-2 mb-8">
         {#each categories as cat}
           <button
