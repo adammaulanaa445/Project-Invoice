@@ -23,6 +23,9 @@
   ];
 
   // props: bisa dioverride dari halaman yang memakai AppSidebar
+  // sidebarOpen & onClose sekarang berfungsi penuh di SEMUA ukuran layar.
+  // Kalau halaman tidak mengirim prop ini sama sekali, default-nya "terbuka terus"
+  // (sama seperti perilaku sebelum fitur tutup ada) -> aman untuk /editor yang belum diubah.
   let {
     menuItems = defaultMenuItems,
     menuLabel = 'Invoice',
@@ -49,8 +52,6 @@
   function handleItemClick(item) {
     if (item.href) {
       goto(item.href);
-      // sidebar ditutup otomatis setelah pindah halaman
-      onClose();
       return;
     }
     if (item.section) {
@@ -82,9 +83,6 @@
     } else {
       goto(`/editor#${section}`);
     }
-
-    // sidebar ditutup otomatis setelah pilih section
-    onClose();
   }
 
   async function handleLogout() {
@@ -94,22 +92,21 @@
 
   function openProfile() {
     goto('/profile');
-    onClose();
   }
 </script>
 
 <!--
   BACKDROP / OVERLAY GELAP
-  cuma muncul saat sidebar terbuka (di SEMUA ukuran layar, termasuk desktop)
-  klik di area ini akan menutup sidebar lewat onClose()
-  z-index sengaja di bawah <aside> (z-40) supaya sidebar tetap di atasnya
+  Hanya muncul di layar mobile (lg:hidden) saat sidebar terbuka.
+  Di desktop tidak ada backdrop -- sidebar cuma geser masuk/keluar,
+  konten di sebelahnya menyesuaikan lewat class di halaman (pl-64 / tidak).
 -->
 {#if sidebarOpen}
   <button
     type="button"
     aria-label="Tutup sidebar"
     onclick={onClose}
-    class="fixed inset-0 z-30 bg-black/40 transition-opacity"
+    class="fixed inset-0 z-30 bg-black/40 transition-opacity lg:hidden"
   ></button>
 {/if}
 
@@ -150,7 +147,7 @@
       </span>
     </button>
 
-    <!-- CLOSE BUTTON -->
+    <!-- CLOSE BUTTON: aktif di semua ukuran layar sekarang -->
     <button
       type="button"
       onclick={onClose}
