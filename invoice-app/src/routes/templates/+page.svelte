@@ -1,5 +1,4 @@
 <script>
-<<<<<<< HEAD
   import { goto } from '$app/navigation';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
@@ -8,7 +7,7 @@
   import { goto } from "$app/navigation";
   import { theme } from "$lib/theme.svelte.js";
   import { lang } from "$lib/lang.svelte.js";
->>>>>>> f713329702249d56a9acde9c2a705cb470153cb3
+
 
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import TemplatePreview from "$lib/components/TemplatePreview.svelte";
@@ -307,7 +306,7 @@
     { nameKey: 'tpl40_name', descKey: 'tpl40_desc', component: InvoiceLavenderSoft, category: 'Minimalis' },
     { nameKey: 'tpl41_name', descKey: 'tpl41_desc', component: InvoiceCoralGradientBar, category: 'Modern' },
     { nameKey: 'tpl42_name', descKey: 'tpl42_desc', component: InvoiceSlateCorporate, category: 'Korporat' },
->>>>>>> bbcb46ff8bbcf3fdc6973987b287cabcb72253e3
+
   ];
 
   // =========================
@@ -429,7 +428,6 @@
 
   <div class={sidebarOpen ? 'lg:pl-64' : ''}>
 
->>>>>>> bbcb46ff8bbcf3fdc6973987b287cabcb72253e3
     <div class="p-6 md:p-10">
       <div class="flex items-center justify-between mb-6">
 <<<<<<< HEAD
@@ -457,7 +455,6 @@
             <p class="text-sm opacity-60 mt-1">Temukan desain invoice yang cocok untuk bisnis kamu.</p>
           </div>
 
->>>>>>> bbcb46ff8bbcf3fdc6973987b287cabcb72253e3
         </div>
 
         <button
@@ -519,7 +516,6 @@
           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] text-sm focus:outline-none focus:ring-2 transition"
           style="--tw-ring-color:#8CFF3D"
         />
->>>>>>> f713329702249d56a9acde9c2a705cb470153cb3
       </div>
 
       <!-- CATEGORY FILTER -->
