@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
+  import { onMount } from 'svelte';
 
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import TemplatePreview from '$lib/components/TemplatePreview.svelte';
@@ -51,7 +52,7 @@
 
 
   // =========================
-  // DATA TEMPLATE (tidak diubah dari sebelumnya, termasuk field category)
+  // DATA TEMPLATE (tidak diubah)
   // =========================
 
   const templates = [
@@ -110,7 +111,7 @@
 
 
   // =========================
-  // MENU UNTUK AppSidebar (khusus halaman ini)
+  // MENU UNTUK AppSidebar (tidak diubah)
   // =========================
 
   const dashboardMenuItems = [
@@ -121,10 +122,51 @@
 
 
   // =========================
-  // BARU: state buka/tutup sidebar
+  // state buka/tutup sidebar (tidak diubah)
   // =========================
 
   let sidebarOpen = $state(true);
+
+
+  // =========================
+  // BARU: TEMPLATE FAVORIT
+  // Disimpan di localStorage browser (key: 'invoicekita_favorite_templates'),
+  // TIDAK lewat API / database sama sekali.
+  // =========================
+
+  const FAVORITES_KEY = 'invoicekita_favorite_templates';
+
+  let favorites = $state([]);
+  let showFavoritesOnly = $state(false);
+
+  onMount(() => {
+    try {
+      const stored = localStorage.getItem(FAVORITES_KEY);
+      favorites = stored ? JSON.parse(stored) : [];
+    } catch (err) {
+      favorites = [];
+    }
+  });
+
+  function saveFavorites() {
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    } catch (err) {
+      // localStorage penuh / private mode -> abaikan, tidak fatal
+    }
+  }
+
+  function toggleFavorite(index, event) {
+    event.stopPropagation();
+
+    if (favorites.includes(index)) {
+      favorites = favorites.filter((i) => i !== index);
+    } else {
+      favorites = [...favorites, index];
+    }
+
+    saveFavorites();
+  }
 
 
   // =========================
@@ -140,6 +182,7 @@
     templates
       .map((t, i) => ({ ...t, index: i }))
       .filter((t) => activeCategory === 'Semua' || t.category === activeCategory)
+      .filter((t) => !showFavoritesOnly || favorites.includes(t.index))
       .filter((t) => lang.t(t.nameKey).toLowerCase().includes(searchQuery.toLowerCase()))
   );
 </script>
@@ -154,7 +197,6 @@
     onClose={() => sidebarOpen = false}
   />
 
-  <!-- MAIN CONTENT: jarak kiri (pl-64) cuma dipasang kalau sidebar sedang terbuka DAN layar besar -->
   <div class={sidebarOpen ? 'lg:pl-64' : ''}>
 
     <div class="p-6 md:p-10">
@@ -162,7 +204,6 @@
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
 
-          <!-- TOMBOL BUKA SIDEBAR (cuma tampil kalau sidebar sedang tertutup) -->
           {#if !sidebarOpen}
             <button
               type="button"
@@ -190,16 +231,41 @@
         </button>
       </div>
 
-      <!-- SEARCH -->
-      <div class="relative mb-4 max-w-md">
-        <span class="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-sm">🔍</span>
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="Cari template..."
-          class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] text-sm focus:outline-none focus:ring-2 transition"
-          style="--tw-ring-color:#8CFF3D"
-        />
+      <!-- SEARCH + TOMBOL FAVORIT -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-4">
+
+        <div class="relative max-w-md flex-1">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-sm">🔍</span>
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Cari template..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] text-sm focus:outline-none focus:ring-2 transition"
+            style="--tw-ring-color:#8CFF3D"
+          />
+        </div>
+
+        <!-- TOGGLE: tampilkan favorit saja -->
+        <button
+          type="button"
+          onclick={() => showFavoritesOnly = !showFavoritesOnly}
+          class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition shrink-0
+            {showFavoritesOnly
+              ? 'border-transparent text-black'
+              : 'border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] text-slate-600 dark:text-white/70 hover:bg-slate-50 dark:hover:bg-white/5'}"
+          style={showFavoritesOnly ? 'background:#8CFF3D' : ''}
+        >
+          <span>{showFavoritesOnly ? '❤️' : '🤍'}</span>
+          Favorit
+          {#if favorites.length > 0}
+            <span
+              class="text-[10px] font-bold rounded-full px-1.5 py-0.5 {showFavoritesOnly ? 'bg-black/20 text-black' : 'bg-slate-100 dark:bg-white/10'}"
+            >
+              {favorites.length}
+            </span>
+          {/if}
+        </button>
+
       </div>
 
       <!-- CATEGORY FILTER -->
@@ -220,7 +286,7 @@
 
         {#each filteredTemplates as t (t.index)}
 
-          <div class="rounded-2xl overflow-hidden bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition duration-300">
+          <div class="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition duration-300">
 
             <div class="relative bg-slate-50 dark:bg-[#0d0d0d]">
 
@@ -230,6 +296,16 @@
               >
                 {String(t.index + 1).padStart(2, '0')}
               </span>
+
+              <!-- TOMBOL FAVORIT (hati) -->
+              <button
+                type="button"
+                onclick={(e) => toggleFavorite(t.index, e)}
+                aria-label={favorites.includes(t.index) ? 'Hapus dari favorit' : 'Tambahkan ke favorit'}
+                class="absolute top-2.5 right-2.5 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/60 backdrop-blur hover:scale-110 transition text-base shadow-sm"
+              >
+                {favorites.includes(t.index) ? '❤️' : '🤍'}
+              </button>
 
               <TemplatePreview component={t.component} />
 
@@ -257,7 +333,13 @@
 
       </div>
 
-      {#if filteredTemplates.length === 0}
+      {#if filteredTemplates.length === 0 && showFavoritesOnly}
+        <div class="text-center py-16">
+          <p class="text-3xl mb-2">🤍</p>
+          <p class="opacity-60 text-sm">Belum ada template favorit.</p>
+          <p class="opacity-40 text-xs mt-1">Klik ikon hati di pojok template untuk menyimpannya di sini.</p>
+        </div>
+      {:else if filteredTemplates.length === 0}
         <p class="text-center opacity-50 text-sm py-16">Template tidak ditemukan.</p>
       {/if}
 
