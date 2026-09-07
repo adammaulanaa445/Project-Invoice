@@ -5,8 +5,8 @@
   import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
 
-  const API_BASE = 'http://localhost:8800/api';
-  const STORAGE_BASE = 'http://localhost:8800/storage';
+  const API_BASE = 'http://localhost:8000/api';
+  const STORAGE_BASE = 'http://localhost:8000/storage';
 
   let currentUser = $state(null);
 

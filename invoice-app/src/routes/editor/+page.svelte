@@ -56,8 +56,8 @@
   // API
   // =====================================================
 
-  const API_BASE = 'http://localhost:8800/api';
-  const STORAGE_BASE = 'http://localhost:8800/storage';
+  const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
+  const STORAGE_BASE = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api').replace(/\/api$/, '/storage');
 
   // =====================================================
   // TEMPLATE
@@ -731,83 +731,14 @@
         pdf.output('blob');
 
       // =================================================
-      // FORM DATA
+      // KIRIM VIA INVOICESTORE
       // =================================================
 
-      const formData =
-        new FormData();
-
-      formData.append(
-        'email',
-        recipientEmail.trim()
+      await invoiceStore.sendEmail(
+        savedInvoiceId,
+        recipientEmail,
+        pdfBlob
       );
-
-      formData.append(
-        'pdf',
-        pdfBlob,
-        `Invoice-${
-          invoice.invoiceNumber ||
-          'invoice'
-        }.pdf`
-      );
-
-      // =================================================
-      // REQUEST KE LARAVEL
-      // =================================================
-
-      const response =
-        await fetch(
-          `${API_BASE}/invoices/${savedInvoiceId}/send-email`,
-          {
-            method: 'POST',
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-
-              Accept:
-                'application/json'
-            },
-
-            body: formData
-          }
-        );
-
-      let result = {};
-
-      try {
-        result =
-          await response.json();
-      } catch {
-        result = {};
-      }
-
-      // =================================================
-      // TOKEN EXPIRED
-      // =================================================
-
-      if (
-        response.status === 401
-      ) {
-        localStorage.removeItem(
-          'auth_token'
-        );
-
-        localStorage.removeItem(
-          'user'
-        );
-
-        goto('/login');
-
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          result.message ||
-          'Gagal mengirim email.'
-        );
-      }
 
       emailMessage =
         '✅ Invoice berhasil dikirim!';
