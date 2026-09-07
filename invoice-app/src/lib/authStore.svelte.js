@@ -1,5 +1,5 @@
-const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
-const API_BASE_DIRECT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
+const API_BASE = 'https://project-invoice-production-6b1f.up.railway.app/api';
+const API_BASE_DIRECT = 'https://project-invoice-production-6b1f.up.railway.app/api';
 
 
 

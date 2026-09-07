@@ -56,8 +56,8 @@
   // API
   // =====================================================
 
-  const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api';
-  const STORAGE_BASE = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000/api').replace(/\/api$/, '/storage');
+  const API_BASE = 'https://project-invoice-production-6b1f.up.railway.app/api';
+  const STORAGE_BASE = ('https://project-invoice-production-6b1f.up.railway.app/api').replace(/\/api$/, '');
 
   // =====================================================
   // TEMPLATE

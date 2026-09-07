@@ -16,7 +16,7 @@
 // Ganti sesuai domain backend Laravel kamu di InfinityFree
 // PENTING: route API Laravel-nya ada di prefix /api (bukan langsung di root)
 // Di development, pakai VITE_BACKEND_URL dari .env, atau fallback ke localhost
-const BACKEND_URL = 'http://localhost:8000/api';
+const BACKEND_URL = 'https://project-invoice-production-6b1f.up.railway.app';
 
 /**
  * Fungsi umum untuk meneruskan (forward) requst apapun ke backend Laravel.
