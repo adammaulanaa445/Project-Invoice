@@ -165,6 +165,7 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'message' => 'Gagal mengirim email.',
+                'debug' => $e->getMessage(),
             ], 500);
         }
     }
