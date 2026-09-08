@@ -64,7 +64,7 @@
         throw new Error('Gagal mengambil profile.');
       }
 
-      const data = await response.json();
+      const data = await response.json.();
 
       profile = {
         company_name: data.company_name ?? '',
