@@ -141,13 +141,13 @@ class AuthController extends Controller
 
 
             return redirect(
-                "http://localhost:5173/auth/callback?$query"
+                "https://invoice-app-kappa-mauve.vercel.app/auth/callback?$query"
             );
 
         } catch (\Exception $e) {
 
             return redirect(
-                'http://localhost:5173/login?error=' .
+                'https://invoice-app-kappa-mauve.vercel.app/login?error=' .
                 urlencode($e->getMessage())
             );
 
