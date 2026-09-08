@@ -12,7 +12,8 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'https://invoice-app-kappa-mauve.vercel.app'],
+    'allowed_origins' => ['http://localhost:5173', 
+            'https://invoice-app-kappa-mauve.vercel.app'],
 
     'allowed_origins_patterns' => [],
 
