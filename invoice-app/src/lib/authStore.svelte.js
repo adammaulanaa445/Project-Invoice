@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Dipakai untuk semua fetch() biasa (login, register, logout, dll)
 // Request lewat proxy SvelteKit ini supaya tidak kena masalah CORS di InfinityFree
 const API_BASE =  'http://localhost:8000/api' ;
@@ -7,6 +8,10 @@ const API_BASE =  'http://localhost:8000/api' ;
 // di sini — jadi tetap arahkan langsung ke domain backend asli.
 // Di development, fallback ke localhost:8000
 const API_BASE_DIRECT = 'https://app-inv.xo.je/api' || 'http://localhost:8000/api';
+=======
+const API_BASE = 'https://project-invoice-production-6b1f.up.railway.app/api';
+const API_BASE_DIRECT = 'https://project-invoice-production-6b1f.up.railway.app/api';
+>>>>>>> 2e03c83d224e1ab9b97235474cc1cc41c2091bd9
 
 
 

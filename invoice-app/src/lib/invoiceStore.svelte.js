@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 // Semua request di sini pakai fetch() biasa, jadi cukup diarahkan
 // lewat proxy SvelteKit supaya tidak kena masalah CORS di InfinityFree.
 const API_BASE =  '/api/proxy';
+=======
+const API_BASE = 'https://project-invoice-production-6b1f.up.railway.app/api';
+>>>>>>> 2e03c83d224e1ab9b97235474cc1cc41c2091bd9
 
 function getToken() {
   return localStorage.getItem('auth_token');
@@ -63,4 +67,36 @@ export const invoiceStore = {
     const json = await res.json();
     return json.data ?? json; // Laravel paginate() bungkus hasil dalam field "data"
   },
+
+  async sendEmail(invoiceId, recipientEmail, pdfBlob) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login terlebih dahulu.');
+
+    const formData = new FormData();
+    formData.append('email', recipientEmail.trim());
+    formData.append('pdf', pdfBlob, `Invoice-${invoiceId}.pdf`);
+
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}/send-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      body: formData
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Gagal mengirim email.');
+    }
+
+    return data;
+  }
 };
