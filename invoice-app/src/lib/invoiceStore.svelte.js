@@ -1,9 +1,9 @@
 
+
 // Semua request di sini pakai fetch() biasa, jadi cukup diarahkan
 // lewat proxy SvelteKit supaya tidak kena masalah CORS di InfinityFree.
-const API_BASE =  '/api/proxy';
 
-const API_BASE = 'https://project-invoice-production-6b1f.up.railway.app/api';
+const API_BASE = 'http://localhost:8000/api';
 
 
 function getToken() {

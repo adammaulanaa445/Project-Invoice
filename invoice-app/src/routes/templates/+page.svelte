@@ -652,7 +652,7 @@
         <!-- EMPTY SEARCH -->
         <p class="text-center opacity-50 text-sm py-16">
           Template tidak ditemukan.
-        </p>
+        </p>--   
 
       {/if}
 
