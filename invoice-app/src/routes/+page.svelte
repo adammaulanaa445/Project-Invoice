@@ -4,7 +4,7 @@
   import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
   import TemplatePreview from '$lib/components/TemplatePreview.svelte';
-  import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import AppSidebar, { templateMenuItems } from '$lib/components/AppSidebar.svelte';
   import { onMount } from 'svelte';
 
   import InvoiceBoldTypography from '$lib/components/invoices/InvoiceBoldTypography.svelte';
@@ -27,13 +27,10 @@
 
   // =========================
   // MENU UNTUK AppSidebar
+  // Sekarang pakai templateMenuItems dari AppSidebar.svelte (satu sumber
+  // untuk semua halaman: Home, Layout Templates, Profil Perusahaan, Klien,
+  // Produk) supaya tidak perlu didefinisikan ulang di sini.
   // =========================
-
-  const menuItems = [
-    { label: 'Beranda', icon: '🏠', href: '/' },
-    { label: 'Template', icon: '🎨', href: '/templates' },
-    { label: 'Profile Perusahaan', icon: '🏢', href: '/profile', authOnly: true },
-  ];
 
   let currentUser = $state(null);
 
@@ -53,7 +50,7 @@
 <div class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
 
   <AppSidebar
-    {menuItems}
+    menuItems={templateMenuItems}
     menuLabel="Menu"
     {sidebarOpen}
     onClose={() => sidebarOpen = false}
