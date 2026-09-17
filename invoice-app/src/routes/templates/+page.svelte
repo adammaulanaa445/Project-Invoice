@@ -310,11 +310,21 @@
   ];
 
   // =========================
-  // PILIH TEMPLATE
+  // PILIH & PREVIEW TEMPLATE
   // =========================
+
+  let selectedPreviewTemplate = $state(null);
 
   function useTemplate(index) {
     goto(`/editor?template=${index}`);
+  }
+
+  function openPreview(template) {
+    selectedPreviewTemplate = template;
+  }
+
+  function closePreview() {
+    selectedPreviewTemplate = null;
   }
 
   // =========================
@@ -360,7 +370,6 @@
 
       favorites = stored ? JSON.parse(stored) : [];
 
-      // Pastikan data favorit selalu berupa array
       if (!Array.isArray(favorites)) {
         favorites = [];
       }
@@ -567,12 +576,13 @@
         {#each filteredTemplates as t (t.index)}
 
           <div
-            class="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition duration-300"
+            class="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:border-[#8CFF3D] transition duration-300 flex flex-col justify-between"
           >
 
             <!-- PREVIEW -->
             <div
-              class="relative bg-slate-50 dark:bg-[#0d0d0d]"
+              class="relative bg-slate-50 dark:bg-[#0d0d0d] cursor-pointer"
+              onclick={() => openPreview(t)}
             >
 
               <!-- NOMOR TEMPLATE -->
@@ -604,21 +614,36 @@
 
             </div>
 
-            <!-- TEMPLATE INFO -->
-            <div class="p-3 space-y-2">
+            <!-- TEMPLATE INFO & ACTIONS -->
+            <div class="p-3 space-y-2.5">
 
               <p class="font-semibold text-sm truncate">
                 {lang.t(t.nameKey)}
               </p>
 
-              <button
-                type="button"
-                onclick={() => useTemplate(t.index)}
-                class="w-full text-xs font-semibold text-black py-2 rounded-full transition hover:opacity-90"
-                style="background:#8CFF3D"
-              >
-                Gunakan Template →
-              </button>
+              <!-- DUA TOMBOL: LIHAT & GUNAKAN TEMPLATE -->
+              <div class="flex items-center gap-1.5">
+
+                <!-- TOMBOL KIRI: LIHAT -->
+                <button
+                  type="button"
+                  onclick={() => openPreview(t)}
+                  class="flex-1 text-xs font-semibold py-2 px-2 rounded-full border border-slate-200 dark:border-white/20 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition text-center"
+                >
+                  Lihat
+                </button>
+
+                <!-- TOMBOL KANAN: GUNAKAN TEMPLATE -->
+                <button
+                  type="button"
+                  onclick={() => useTemplate(t.index)}
+                  class="flex-[1.4] text-xs font-semibold text-black py-2 px-2 rounded-full transition hover:opacity-90 text-center truncate"
+                  style="background:#8CFF3D"
+                >
+                  Gunakan →
+                </button>
+
+              </div>
 
             </div>
 
@@ -652,10 +677,74 @@
         <!-- EMPTY SEARCH -->
         <p class="text-center opacity-50 text-sm py-16">
           Template tidak ditemukan.
-        </p>--   
+        </p>
 
       {/if}
 
     </div>
   </div>
 </div>
+
+<!-- MODAL PREVIEW DOKUMEN -->
+{#if selectedPreviewTemplate}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+    onclick={closePreview}
+  >
+    <div
+      class="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-[#161616] rounded-2xl p-6 overflow-y-auto flex flex-col justify-between shadow-2xl border border-slate-200 dark:border-white/10"
+      onclick={(e) => e.stopPropagation()}
+    >
+      <!-- HEADER MODAL -->
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/10">
+        <div>
+          <h2 class="text-lg font-bold">
+            {lang.t(selectedPreviewTemplate.nameKey)}
+          </h2>
+          <span class="text-xs opacity-60">
+            Kategori: {selectedPreviewTemplate.category}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onclick={closePreview}
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 hover:opacity-80 transition text-sm font-bold"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- ISI TEMPLATE PREVIEW DESAIN -->
+      <div class="w-full flex justify-center bg-slate-100 dark:bg-[#0a0a0a] p-4 rounded-xl my-2 overflow-hidden border border-slate-200 dark:border-white/5">
+        <div class="w-full max-w-md">
+          <TemplatePreview component={selectedPreviewTemplate.component} />
+        </div>
+      </div>
+
+      <!-- FOOTER MODAL ACTION -->
+      <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-white/10">
+        <button
+          type="button"
+          onclick={closePreview}
+          class="px-4 py-2 text-xs font-semibold rounded-full border border-slate-200 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+        >
+          Tutup
+        </button>
+
+        <button
+          type="button"
+          onclick={() => {
+            const index = selectedPreviewTemplate.index;
+            closePreview();
+            useTemplate(index);
+          }}
+          class="px-5 py-2 text-xs font-semibold text-black rounded-full transition hover:opacity-90"
+          style="background:#8CFF3D"
+        >
+          Gunakan Template Ini →
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
