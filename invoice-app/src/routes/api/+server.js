@@ -1,21 +1,4 @@
-// src/routes/api/proxy/[...path]/+server.js
-//
-// File ini bertugas sebagai "perantara" (proxy) antara frontend SvelteKit
-// dan backend Laravel di InfinityFree.
-//
-// Karena file ini jalan di SERVER (bukan di browser), request ke InfinityFree
-// dikirim dari server-ke-server — tidak pernah lewat browser sama sekali.
-// Akibatnya, aturan CORS browser tidak berlaku di sini, jadi masalah
-// preflight OPTIONS yang diblokir InfinityFree otomatis terhindari.
-//
-// Analogi Laravel: ini seperti membuat satu Controller umum yang menerima
-// semua request, lalu meneruskannya (forward) ke service eksternal
-// menggunakan Http::get() / Http::post() dari sisi server Laravel,
-// bukan langsung dari JavaScript di browser.
 
-// Ganti sesuai domain backend Laravel kamu di InfinityFree
-// PENTING: route API Laravel-nya ada di prefix /api (bukan langsung di root)
-// Di development, pakai VITE_BACKEND_URL dari .env, atau fallback ke localhost
 const BACKEND_URL = 'http://localhost:8000';
 
 /**

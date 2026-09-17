@@ -1,101 +1,157 @@
 <script>
-  import { onMount } from 'svelte';
-  import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import { onMount } from "svelte";
+  import AppSidebar from "$lib/components/AppSidebar.svelte";
 
-  import Invoice01Neat from '$lib/components/invoices/Invoice01Neat.svelte';
-  import Invoice02Corporate from '$lib/components/invoices/Invoice02Corporate.svelte';
-  import Invoice03BoldBand from '$lib/components/invoices/Invoice03BoldBand.svelte';
-  import Invoice04Gradient from '$lib/components/invoices/Invoice04Gradient.svelte';
-  import Invoice05DarkStudio from '$lib/components/invoices/Invoice05DarkStudio.svelte';
-  import Invoice06Luxury from '$lib/components/invoices/Invoice06Luxury.svelte';
-  import Invoice07Asymmetric from '$lib/components/invoices/Invoice07Asymmetric.svelte';
-  import Invoice08NatureEco from '$lib/components/invoices/Invoice08NatureEco.svelte';
-  import Invoice09TechStartup from '$lib/components/invoices/Invoice09TechStartup.svelte';
-  import Invoice10Freelance from '$lib/components/invoices/Invoice10Freelance.svelte';
-  import InvoiceBoldTypography from '$lib/components/invoices/InvoiceBoldTypography.svelte';
-  import InvoiceDarkTech from '$lib/components/invoices/InvoiceDarkTech.svelte';
-  import InvoiceEditorialKoran from '$lib/components/invoices/InvoiceEditorialKoran.svelte';
-  import InvoiceEleganEmas from '$lib/components/invoices/InvoiceEleganEmas.svelte';
-  import InvoiceGradientVibrant from '$lib/components/invoices/InvoiceGradientVibrant.svelte';
-  import InvoiceKlasikFormal from '$lib/components/invoices/InvoiceKlasikFormal.svelte';
-  import InvoiceKorporatBiru from '$lib/components/invoices/InvoiceKorporatBiru.svelte';
-  import InvoiceModernMinimalis from '$lib/components/invoices/InvoiceModernMinimalis.svelte';
-  import InvoiceNordicEarthy from '$lib/components/invoices/InvoiceNordicEarthy.svelte';
-  import InvoicePastelPlayful from '$lib/components/invoices/InvoicePastelPlayful.svelte';
-  import InvoiceRetroVintage from '$lib/components/invoices/InvoiceRetroVintage.svelte';
-  import InvoiceTechSaaS from '$lib/components/invoices/InvoiceTechSaaS.svelte';
-  import InvoiceCurvedTeal from '$lib/components/invoices/InvoiceCurvedTeal.svelte';
-  import InvoicePixelReceipt from '$lib/components/invoices/InvoicePixelReceipt.svelte';
-  import InvoiceLedgerKlasik from '$lib/components/invoices/InvoiceLedgerKlasik.svelte';
-  import InvoiceSwissGrid from '$lib/components/invoices/InvoiceSwissGrid.svelte';
-  import InvoiceMotifWarm from '$lib/components/invoices/InvoiceMotifWarm.svelte';
-  import InvoiceMinimalisMono from '$lib/components/invoices/InvoiceMinimalisMono.svelte';
-  import InvoiceStudioHitam from '$lib/components/invoices/InvoiceStudioHitam.svelte';
-  import InvoiceBrutalistBracket from '$lib/components/invoices/InvoiceBrutalistBracket.svelte';
-  import InvoiceEditorialMerah from '$lib/components/invoices/InvoiceEditorialMerah.svelte';
-  import InvoiceSidebarBiru from '$lib/components/invoices/InvoiceSidebarBiru.svelte';
-  import InvoiceAuroraNight from '$lib/components/invoices/InvoiceAuroraNight.svelte';
-  import InvoiceCreamMonogramme from '$lib/components/invoices/InvoiceCreamMonogramme.svelte';
-  import InvoiceDottedBlueWave from '$lib/components/invoices/InvoiceDottedBlueWave.svelte';
-  import InvoiceIndigoSwirl from '$lib/components/invoices/InvoiceIndigoSwirl.svelte';
-  import InvoiceCrimsonVAT from '$lib/components/invoices/InvoiceCrimsonVAT.svelte';
-  import InvoicePillRowsIndigo from '$lib/components/invoices/InvoicePillRowsIndigo.svelte';
-  import InvoiceSignatureCream from '$lib/components/invoices/InvoiceSignatureCream.svelte';
-  import InvoiceLavenderSoft from '$lib/components/invoices/InvoiceLavenderSoft.svelte';
-  import InvoiceCoralGradientBar from '$lib/components/invoices/InvoiceCoralGradientBar.svelte';
-  import InvoiceSlateCorporate from '$lib/components/invoices/InvoiceSlateCorporate.svelte';
+  import Invoice01Neat from "$lib/components/invoices/Invoice01Neat.svelte";
+  import Invoice02Corporate from "$lib/components/invoices/Invoice02Corporate.svelte";
+  import Invoice03BoldBand from "$lib/components/invoices/Invoice03BoldBand.svelte";
+  import Invoice04Gradient from "$lib/components/invoices/Invoice04Gradient.svelte";
+  import Invoice05DarkStudio from "$lib/components/invoices/Invoice05DarkStudio.svelte";
+  import Invoice06Luxury from "$lib/components/invoices/Invoice06Luxury.svelte";
+  import Invoice07Asymmetric from "$lib/components/invoices/Invoice07Asymmetric.svelte";
+  import Invoice08NatureEco from "$lib/components/invoices/Invoice08NatureEco.svelte";
+  import Invoice09TechStartup from "$lib/components/invoices/Invoice09TechStartup.svelte";
+  import Invoice10Freelance from "$lib/components/invoices/Invoice10Freelance.svelte";
+  import InvoiceBoldTypography from "$lib/components/invoices/InvoiceBoldTypography.svelte";
+  import InvoiceDarkTech from "$lib/components/invoices/InvoiceDarkTech.svelte";
+  import InvoiceEditorialKoran from "$lib/components/invoices/InvoiceEditorialKoran.svelte";
+  import InvoiceEleganEmas from "$lib/components/invoices/InvoiceEleganEmas.svelte";
+  import InvoiceGradientVibrant from "$lib/components/invoices/InvoiceGradientVibrant.svelte";
+  import InvoiceKlasikFormal from "$lib/components/invoices/InvoiceKlasikFormal.svelte";
+  import InvoiceKorporatBiru from "$lib/components/invoices/InvoiceKorporatBiru.svelte";
+  import InvoiceModernMinimalis from "$lib/components/invoices/InvoiceModernMinimalis.svelte";
+  import InvoiceNordicEarthy from "$lib/components/invoices/InvoiceNordicEarthy.svelte";
+  import InvoicePastelPlayful from "$lib/components/invoices/InvoicePastelPlayful.svelte";
+  import InvoiceRetroVintage from "$lib/components/invoices/InvoiceRetroVintage.svelte";
+  import InvoiceTechSaaS from "$lib/components/invoices/InvoiceTechSaaS.svelte";
+  import InvoiceCurvedTeal from "$lib/components/invoices/InvoiceCurvedTeal.svelte";
+  import InvoicePixelReceipt from "$lib/components/invoices/InvoicePixelReceipt.svelte";
+  import InvoiceLedgerKlasik from "$lib/components/invoices/InvoiceLedgerKlasik.svelte";
+  import InvoiceSwissGrid from "$lib/components/invoices/InvoiceSwissGrid.svelte";
+  import InvoiceMotifWarm from "$lib/components/invoices/InvoiceMotifWarm.svelte";
+  import InvoiceMinimalisMono from "$lib/components/invoices/InvoiceMinimalisMono.svelte";
+  import InvoiceStudioHitam from "$lib/components/invoices/InvoiceStudioHitam.svelte";
+  import InvoiceBrutalistBracket from "$lib/components/invoices/InvoiceBrutalistBracket.svelte";
+  import InvoiceEditorialMerah from "$lib/components/invoices/InvoiceEditorialMerah.svelte";
+  import InvoiceSidebarBiru from "$lib/components/invoices/InvoiceSidebarBiru.svelte";
+  import InvoiceAuroraNight from "$lib/components/invoices/InvoiceAuroraNight.svelte";
+  import InvoiceCreamMonogramme from "$lib/components/invoices/InvoiceCreamMonogramme.svelte";
+  import InvoiceDottedBlueWave from "$lib/components/invoices/InvoiceDottedBlueWave.svelte";
+  import InvoiceIndigoSwirl from "$lib/components/invoices/InvoiceIndigoSwirl.svelte";
+  import InvoiceCrimsonVAT from "$lib/components/invoices/InvoiceCrimsonVAT.svelte";
+  import InvoicePillRowsIndigo from "$lib/components/invoices/InvoicePillRowsIndigo.svelte";
+  import InvoiceSignatureCream from "$lib/components/invoices/InvoiceSignatureCream.svelte";
+  import InvoiceLavenderSoft from "$lib/components/invoices/InvoiceLavenderSoft.svelte";
+  import InvoiceCoralGradientBar from "$lib/components/invoices/InvoiceCoralGradientBar.svelte";
+  import InvoiceSlateCorporate from "$lib/components/invoices/InvoiceSlateCorporate.svelte";
 
-  import { page } from '$app/state';
-  import { goto } from '$app/navigation';
+  import { page } from "$app/state";
+  import { goto } from "$app/navigation";
 
-  import { theme } from '$lib/theme.svelte.js';
-  import { lang } from '$lib/lang.svelte.js';
-  import { invoiceStore } from '$lib/invoiceStore.svelte.js';
+  import { theme } from "$lib/theme.svelte.js";
+  import { lang } from "$lib/lang.svelte.js";
+  import { invoiceStore } from "$lib/invoiceStore.svelte.js";
+  import { clientStore } from "$lib/clientStore.svelte.js";
+  import { productStore } from "$lib/productStore.svelte.js";
 
   // =====================================================
   // API
   // =====================================================
 
-  const API_BASE = 'http://localhost:8000/api';
-  const STORAGE_BASE = 'http://localhost:8000';
+  const API_BASE = "http://localhost:8000/api";
+  const STORAGE_BASE = "http://localhost:8000";
 
   // =====================================================
   // TEMPLATE
   // =====================================================
 
   const templates = [
-    { name: () => `1. ${lang.t('tpl1_name')}`, component: Invoice01Neat },
-    { name: () => `2. ${lang.t('tpl2_name')}`, component: Invoice02Corporate },
-    { name: () => `3. ${lang.t('tpl3_name')}`, component: Invoice03BoldBand },
-    { name: () => `4. ${lang.t('tpl4_name')}`, component: Invoice04Gradient },
-    { name: () => `5. ${lang.t('tpl5_name')}`, component: Invoice05DarkStudio },
-    { name: () => `6. ${lang.t('tpl6_name')}`, component: Invoice06Luxury },
-    { name: () => `7. ${lang.t('tpl7_name')}`, component: Invoice07Asymmetric },
-    { name: () => `8. ${lang.t('tpl8_name')}`, component: Invoice08NatureEco },
-    { name: () => `9. ${lang.t('tpl9_name')}`, component: Invoice09TechStartup },
-    { name: () => `10. ${lang.t('tpl10_name')}`, component: Invoice10Freelance },
-    { name: () => `11. ${lang.t('tpl11_name')}`, component: InvoiceBoldTypography },
-    { name: () => `12. ${lang.t('tpl12_name')}`, component: InvoiceDarkTech },
-    { name: () => `13. ${lang.t('tpl13_name')}`, component: InvoiceEditorialKoran },
-    { name: () => `14. ${lang.t('tpl14_name')}`, component: InvoiceEleganEmas },
-    { name: () => `15. ${lang.t('tpl15_name')}`, component: InvoiceGradientVibrant },
-    { name: () => `16. ${lang.t('tpl16_name')}`, component: InvoiceKlasikFormal },
-    { name: () => `17. ${lang.t('tpl17_name')}`, component: InvoiceKorporatBiru },
-    { name: () => `18. ${lang.t('tpl18_name')}`, component: InvoiceModernMinimalis },
-    { name: () => `19. ${lang.t('tpl19_name')}`, component: InvoiceNordicEarthy },
-    { name: () => `20. ${lang.t('tpl20_name')}`, component: InvoicePastelPlayful },
-    { name: () => `21. ${lang.t('tpl21_name')}`, component: InvoiceRetroVintage },
-    { name: () => `22. ${lang.t('tpl22_name')}`, component: InvoiceTechSaaS },
-    { name: () => `23. ${lang.t('tpl23_name')}`, component: InvoiceCurvedTeal },
-    { name: () => `24. ${lang.t('tpl24_name')}`, component: InvoicePixelReceipt },
-    { name: () => `25. ${lang.t('tpl25_name')}`, component: InvoiceLedgerKlasik },
-    { name: () => `26. ${lang.t('tpl26_name')}`, component: InvoiceSwissGrid },
-    { name: () => `27. ${lang.t('tpl27_name')}`, component: InvoiceMotifWarm },
-    { name: () => `28. ${lang.t('tpl28_name')}`, component: InvoiceMinimalisMono },
-    { name: () => `29. ${lang.t('tpl29_name')}`, component: InvoiceStudioHitam },
-    { name: () => `30. ${lang.t('tpl30_name')}`, component: InvoiceBrutalistBracket },
-    { name: () => `31. ${lang.t('tpl31_name')}`, component: InvoiceEditorialMerah },
-    { name: () => `32. ${lang.t('tpl32_name')}`, component: InvoiceSidebarBiru },
+    { name: () => `1. ${lang.t("tpl1_name")}`, component: Invoice01Neat },
+    { name: () => `2. ${lang.t("tpl2_name")}`, component: Invoice02Corporate },
+    { name: () => `3. ${lang.t("tpl3_name")}`, component: Invoice03BoldBand },
+    { name: () => `4. ${lang.t("tpl4_name")}`, component: Invoice04Gradient },
+    { name: () => `5. ${lang.t("tpl5_name")}`, component: Invoice05DarkStudio },
+    { name: () => `6. ${lang.t("tpl6_name")}`, component: Invoice06Luxury },
+    { name: () => `7. ${lang.t("tpl7_name")}`, component: Invoice07Asymmetric },
+    { name: () => `8. ${lang.t("tpl8_name")}`, component: Invoice08NatureEco },
+    {
+      name: () => `9. ${lang.t("tpl9_name")}`,
+      component: Invoice09TechStartup,
+    },
+    {
+      name: () => `10. ${lang.t("tpl10_name")}`,
+      component: Invoice10Freelance,
+    },
+    {
+      name: () => `11. ${lang.t("tpl11_name")}`,
+      component: InvoiceBoldTypography,
+    },
+    { name: () => `12. ${lang.t("tpl12_name")}`, component: InvoiceDarkTech },
+    {
+      name: () => `13. ${lang.t("tpl13_name")}`,
+      component: InvoiceEditorialKoran,
+    },
+    { name: () => `14. ${lang.t("tpl14_name")}`, component: InvoiceEleganEmas },
+    {
+      name: () => `15. ${lang.t("tpl15_name")}`,
+      component: InvoiceGradientVibrant,
+    },
+    {
+      name: () => `16. ${lang.t("tpl16_name")}`,
+      component: InvoiceKlasikFormal,
+    },
+    {
+      name: () => `17. ${lang.t("tpl17_name")}`,
+      component: InvoiceKorporatBiru,
+    },
+    {
+      name: () => `18. ${lang.t("tpl18_name")}`,
+      component: InvoiceModernMinimalis,
+    },
+    {
+      name: () => `19. ${lang.t("tpl19_name")}`,
+      component: InvoiceNordicEarthy,
+    },
+    {
+      name: () => `20. ${lang.t("tpl20_name")}`,
+      component: InvoicePastelPlayful,
+    },
+    {
+      name: () => `21. ${lang.t("tpl21_name")}`,
+      component: InvoiceRetroVintage,
+    },
+    { name: () => `22. ${lang.t("tpl22_name")}`, component: InvoiceTechSaaS },
+    { name: () => `23. ${lang.t("tpl23_name")}`, component: InvoiceCurvedTeal },
+    {
+      name: () => `24. ${lang.t("tpl24_name")}`,
+      component: InvoicePixelReceipt,
+    },
+    {
+      name: () => `25. ${lang.t("tpl25_name")}`,
+      component: InvoiceLedgerKlasik,
+    },
+    { name: () => `26. ${lang.t("tpl26_name")}`, component: InvoiceSwissGrid },
+    { name: () => `27. ${lang.t("tpl27_name")}`, component: InvoiceMotifWarm },
+    {
+      name: () => `28. ${lang.t("tpl28_name")}`,
+      component: InvoiceMinimalisMono,
+    },
+    {
+      name: () => `29. ${lang.t("tpl29_name")}`,
+      component: InvoiceStudioHitam,
+    },
+    {
+      name: () => `30. ${lang.t("tpl30_name")}`,
+      component: InvoiceBrutalistBracket,
+    },
+    {
+      name: () => `31. ${lang.t("tpl31_name")}`,
+      component: InvoiceEditorialMerah,
+    },
+    {
+      name: () => `32. ${lang.t("tpl32_name")}`,
+      component: InvoiceSidebarBiru,
+    },
 
     { name: () => `33. Aurora Night`, component: InvoiceAuroraNight },
     { name: () => `34. Cream Monogramme`, component: InvoiceCreamMonogramme },
@@ -105,67 +161,136 @@
     { name: () => `38. Pill Rows Indigo`, component: InvoicePillRowsIndigo },
     { name: () => `39. Signature Cream`, component: InvoiceSignatureCream },
     { name: () => `40. Lavender Soft`, component: InvoiceLavenderSoft },
-    { name: () => `41. Coral Gradient Bar`, component: InvoiceCoralGradientBar },
-    { name: () => `42. Slate Corporate`, component: InvoiceSlateCorporate }
+    {
+      name: () => `41. Coral Gradient Bar`,
+      component: InvoiceCoralGradientBar,
+    },
+    { name: () => `42. Slate Corporate`, component: InvoiceSlateCorporate },
   ];
 
-  let selected = $state(
-    Number(page.url.searchParams.get('template')) || 0
-  );
+  let selected = $state(Number(page.url.searchParams.get("template")) || 0);
+
+  // =====================================================
+  // CAROUSEL TEMPLATE
+  // =====================================================
+
+  let carouselEl = $state();
+
+  function scrollCarousel(direction) {
+    if (!carouselEl) return;
+
+    // Geser sejauh 80% lebar container, biar kayak "next page"
+    const scrollAmount = carouselEl.clientWidth * 0.8;
+
+    carouselEl.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+  }
 
   // =====================================================
   // INVOICE DATA
   // =====================================================
 
   let invoice = $state({
-    invoiceNumber: 'INV-0001',
-    issueDate: '2026-08-14',
-    dueDate: '2026-08-28',
-    currency: 'IDR',
-    logoUrl: '',
+    invoiceNumber: "INV-0001",
+    issueDate: "2026-08-14",
+    dueDate: "2026-08-28",
+    currency: "IDR",
+    logoUrl: "",
 
     from: {
-      name: 'PT Contoh Jaya',
-      address: 'Jl. Merdeka No.1, Surabaya',
-      email: 'hello@contoh.co',
-      phone: '08123456789'
+      name: "PT Contoh Jaya",
+      address: "Jl. Merdeka No.1, Surabaya",
+      email: "hello@contoh.co",
+      phone: "08123456789",
     },
 
     to: {
-      name: 'Budi Santoso',
-      address: 'Jl. Sudirman No.5, Jakarta',
-      email: 'budi@klien.com'
+      name: "Budi Santoso",
+      address: "Jl. Sudirman No.5, Jakarta",
+      email: "budi@klien.com",
     },
 
     items: [
       {
-        description: 'Jasa Desain Logo',
+        description: "Jasa Desain Logo",
         qty: 1,
-        price: 1500000
+        price: 1500000,
       },
       {
-        description: 'Jasa Maintenance Website',
+        description: "Jasa Maintenance Website",
         qty: 2,
-        price: 500000
-      }
+        price: 500000,
+      },
     ],
 
     taxPercent: 11,
     discountPercent: 0,
 
-    notes:
-      'Pembayaran via transfer BCA 1234567890 a.n PT Contoh Jaya',
+    notes: "Pembayaran via transfer BCA 1234567890 a.n PT Contoh Jaya",
 
-    status: 'unpaid'
+    status: "unpaid",
   });
 
-  let logoError = $state('');
+  let logoError = $state("");
   let previewEl = $state();
 
   let downloading = $state(false);
   let saving = $state(false);
 
-  let saveMessage = $state('');
+  let saveMessage = $state("");
+
+  // =====================================================
+  // KLIEN & PRODUK (pilih dari daftar, tetap bisa manual)
+  // =====================================================
+
+  let clients = $state([]);
+  let products = $state([]);
+
+  let selectedClientId = $state("");
+  let selectedProductId = $state("");
+
+  async function loadClientsAndProducts() {
+    try {
+      clients = await clientStore.getAll();
+      products = await productStore.getAll();
+    } catch (error) {
+      console.error("Load clients/products error:", error);
+    }
+  }
+
+  function handleSelectClient(id) {
+    selectedClientId = id;
+
+    if (!id) return;
+
+    const client = clients.find((c) => String(c.id) === String(id));
+
+    if (!client) return;
+
+    // Isi otomatis, tapi field di bawah tetap bisa diubah manual setelah ini
+    invoice.to.name = client.name || "";
+    invoice.to.address = client.address || "";
+    invoice.to.email = client.email || "";
+  }
+
+  function addProductItem() {
+    if (!selectedProductId) return;
+
+    const product = products.find(
+      (p) => String(p.id) === String(selectedProductId),
+    );
+
+    if (!product) return;
+
+    invoice.items.push({
+      description: product.name,
+      qty: 1,
+      price: Number(product.price) || 0,
+    });
+
+    invoice.items = invoice.items;
+
+    selectedProductId = "";
+  }
 
   // =====================================================
   // EMAIL
@@ -173,8 +298,8 @@
 
   let sendingEmail = $state(false);
   let showEmailModal = $state(false);
-  let emailMessage = $state('');
-  let recipientEmail = $state('');
+  let emailMessage = $state("");
+  let recipientEmail = $state("");
 
   // =====================================================
   // SAVED INVOICE ID
@@ -192,7 +317,7 @@
   // SIDEBAR ACTIVE SECTION
   // =====================================================
 
-  let activeSection = $state('');
+  let activeSection = $state("");
 
   let highlightTimer;
 
@@ -206,7 +331,7 @@
     clearTimeout(highlightTimer);
 
     highlightTimer = setTimeout(() => {
-      activeSection = '';
+      activeSection = "";
     }, 1500);
   }
 
@@ -219,18 +344,15 @@
 
     if (!hash) return;
 
-    const section = decodeURIComponent(
-      hash.replace('#', '')
-    );
+    const section = decodeURIComponent(hash.replace("#", ""));
 
-    const element =
-      document.getElementById(section);
+    const element = document.getElementById(section);
 
     if (!element) return;
 
     element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
+      behavior: "smooth",
+      block: "start",
     });
 
     activeSection = section;
@@ -238,96 +360,76 @@
     clearTimeout(highlightTimer);
 
     highlightTimer = setTimeout(() => {
-      activeSection = '';
+      activeSection = "";
     }, 1500);
   }
   //
-
 
   function closeSidebar() {
     sidebarOpen = false;
   }
 
-  
   // =====================================================
   // LOAD COMPANY PROFILE
   // =====================================================
 
   async function loadCompanyProfile() {
     try {
-      const token =
-        localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
 
       if (!token) {
-        goto('/login');
+        goto("/login");
         return;
       }
 
-      const response =
-        await fetch(
-          `${API_BASE}/company-profile`,
-          {
-            method: 'GET',
+      const response = await fetch(`${API_BASE}/company-profile`, {
+        method: "GET",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
 
-              Accept:
-                'application/json'
-            }
-          }
-        );
+          Accept: "application/json",
+        },
+      });
 
       // =================================================
       // TOKEN EXPIRED / UNAUTHORIZED
       // =================================================
 
       if (response.status === 401) {
-        localStorage.removeItem(
-          'auth_token'
-        );
+        localStorage.removeItem("auth_token");
 
-        localStorage.removeItem(
-          'user'
-        );
+        localStorage.removeItem("user");
 
-        goto('/login');
+        goto("/login");
 
         return;
       }
 
       if (!response.ok) {
-        throw new Error(
-          'Gagal mengambil profile perusahaan.'
-        );
+        throw new Error("Gagal mengambil profile perusahaan.");
       }
 
-      const profile =
-        await response.json();
+      const profile = await response.json();
 
       // =================================================
       // DATA PERUSAHAAN
       // =================================================
 
       if (profile.company_name) {
-        invoice.from.name =
-          profile.company_name;
+        invoice.from.name = profile.company_name;
       }
 
       if (profile.address) {
-        invoice.from.address =
-          profile.address;
+        invoice.from.address = profile.address;
       }
 
       if (profile.email) {
-        invoice.from.email =
-          profile.email;
+        invoice.from.email = profile.email;
       }
 
       if (profile.phone) {
-        invoice.from.phone =
-          profile.phone;
+        invoice.from.phone = profile.phone;
       }
 
       // =================================================
@@ -335,15 +437,10 @@
       // =================================================
 
       if (profile.logo_path) {
-        invoice.logoUrl =
-          `${STORAGE_BASE}/${profile.logo_path}`;
+        invoice.logoUrl = `${STORAGE_BASE}/${profile.logo_path}`;
       }
-
     } catch (error) {
-      console.error(
-        'Load company profile error:',
-        error
-      );
+      console.error("Load company profile error:", error);
     }
   }
 
@@ -354,12 +451,11 @@
   onMount(async () => {
     lang.init();
 
-    window.addEventListener(
-      'invoice-section',
-      handleInvoiceSection
-    );
+    window.addEventListener("invoice-section", handleInvoiceSection);
 
     await loadCompanyProfile();
+
+    await loadClientsAndProducts();
 
     // Tunggu DOM selesai dirender
     setTimeout(() => {
@@ -367,10 +463,7 @@
     }, 100);
 
     return () => {
-      window.removeEventListener(
-        'invoice-section',
-        handleInvoiceSection
-      );
+      window.removeEventListener("invoice-section", handleInvoiceSection);
 
       clearTimeout(highlightTimer);
     };
@@ -381,36 +474,28 @@
   // =====================================================
 
   function handleLogoUpload(e) {
-    const file =
-      e.target.files?.[0];
+    const file = e.target.files?.[0];
 
     if (!file) return;
 
-    logoError = '';
+    logoError = "";
 
-    if (!file.type.startsWith('image/')) {
-      logoError =
-        lang.t('logo_file_error');
-
-      return;
-    }
-
-    if (
-      file.size >
-      2 * 1024 * 1024
-    ) {
-      logoError =
-        lang.t('logo_size_error');
+    if (!file.type.startsWith("image/")) {
+      logoError = lang.t("logo_file_error");
 
       return;
     }
 
-    const reader =
-      new FileReader();
+    if (file.size > 2 * 1024 * 1024) {
+      logoError = lang.t("logo_size_error");
+
+      return;
+    }
+
+    const reader = new FileReader();
 
     reader.onload = (event) => {
-      invoice.logoUrl =
-        event.target.result;
+      invoice.logoUrl = event.target.result;
     };
 
     reader.readAsDataURL(file);
@@ -421,7 +506,7 @@
   // =====================================================
 
   function removeLogo() {
-    invoice.logoUrl = '';
+    invoice.logoUrl = "";
   }
 
   // =====================================================
@@ -430,13 +515,12 @@
 
   function addItem() {
     invoice.items.push({
-      description: '',
+      description: "",
       qty: 1,
-      price: 0
+      price: 0,
     });
 
-    invoice.items =
-      invoice.items;
+    invoice.items = invoice.items;
   }
 
   // =====================================================
@@ -444,10 +528,7 @@
   // =====================================================
 
   function removeItem(index) {
-    invoice.items =
-      invoice.items.filter(
-        (_, i) => i !== index
-      );
+    invoice.items = invoice.items.filter((_, i) => i !== index);
   }
 
   // =====================================================
@@ -456,114 +537,58 @@
 
   async function generatePDF() {
     if (!previewEl) {
-      throw new Error(
-        'Preview invoice tidak ditemukan.'
-      );
+      throw new Error("Preview invoice tidak ditemukan.");
     }
 
-    const { default: html2canvas } =
-      await import(
-        'html2canvas-pro'
-      );
+    const { default: html2canvas } = await import("html2canvas-pro");
 
-    const { jsPDF } =
-      await import('jspdf');
+    const { jsPDF } = await import("jspdf");
 
-    const canvas =
-      await html2canvas(
-        previewEl,
-        {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor:
-            '#ffffff'
-        }
-      );
+    const canvas = await html2canvas(previewEl, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#ffffff",
+    });
 
-    const imgData =
-      canvas.toDataURL(
-        'image/jpeg',
-        0.98
-      );
+    const imgData = canvas.toDataURL("image/jpeg", 0.98);
 
-    const pdf =
-      new jsPDF(
-        'p',
-        'mm',
-        'a4'
-      );
+    const pdf = new jsPDF("p", "mm", "a4");
 
-    const pageWidth =
-      pdf.internal.pageSize.getWidth();
+    const pageWidth = pdf.internal.pageSize.getWidth();
 
-    const pageHeight =
-      pdf.internal.pageSize.getHeight();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    const imgHeight =
-      (canvas.height *
-        pageWidth) /
-      canvas.width;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
     // =================================================
     // 1 PAGE
     // =================================================
 
-    if (
-      imgHeight <=
-      pageHeight
-    ) {
-      pdf.addImage(
-        imgData,
-        'JPEG',
-        0,
-        0,
-        pageWidth,
-        imgHeight
-      );
+    if (imgHeight <= pageHeight) {
+      pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, imgHeight);
     }
 
     // =================================================
     // MULTI PAGE
     // =================================================
-
     else {
-      let heightLeft =
-        imgHeight;
+      let heightLeft = imgHeight;
 
       let position = 0;
 
-      pdf.addImage(
-        imgData,
-        'JPEG',
-        0,
-        position,
-        pageWidth,
-        imgHeight
-      );
+      pdf.addImage(imgData, "JPEG", 0, position, pageWidth, imgHeight);
 
-      heightLeft -=
-        pageHeight;
+      heightLeft -= pageHeight;
 
-      while (
-        heightLeft > 0
-      ) {
-        position -=
-          pageHeight;
+      while (heightLeft > 0) {
+        position -= pageHeight;
 
         pdf.addPage();
 
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          0,
-          position,
-          pageWidth,
-          imgHeight
-        );
+        pdf.addImage(imgData, "JPEG", 0, position, pageWidth, imgHeight);
 
-        heightLeft -=
-          pageHeight;
+        heightLeft -= pageHeight;
       }
     }
 
@@ -578,29 +603,17 @@
     downloading = true;
 
     try {
-      const pdf =
-        await generatePDF();
+      const pdf = await generatePDF();
 
-      pdf.save(
-        `${
-          invoice.invoiceNumber ||
-          'invoice'
-        }.pdf`
-      );
-
+      pdf.save(`${invoice.invoiceNumber || "invoice"}.pdf`);
     } catch (error) {
-      console.error(
-        'Generate PDF error:',
-        error
-      );
+      console.error("Generate PDF error:", error);
 
-      saveMessage =
-        '❌ Gagal membuat PDF.';
+      saveMessage = "❌ Gagal membuat PDF.";
 
       setTimeout(() => {
-        saveMessage = '';
+        saveMessage = "";
       }, 4000);
-
     } finally {
       downloading = false;
     }
@@ -612,46 +625,28 @@
 
   async function saveInvoice() {
     saving = true;
-    saveMessage = '';
+    saveMessage = "";
 
     try {
-      const record =
-        await invoiceStore.save(
-          selected + 1,
-          invoice
-        );
+      const record = await invoiceStore.save(selected + 1, invoice);
 
-      savedInvoiceId =
-        record.id;
+      savedInvoiceId = record.id;
 
-      if (
-        record.invoiceNumber
-      ) {
-        invoice.invoiceNumber =
-          record.invoiceNumber;
+      if (record.invoiceNumber) {
+        invoice.invoiceNumber = record.invoiceNumber;
       }
 
-      saveMessage =
-        '✅ Invoice berhasil disimpan!';
-
+      saveMessage = "✅ Invoice berhasil disimpan!";
     } catch (e) {
-      console.error(
-        'Save invoice error:',
-        e
-      );
+      console.error("Save invoice error:", e);
 
       saveMessage =
-        '❌ Gagal menyimpan: ' +
-        (
-          e.message ||
-          'Terjadi kesalahan.'
-        );
-
+        "❌ Gagal menyimpan: " + (e.message || "Terjadi kesalahan.");
     } finally {
       saving = false;
 
       setTimeout(() => {
-        saveMessage = '';
+        saveMessage = "";
       }, 4000);
     }
   }
@@ -661,10 +656,9 @@
   // =====================================================
 
   function openEmailModal() {
-    recipientEmail =
-      invoice.to.email || '';
+    recipientEmail = invoice.to.email || "";
 
-    emailMessage = '';
+    emailMessage = "";
 
     showEmailModal = true;
   }
@@ -674,28 +668,20 @@
   // =====================================================
 
   async function sendEmail() {
-    if (
-      !recipientEmail.trim()
-    ) {
-      emailMessage =
-        '❌ Masukkan email penerima.';
+    if (!recipientEmail.trim()) {
+      emailMessage = "❌ Masukkan email penerima.";
 
       return;
     }
 
     sendingEmail = true;
-    emailMessage = '';
+    emailMessage = "";
 
     try {
-      const token =
-        localStorage.getItem(
-          'auth_token'
-        );
+      const token = localStorage.getItem("auth_token");
 
       if (!token) {
-        throw new Error(
-          'Kamu harus login terlebih dahulu.'
-        );
+        throw new Error("Kamu harus login terlebih dahulu.");
       }
 
       // =================================================
@@ -703,20 +689,12 @@
       // =================================================
 
       if (!savedInvoiceId) {
-        const record =
-          await invoiceStore.save(
-            selected + 1,
-            invoice
-          );
+        const record = await invoiceStore.save(selected + 1, invoice);
 
-        savedInvoiceId =
-          record.id;
+        savedInvoiceId = record.id;
 
-        if (
-          record.invoiceNumber
-        ) {
-          invoice.invoiceNumber =
-            record.invoiceNumber;
+        if (record.invoiceNumber) {
+          invoice.invoiceNumber = record.invoiceNumber;
         }
       }
 
@@ -724,49 +702,31 @@
       // GENERATE PDF
       // =================================================
 
-      const pdf =
-        await generatePDF();
+      const pdf = await generatePDF();
 
-      const pdfBlob =
-        pdf.output('blob');
+      const pdfBlob = pdf.output("blob");
 
       // =================================================
       // KIRIM VIA INVOICESTORE
       // =================================================
 
-      await invoiceStore.sendEmail(
-        savedInvoiceId,
-        recipientEmail,
-        pdfBlob
-      );
+      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob);
 
-      emailMessage =
-        '✅ Invoice berhasil dikirim!';
+      emailMessage = "✅ Invoice berhasil dikirim!";
 
       // =================================================
       // CLOSE MODAL
       // =================================================
 
       setTimeout(() => {
-        showEmailModal =
-          false;
+        showEmailModal = false;
 
-        emailMessage = '';
+        emailMessage = "";
       }, 2500);
-
     } catch (error) {
-      console.error(
-        'Send email error:',
-        error
-      );
+      console.error("Send email error:", error);
 
-      emailMessage =
-        '❌ ' +
-        (
-          error.message ||
-          'Gagal mengirim email.'
-        );
-
+      emailMessage = "❌ " + (error.message || "Gagal mengirim email.");
     } finally {
       sendingEmail = false;
     }
@@ -777,41 +737,29 @@
   // =====================================================
 
   async function handleLogout() {
-    const token =
-      localStorage.getItem(
-        'auth_token'
-      );
+    const token = localStorage.getItem("auth_token");
 
     if (token) {
       try {
-        await fetch(
-          `${API_BASE}/logout`,
-          {
-            method: 'POST',
+        await fetch(`${API_BASE}/logout`, {
+          method: "POST",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
 
-              Accept:
-                'application/json'
-            }
-          }
-        );
+            Accept: "application/json",
+          },
+        });
       } catch (error) {
         console.error(error);
       }
     }
 
-    localStorage.removeItem(
-      'auth_token'
-    );
+    localStorage.removeItem("auth_token");
 
-    localStorage.removeItem(
-      'user'
-    );
+    localStorage.removeItem("user");
 
-    goto('/login');
+    goto("/login");
   }
 </script>
 
@@ -824,15 +772,15 @@
 >
   <!-- SIDEBAR -->
 
-  <AppSidebar
-    sidebarOpen={sidebarOpen}
-    onClose={closeSidebar}
-  />
+  <AppSidebar {sidebarOpen} onClose={closeSidebar} />
 
   <!-- MAIN CONTENT -->
 
-  <main class="min-h-screen transition-all duration-300 {sidebarOpen ? 'ml-64' : 'ml-0'}">
-
+  <main
+    class="min-h-screen transition-all duration-300 {sidebarOpen
+      ? 'ml-64'
+      : 'ml-0'}"
+  >
     <!-- NAVBAR -->
 
     <nav
@@ -842,51 +790,50 @@
         <!-- HAMBURGER TOGGLE -->
         <button
           type="button"
-          onclick={() => sidebarOpen = !sidebarOpen}
+          onclick={() => (sidebarOpen = !sidebarOpen)}
           aria-label="Toggle sidebar"
           class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
         >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
-            <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
-            <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect y="2" width="18" height="2" rx="1" fill="currentColor" />
+            <rect y="8" width="18" height="2" rx="1" fill="currentColor" />
+            <rect y="14" width="18" height="2" rx="1" fill="currentColor" />
           </svg>
         </button>
 
-        <a
-          href="/"
-          class="flex items-center gap-2 font-bold text-lg"
-        >
-        <span
-          class="w-3 h-3 rounded-full"
-          style="background:#8CFF3D"
-        ></span>
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
 
           InvoiceKita
         </a>
       </div>
 
-      <div
-        class="flex gap-4 items-center text-sm"
-      >
-        <a
-          href="/templates"
-          class="opacity-70 hover:opacity-100 transition"
-        >
-          {lang.t('nav_templates')}
+      <div class="flex gap-4 items-center text-sm">
+        <a href="/templates" class="opacity-70 hover:opacity-100 transition">
+          {lang.t("nav_templates")}
+        </a>
+
+        <a href="/clients" class="opacity-70 hover:opacity-100 transition">
+          Klien
+        </a>
+
+        <a href="/products" class="opacity-70 hover:opacity-100 transition">
+          Produk
         </a>
 
         <select
           value={lang.current}
-          onchange={(e) =>
-            lang.set(e.target.value)}
+          onchange={(e) => lang.set(e.target.value)}
           class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
         >
           {#each Object.entries(lang.options) as [code, label]}
-            <option
-              value={code}
-              class="text-slate-900"
-            >
+            <option value={code} class="text-slate-900">
               {label}
             </option>
           {/each}
@@ -897,14 +844,14 @@
           class="text-lg"
           aria-label="Toggle dark mode"
         >
-          {theme.dark ? '☀️' : '🌙'}
+          {theme.dark ? "☀️" : "🌙"}
         </button>
 
         <button
           onclick={handleLogout}
           class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-full"
         >
-          {lang.t('logout')}
+          {lang.t("logout")}
         </button>
       </div>
     </nav>
@@ -912,94 +859,112 @@
     <!-- CONTENT -->
 
     <div class="py-8 px-4">
-
-      <h1
-        class="text-2xl font-bold text-center mb-6"
-      >
-        {lang.t('et_title')}
+      <h1 class="text-2xl font-bold text-center mb-6">
+        {lang.t("et_title")}
       </h1>
 
-      <!-- TEMPLATE SELECTOR -->
+      <!-- ================================================= -->
+      <!-- TEMPLATE SELECTOR (CAROUSEL) -->
+      <!-- ================================================= -->
 
-      <div
-        class="flex flex-wrap justify-center gap-2 mb-8 max-w-5xl mx-auto"
-      >
-        {#each templates as t, i}
+      <div class="relative max-w-6xl mx-auto mb-8">
+        <!-- TOMBOL GESER KIRI -->
+        <button
+          type="button"
+          onclick={() => scrollCarousel(-1)}
+          aria-label="Sebelumnya"
+          class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
+        >
+          ‹
+        </button>
 
-          <button
-            class="px-3 py-1.5 rounded-full text-sm border transition {selected === i
-              ? ''
-              : 'border-slate-300 dark:border-white/10 opacity-70'}"
-            style={selected === i
-              ? 'background:#8CFF3D; color:#000; border-color:#8CFF3D;'
-              : ''}
-            onclick={() =>
-              selected = i}
-          >
-            {t.name()}
-          </button>
+        <!-- TRACK / RAIL CAROUSEL -->
+        <div
+          bind:this={carouselEl}
+          class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-2 py-2 no-scrollbar"
+        >
+          {#each templates as t, i}
+            <button
+              type="button"
+              onclick={() => (selected = i)}
+              class="snap-start shrink-0 w-40 rounded-xl border-2 overflow-hidden transition text-left {selected ===
+              i
+                ? ''
+                : 'border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'}"
+              style={selected === i ? "border-color:#8CFF3D;" : ""}
+            >
+              <!-- THUMBNAIL: komponen invoice asli, diperkecil pakai scale -->
+              <div class="relative w-40 h-52 bg-white overflow-hidden">
+                <div
+                  class="absolute top-0 left-0 origin-top-left pointer-events-none"
+                  style="width:800px; transform: scale(0.2);"
+                >
+                  <svelte:component this={t.component} {invoice} />
+                </div>
+              </div>
 
-        {/each}
+              <!-- NAMA TEMPLATE -->
+              <div
+                class="text-[11px] font-medium text-center py-1.5 border-t border-slate-200 dark:border-white/10 truncate px-1"
+                style={selected === i ? "background:#8CFF3D; color:#000;" : ""}
+              >
+                {t.name()}
+              </div>
+            </button>
+          {/each}
+        </div>
+
+        <!-- TOMBOL GESER KANAN -->
+        <button
+          type="button"
+          onclick={() => scrollCarousel(1)}
+          aria-label="Selanjutnya"
+          class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
+        >
+          ›
+        </button>
       </div>
 
       <!-- MAIN GRID -->
 
-      <div
-        class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
-      >
-
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- FORM -->
 
         <div
           class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
         >
-
           <!-- ================================================= -->
           <!-- COMPANY + LOGO -->
           <!-- ================================================= -->
 
           <div
             id="company"
-            class:section-highlight={activeSection === 'company'}
+            class:section-highlight={activeSection === "company"}
             class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
             <!-- LOGO -->
 
             <div>
-              <h2
-                class="font-semibold mb-3"
-              >
-                {lang.t('logo_company')}
+              <h2 class="font-semibold mb-3">
+                {lang.t("logo_company")}
               </h2>
 
-              <div
-                class="flex items-center gap-4"
-              >
+              <div class="flex items-center gap-4">
                 {#if invoice.logoUrl}
-
                   <img
                     src={invoice.logoUrl}
-                    alt={lang.t(
-                      'logo_company'
-                    )}
+                    alt={lang.t("logo_company")}
                     class="w-16 h-16 object-contain rounded-lg border border-slate-200 dark:border-white/10 bg-white p-1"
                   />
-
                 {:else}
-
                   <div
                     class="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center opacity-50 text-xs text-center"
                   >
-                    {lang.t(
-                      'logo_empty'
-                    )}
+                    {lang.t("logo_empty")}
                   </div>
-
                 {/if}
 
                 <div class="flex-1">
-
                   <input
                     type="file"
                     accept="image/*"
@@ -1008,28 +973,19 @@
                   />
 
                   {#if invoice.logoUrl}
-
                     <button
                       onclick={removeLogo}
                       class="text-xs text-red-500 mt-1 hover:underline"
                     >
-                      {lang.t(
-                        'logo_remove'
-                      )}
+                      {lang.t("logo_remove")}
                     </button>
-
                   {/if}
 
                   {#if logoError}
-
-                    <p
-                      class="text-xs text-red-500 mt-1"
-                    >
+                    <p class="text-xs text-red-500 mt-1">
                       {logoError}
                     </p>
-
                   {/if}
-
                 </div>
               </div>
             </div>
@@ -1037,55 +993,38 @@
             <!-- FROM / COMPANY DATA -->
 
             <div class="mt-5">
-
-              <h2
-                class="font-semibold mb-3"
-              >
-                {lang.t('et_from')}
+              <h2 class="font-semibold mb-3">
+                {lang.t("et_from")}
               </h2>
 
               <div class="space-y-2">
-
                 <input
-                  placeholder={lang.t(
-                    'et_company_name'
-                  )}
+                  placeholder={lang.t("et_company_name")}
                   bind:value={invoice.from.name}
                   class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                 />
 
                 <input
-                  placeholder={lang.t(
-                    'et_address'
-                  )}
+                  placeholder={lang.t("et_address")}
                   bind:value={invoice.from.address}
                   class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                 />
 
-                <div
-                  class="grid grid-cols-2 gap-2"
-                >
-
+                <div class="grid grid-cols-2 gap-2">
                   <input
-                    placeholder={lang.t(
-                      'et_email'
-                    )}
+                    placeholder={lang.t("et_email")}
                     bind:value={invoice.from.email}
                     class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                   />
 
                   <input
-                    placeholder={lang.t(
-                      'et_phone'
-                    )}
+                    placeholder={lang.t("et_phone")}
                     bind:value={invoice.from.phone}
                     class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                   />
-
                 </div>
               </div>
             </div>
-
           </div>
 
           <!-- ================================================= -->
@@ -1094,27 +1033,17 @@
 
           <div
             id="invoice"
-            class:section-highlight={activeSection === 'invoice'}
+            class:section-highlight={activeSection === "invoice"}
             class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
-            <h2
-              class="font-semibold mb-3"
-            >
-              {lang.t('et_info')}
+            <h2 class="font-semibold mb-3">
+              {lang.t("et_info")}
             </h2>
 
-            <div
-              class="grid grid-cols-2 gap-3"
-            >
-
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <label
-                  class="text-xs opacity-60"
-                >
-                  {lang.t(
-                    'et_invoice_number'
-                  )}
+                <label class="text-xs opacity-60">
+                  {lang.t("et_invoice_number")}
                 </label>
 
                 <input
@@ -1124,10 +1053,8 @@
               </div>
 
               <div>
-                <label
-                  class="text-xs opacity-60"
-                >
-                  {lang.t('et_status')}
+                <label class="text-xs opacity-60">
+                  {lang.t("et_status")}
                 </label>
 
                 <select
@@ -1135,32 +1062,22 @@
                   class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
                 >
                   <option value="unpaid">
-                    {lang.t(
-                      'et_status_unpaid'
-                    )}
+                    {lang.t("et_status_unpaid")}
                   </option>
 
                   <option value="paid">
-                    {lang.t(
-                      'et_status_paid'
-                    )}
+                    {lang.t("et_status_paid")}
                   </option>
 
                   <option value="overdue">
-                    {lang.t(
-                      'et_status_overdue'
-                    )}
+                    {lang.t("et_status_overdue")}
                   </option>
                 </select>
               </div>
 
               <div>
-                <label
-                  class="text-xs opacity-60"
-                >
-                  {lang.t(
-                    'et_issue_date'
-                  )}
+                <label class="text-xs opacity-60">
+                  {lang.t("et_issue_date")}
                 </label>
 
                 <input
@@ -1171,12 +1088,8 @@
               </div>
 
               <div>
-                <label
-                  class="text-xs opacity-60"
-                >
-                  {lang.t(
-                    'et_due_date'
-                  )}
+                <label class="text-xs opacity-60">
+                  {lang.t("et_due_date")}
                 </label>
 
                 <input
@@ -1185,7 +1098,6 @@
                   class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
                 />
               </div>
-
             </div>
           </div>
 
@@ -1195,43 +1107,62 @@
 
           <div
             id="customer"
-            class:section-highlight={activeSection === 'customer'}
+            class:section-highlight={activeSection === "customer"}
             class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
-            <h2
-              class="font-semibold mb-3"
-            >
-              {lang.t('et_to')}
+            <h2 class="font-semibold mb-3">
+              {lang.t("et_to")}
             </h2>
 
-            <div class="space-y-2">
+            <!-- PILIH DARI DAFTAR KLIEN (opsional, tetap bisa isi manual di bawah) -->
 
+            {#if clients.length > 0}
+              <div class="mb-2">
+                <label class="text-xs opacity-60">
+                  Pilih dari daftar klien (opsional)
+                </label>
+
+                <select
+                  value={selectedClientId}
+                  onchange={(e) => handleSelectClient(e.target.value)}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                >
+                  <option value="">-- Isi manual --</option>
+
+                  {#each clients as c}
+                    <option value={c.id}>{c.name}</option>
+                  {/each}
+                </select>
+              </div>
+            {:else}
+              <p class="text-xs opacity-50 mb-2">
+                Belum ada klien tersimpan.
+                <a href="/clients" class="underline" style="color:#8CFF3D">
+                  Tambah klien
+                </a>
+                supaya bisa dipilih langsung di sini.
+              </p>
+            {/if}
+
+            <div class="space-y-2">
               <input
-                placeholder={lang.t(
-                  'et_client_name'
-                )}
+                placeholder={lang.t("et_client_name")}
                 bind:value={invoice.to.name}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
               <input
-                placeholder={lang.t(
-                  'et_address'
-                )}
+                placeholder={lang.t("et_address")}
                 bind:value={invoice.to.address}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
 
               <input
                 type="email"
-                placeholder={lang.t(
-                  'et_email'
-                )}
+                placeholder={lang.t("et_email")}
                 bind:value={invoice.to.email}
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
               />
-
             </div>
           </div>
 
@@ -1241,18 +1172,12 @@
 
           <div
             id="items"
-            class:section-highlight={activeSection === 'items'}
+            class:section-highlight={activeSection === "items"}
             class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
-            <div
-              class="flex justify-between items-center mb-3"
-            >
-
-              <h2
-                class="font-semibold"
-              >
-                {lang.t('et_items')}
+            <div class="flex justify-between items-center mb-3">
+              <h2 class="font-semibold">
+                {lang.t("et_items")}
               </h2>
 
               <button
@@ -1260,59 +1185,77 @@
                 class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
                 style="background:#8CFF3D"
               >
-                {lang.t(
-                  'et_add_item'
-                )}
+                {lang.t("et_add_item")}
               </button>
-
             </div>
 
-            <div class="space-y-2">
+            <!-- PILIH DARI DAFTAR PRODUK (opsional, item tetap bisa diedit manual) -->
 
-              {#each invoice.items as item, i}
-
-                <div
-                  class="flex gap-2 items-center"
+            {#if products.length > 0}
+              <div class="flex gap-2 mb-3">
+                <select
+                  bind:value={selectedProductId}
+                  class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                 >
+                  <option value="">Pilih produk...</option>
 
+                  {#each products as p}
+                    <option value={p.id}>
+                      {p.name} — Rp{Number(p.price).toLocaleString("id-ID")}
+                    </option>
+                  {/each}
+                </select>
+
+                <button
+                  onclick={addProductItem}
+                  disabled={!selectedProductId}
+                  class="text-xs px-3 py-1.5 font-semibold rounded-full border-2 disabled:opacity-40"
+                  style="border-color:#8CFF3D; color:#8CFF3D;"
+                >
+                  Tambah dari Produk
+                </button>
+              </div>
+            {:else}
+              <p class="text-xs opacity-50 mb-3">
+                Belum ada produk tersimpan.
+                <a href="/products" class="underline" style="color:#8CFF3D">
+                  Tambah produk
+                </a>
+                supaya bisa dipilih langsung di sini.
+              </p>
+            {/if}
+
+            <div class="space-y-2">
+              {#each invoice.items as item, i}
+                <div class="flex gap-2 items-center">
                   <input
-                    placeholder={lang.t(
-                      'et_description'
-                    )}
+                    placeholder={lang.t("et_description")}
                     bind:value={item.description}
                     class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
                   />
 
                   <input
                     type="number"
-                    placeholder={lang.t(
-                      'et_qty'
-                    )}
+                    placeholder={lang.t("et_qty")}
                     bind:value={item.qty}
                     class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                   />
 
                   <input
                     type="number"
-                    placeholder={lang.t(
-                      'et_price'
-                    )}
+                    placeholder={lang.t("et_price")}
                     bind:value={item.price}
                     class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
                   />
 
                   <button
-                    onclick={() =>
-                      removeItem(i)}
+                    onclick={() => removeItem(i)}
                     class="text-red-500 text-sm px-2"
                   >
                     ✕
                   </button>
-
                 </div>
-
               {/each}
-
             </div>
           </div>
 
@@ -1322,15 +1265,12 @@
 
           <div
             id="tax"
-            class:section-highlight={activeSection === 'tax'}
+            class:section-highlight={activeSection === "tax"}
             class="grid grid-cols-2 gap-3 scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
             <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t('et_tax')}
+              <label class="text-xs opacity-60">
+                {lang.t("et_tax")}
               </label>
 
               <input
@@ -1341,12 +1281,8 @@
             </div>
 
             <div>
-              <label
-                class="text-xs opacity-60"
-              >
-                {lang.t(
-                  'et_discount'
-                )}
+              <label class="text-xs opacity-60">
+                {lang.t("et_discount")}
               </label>
 
               <input
@@ -1355,7 +1291,6 @@
                 class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
             </div>
-
           </div>
 
           <!-- ================================================= -->
@@ -1364,14 +1299,11 @@
 
           <div
             id="notes"
-            class:section-highlight={activeSection === 'notes'}
+            class:section-highlight={activeSection === "notes"}
             class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
           >
-
-            <label
-              class="text-xs opacity-60"
-            >
-              {lang.t('et_notes')}
+            <label class="text-xs opacity-60">
+              {lang.t("et_notes")}
             </label>
 
             <textarea
@@ -1379,119 +1311,71 @@
               class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               rows="2"
             ></textarea>
-
           </div>
-
         </div>
 
         <!-- ================================================= -->
         <!-- PREVIEW -->
         <!-- ================================================= -->
 
-        <div
-          class="lg:sticky lg:top-6 h-fit"
-        >
-
+        <div class="lg:sticky lg:top-6 h-fit">
           <!-- ACTION BUTTONS -->
 
           <div class="flex gap-2 mb-3">
-
             <!-- SAVE -->
 
             <button
               onclick={saveInvoice}
-              disabled={
-                saving ||
-                sendingEmail
-              }
+              disabled={saving || sendingEmail}
               class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
               style="background:#8CFF3D"
             >
-              {saving
-                ? lang.t(
-                    'saving_invoice'
-                  )
-                : lang.t(
-                    'save_invoice'
-                  )}
+              {saving ? lang.t("saving_invoice") : lang.t("save_invoice")}
             </button>
 
             <!-- DOWNLOAD -->
 
             <button
               onclick={downloadPDF}
-              disabled={
-                downloading ||
-                sendingEmail
-              }
+              disabled={downloading || sendingEmail}
               class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
               style="border-color:#8CFF3D; color:#8CFF3D;"
             >
-              {downloading
-                ? lang.t(
-                    'generating_pdf'
-                  )
-                : lang.t(
-                    'download_pdf'
-                  )}
+              {downloading ? lang.t("generating_pdf") : lang.t("download_pdf")}
             </button>
-
           </div>
 
           <!-- EMAIL BUTTON -->
 
           <div class="mb-3">
-
             <button
               onclick={openEmailModal}
-              disabled={
-                saving ||
-                downloading ||
-                sendingEmail
-              }
+              disabled={saving || downloading || sendingEmail}
               class="w-full px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
               style="border-color:#8CFF3D; color:#8CFF3D;"
             >
               📧 Kirim Email
             </button>
-
           </div>
 
           <!-- SAVE MESSAGE -->
 
           {#if saveMessage}
-
             <p
-              class="text-center text-sm mb-3 {saveMessage.startsWith(
-                '✅'
-              )
+              class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
                 ? 'text-emerald-500'
                 : 'text-red-500'}"
             >
               {saveMessage}
             </p>
-
           {/if}
 
           <!-- PREVIEW -->
 
-          <div
-            bind:this={previewEl}
-            class="rounded-2xl overflow-hidden"
-          >
-
-            <svelte:component
-              this={
-                templates[selected]
-                  .component
-              }
-              {invoice}
-            />
-
+          <div bind:this={previewEl} class="rounded-2xl overflow-hidden">
+            <svelte:component this={templates[selected].component} {invoice} />
           </div>
-
         </div>
-
       </div>
     </div>
 
@@ -1500,46 +1384,30 @@
     <!-- ================================================= -->
 
     {#if showEmailModal}
-
       <div
         class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
         onclick={(e) => {
-          if (
-            e.target ===
-              e.currentTarget &&
-            !sendingEmail
-          ) {
-            showEmailModal =
-              false;
+          if (e.target === e.currentTarget && !sendingEmail) {
+            showEmailModal = false;
 
-            emailMessage = '';
+            emailMessage = "";
           }
         }}
       >
-
         <div
           class="w-full max-w-md bg-white dark:bg-[#111] text-slate-900 dark:text-white rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-white/10"
         >
-
           <!-- TITLE -->
 
-          <div
-            class="flex items-center justify-between mb-2"
-          >
-
-            <h2
-              class="text-xl font-bold"
-            >
-              📧 Kirim Invoice
-            </h2>
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xl font-bold">📧 Kirim Invoice</h2>
 
             <button
               onclick={() => {
                 if (!sendingEmail) {
-                  showEmailModal =
-                    false;
+                  showEmailModal = false;
 
-                  emailMessage = '';
+                  emailMessage = "";
                 }
               }}
               disabled={sendingEmail}
@@ -1547,22 +1415,15 @@
             >
               ✕
             </button>
-
           </div>
 
-          <p
-            class="text-sm opacity-60 mb-5"
-          >
-            Masukkan email pelanggan
-            untuk mengirim invoice.
+          <p class="text-sm opacity-60 mb-5">
+            Masukkan email pelanggan untuk mengirim invoice.
           </p>
 
           <!-- EMAIL -->
 
-          <label
-            class="text-sm font-medium"
-            for="recipient-email"
-          >
+          <label class="text-sm font-medium" for="recipient-email">
             Email penerima
           </label>
 
@@ -1574,10 +1435,7 @@
             class="w-full mt-2 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#8CFF3D]"
             disabled={sendingEmail}
             onkeydown={(e) => {
-              if (
-                e.key === 'Enter' &&
-                !sendingEmail
-              ) {
+              if (e.key === "Enter" && !sendingEmail) {
                 sendEmail();
               }
             }}
@@ -1586,29 +1444,23 @@
           <!-- MESSAGE -->
 
           {#if emailMessage}
-
             <p
-              class="text-sm mt-3 {emailMessage.startsWith(
-                '✅'
-              )
+              class="text-sm mt-3 {emailMessage.startsWith('✅')
                 ? 'text-emerald-500'
                 : 'text-red-500'}"
             >
               {emailMessage}
             </p>
-
           {/if}
 
           <!-- BUTTONS -->
 
           <div class="flex gap-2 mt-6">
-
             <button
               onclick={() => {
-                showEmailModal =
-                  false;
+                showEmailModal = false;
 
-                emailMessage = '';
+                emailMessage = "";
               }}
               disabled={sendingEmail}
               class="flex-1 px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 disabled:opacity-50"
@@ -1618,28 +1470,17 @@
 
             <button
               onclick={sendEmail}
-              disabled={
-                sendingEmail ||
-                !recipientEmail.trim()
-              }
+              disabled={sendingEmail || !recipientEmail.trim()}
               class="flex-1 px-4 py-2 rounded-full font-semibold text-black disabled:opacity-50"
               style="background:#8CFF3D"
             >
-              {sendingEmail
-                ? 'Mengirim...'
-                : 'Kirim Invoice'}
+              {sendingEmail ? "Mengirim..." : "Kirim Invoice"}
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     {/if}
-
   </main>
-
 </div>
 
 <!-- ===================================================== -->
@@ -1658,4 +1499,13 @@
       0 0 0 2px rgba(140, 255, 61, 0.45),
       0 0 25px rgba(140, 255, 61, 0.12);
   }
-</style>  
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

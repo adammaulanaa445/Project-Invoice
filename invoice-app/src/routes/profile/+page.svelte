@@ -4,10 +4,25 @@
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
+  import AppSidebar from '$lib/components/AppSidebar.svelte';
 
 
   const API_BASE = 'http://localhost:8000/api';
   const STORAGE_BASE = 'http://localhost:8000/storage';
+
+  // =====================================================
+  // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
+  // =====================================================
+
+  const menuItems = [
+    { label: 'Buat Invoice', icon: '▣', href: '/editor' },
+    { label: 'Template', icon: '▤', href: '/templates' },
+    { label: 'Klien', icon: '♙', href: '/clients' },
+    { label: 'Produk', icon: '▱', href: '/products' },
+    { label: 'Profile', icon: '⚙', href: '/profile' }
+  ];
+
+  let sidebarOpen = $state(false);
 
   let currentUser = $state(null);
 
@@ -194,211 +209,129 @@
       saving = false;
     }
   }
-
-  function logout() {
-    authStore.logout();
-    goto('/login');
-  }
 </script>
 
-
-<main
+<div
   class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors"
 >
+  <AppSidebar
+    {sidebarOpen}
+    onClose={() => (sidebarOpen = false)}
+    {menuItems}
+    menuLabel="Menu"
+  />
 
-  <!-- NAVBAR -->
-  <nav
-    class="border-b border-slate-200 dark:border-white/10"
+  <main
+    class="min-h-screen transition-all duration-300 {sidebarOpen
+      ? 'ml-64'
+      : 'ml-0'}"
   >
-    <div
-      class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between"
+    <!-- NAVBAR -->
+
+    <nav
+      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-4 py-4 flex justify-between items-center"
     >
-
-      <a
-        href="/"
-        class="flex items-center gap-2 font-bold text-lg"
-      >
-        <span
-          class="w-3 h-3 rounded-full"
-          style="background:#8CFF3D"
-        ></span>
-
-        InvoiceKita
-      </a>
-
-      <div class="flex items-center gap-4">
-
-        <a
-          href="/templates"
-          class="text-sm opacity-70 hover:opacity-100"
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          onclick={() => (sidebarOpen = !sidebarOpen)}
+          aria-label="Toggle sidebar"
+          class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
         >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect y="2" width="18" height="2" rx="1" fill="currentColor" />
+            <rect y="8" width="18" height="2" rx="1" fill="currentColor" />
+            <rect y="14" width="18" height="2" rx="1" fill="currentColor" />
+          </svg>
+        </button>
+
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
+          InvoiceKita
+        </a>
+      </div>
+
+      <div class="flex gap-4 items-center text-sm">
+        <a href="/templates" class="opacity-70 hover:opacity-100 transition">
           {lang.t('nav_templates')}
         </a>
 
         <button
           onclick={() => theme.toggle()}
           class="text-lg"
+          aria-label="Toggle dark mode"
         >
           {theme.dark ? '☀️' : '🌙'}
         </button>
+      </div>
+    </nav>
 
-        {#if currentUser}
-          <div
-            class="flex items-center gap-2 rounded-full border border-slate-300 dark:border-white/20 px-3 py-1.5"
-          >
-            <span
-              class="w-7 h-7 rounded-full flex items-center justify-center text-black text-xs font-bold"
-              style="background:#8CFF3D"
-            >
-              {currentUser.name?.charAt(0).toUpperCase() ?? '?'}
-            </span>
+    <!-- CONTENT -->
 
-            <span class="text-sm font-medium">
-              {currentUser.name}
-            </span>
-          </div>
-        {/if}
+    <section class="max-w-4xl mx-auto px-6 py-10">
+
+      <div class="mb-8">
+
+        <h1 class="text-3xl font-bold">
+          Profile & Company Settings
+        </h1>
+
+        <p class="opacity-60 mt-2">
+          Kelola informasi akun dan perusahaanmu.
+        </p>
 
       </div>
 
-    </div>
-  </nav>
 
+      {#if loading}
 
-  <!-- CONTENT -->
-  <section class="max-w-4xl mx-auto px-6 py-10">
-
-    <div class="mb-8">
-
-      <button
-        onclick={() => goto('/')}
-        class="text-sm opacity-60 hover:opacity-100"
-      >
-        ← Kembali
-      </button>
-
-      <h1 class="text-3xl font-bold mt-5">
-        Profile & Company Settings
-      </h1>
-
-      <p class="opacity-60 mt-2">
-        Kelola informasi akun dan perusahaanmu.
-      </p>
-
-    </div>
-
-
-    {#if loading}
-
-      <div
-        class="rounded-2xl border border-slate-200 dark:border-white/10 p-8 text-center"
-      >
-        Loading...
-      </div>
-
-    {:else}
-
-      <!-- PROFILE -->
-      <div
-        class="rounded-2xl border border-slate-200 dark:border-white/10 p-6 mb-6"
-      >
-
-        <h2 class="text-xl font-bold mb-6">
-          👤 Profile
-        </h2>
-
-        <div class="grid md:grid-cols-2 gap-5">
-
-          <div>
-            <label class="text-sm font-medium">
-              Nama
-            </label>
-
-            <input
-              value={currentUser?.name ?? ''}
-              disabled
-              class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 opacity-70"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">
-              Email
-            </label>
-
-            <input
-              value={currentUser?.email ?? ''}
-              disabled
-              class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 opacity-70"
-            />
-          </div>
-
+        <div
+          class="rounded-2xl border border-slate-200 dark:border-white/10 p-8 text-center"
+        >
+          Loading...
         </div>
 
-      </div>
+      {:else}
 
+        <!-- PROFILE -->
+        <div
+          class="rounded-2xl border border-slate-200 dark:border-white/10 p-6 mb-6"
+        >
 
-      <!-- COMPANY -->
-      <div
-        class="rounded-2xl border border-slate-200 dark:border-white/10 p-6"
-      >
+          <h2 class="text-xl font-bold mb-6">
+            👤 Profile
+          </h2>
 
-        <h2 class="text-xl font-bold mb-6">
-          🏢 Company Information
-        </h2>
+          <div class="grid md:grid-cols-2 gap-5">
 
+            <div>
+              <label class="text-sm font-medium">
+                Nama
+              </label>
 
-        <!-- LOGO -->
-        <div class="mb-7">
-
-          <label class="text-sm font-medium">
-            Logo Perusahaan
-          </label>
-
-          <div class="flex items-center gap-5 mt-3">
-
-            <div
-              class="w-24 h-24 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-white/5"
-            >
-
-              {#if logoPreview}
-
-                <img
-                  src={logoPreview}
-                  alt="Logo perusahaan"
-                  class="w-full h-full object-contain"
-                />
-
-              {:else}
-
-                <span class="text-3xl opacity-30">
-                  🏢
-                </span>
-
-              {/if}
-
+              <input
+                value={currentUser?.name ?? ''}
+                disabled
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 opacity-70"
+              />
             </div>
 
             <div>
-
-              <label
-                class="inline-block cursor-pointer px-4 py-2 rounded-full font-semibold text-black"
-                style="background:#8CFF3D"
-              >
-                Upload Logo
-
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  onchange={handleLogoChange}
-                  class="hidden"
-                />
+              <label class="text-sm font-medium">
+                Email
               </label>
 
-              <p class="text-xs opacity-50 mt-2">
-                PNG, JPG atau WEBP · Maks. 2MB
-              </p>
-
+              <input
+                value={currentUser?.email ?? ''}
+                disabled
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 opacity-70"
+              />
             </div>
 
           </div>
@@ -406,140 +339,208 @@
         </div>
 
 
-        <!-- COMPANY NAME -->
-        <div class="mb-5">
+        <!-- COMPANY -->
+        <div
+          class="rounded-2xl border border-slate-200 dark:border-white/10 p-6"
+        >
 
-          <label class="text-sm font-medium">
-            Nama Perusahaan
-          </label>
-
-          <input
-            bind:value={profile.company_name}
-            placeholder="PT Contoh Indonesia"
-            class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-          />
-
-        </div>
+          <h2 class="text-xl font-bold mb-6">
+            🏢 Company Information
+          </h2>
 
 
-        <!-- ADDRESS -->
-        <div class="mb-5">
-
-          <label class="text-sm font-medium">
-            Alamat
-          </label>
-
-          <textarea
-            bind:value={profile.address}
-            rows="3"
-            placeholder="Jl. Contoh No. 123, Surabaya"
-            class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-          ></textarea>
-
-        </div>
-
-
-        <!-- EMAIL + PHONE -->
-        <div class="grid md:grid-cols-2 gap-5 mb-5">
-
-          <div>
+          <!-- LOGO -->
+          <div class="mb-7">
 
             <label class="text-sm font-medium">
-              Email Perusahaan
+              Logo Perusahaan
+            </label>
+
+            <div class="flex items-center gap-5 mt-3">
+
+              <div
+                class="w-24 h-24 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-white/5"
+              >
+
+                {#if logoPreview}
+
+                  <img
+                    src={logoPreview}
+                    alt="Logo perusahaan"
+                    class="w-full h-full object-contain"
+                  />
+
+                {:else}
+
+                  <span class="text-3xl opacity-30">
+                    🏢
+                  </span>
+
+                {/if}
+
+              </div>
+
+              <div>
+
+                <label
+                  class="inline-block cursor-pointer px-4 py-2 rounded-full font-semibold text-black"
+                  style="background:#8CFF3D"
+                >
+                  Upload Logo
+
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onchange={handleLogoChange}
+                    class="hidden"
+                  />
+                </label>
+
+                <p class="text-xs opacity-50 mt-2">
+                  PNG, JPG atau WEBP · Maks. 2MB
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- COMPANY NAME -->
+          <div class="mb-5">
+
+            <label class="text-sm font-medium">
+              Nama Perusahaan
             </label>
 
             <input
-              type="email"
-              bind:value={profile.email}
-              placeholder="admin@perusahaan.com"
+              bind:value={profile.company_name}
+              placeholder="PT Contoh Indonesia"
               class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
             />
 
           </div>
 
 
-          <div>
+          <!-- ADDRESS -->
+          <div class="mb-5">
 
             <label class="text-sm font-medium">
-              No. Telepon
+              Alamat
             </label>
 
-            <input
-              bind:value={profile.phone}
-              placeholder="08123456789"
+            <textarea
+              bind:value={profile.address}
+              rows="3"
+              placeholder="Jl. Contoh No. 123, Surabaya"
               class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-            />
+            ></textarea>
+
+          </div>
+
+
+          <!-- EMAIL + PHONE -->
+          <div class="grid md:grid-cols-2 gap-5 mb-5">
+
+            <div>
+
+              <label class="text-sm font-medium">
+                Email Perusahaan
+              </label>
+
+              <input
+                type="email"
+                bind:value={profile.email}
+                placeholder="admin@perusahaan.com"
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+              />
+
+            </div>
+
+
+            <div>
+
+              <label class="text-sm font-medium">
+                No. Telepon
+              </label>
+
+              <input
+                bind:value={profile.phone}
+                placeholder="08123456789"
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+              />
+
+            </div>
+
+          </div>
+
+
+          <!-- WEBSITE + NPWP -->
+          <div class="grid md:grid-cols-2 gap-5">
+
+            <div>
+
+              <label class="text-sm font-medium">
+                Website
+              </label>
+
+              <input
+                bind:value={profile.website}
+                placeholder="https://perusahaan.com"
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+              />
+
+            </div>
+
+
+            <div>
+
+              <label class="text-sm font-medium">
+                NPWP
+              </label>
+
+              <input
+                bind:value={profile.npwp}
+                placeholder="00.000.000.0-000.000"
+                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
+              />
+
+            </div>
+
+          </div>
+
+
+          <!-- MESSAGE -->
+          {#if message}
+
+            <div
+              class="mt-5 text-sm"
+            >
+              {message}
+            </div>
+
+          {/if}
+
+
+          <!-- SAVE -->
+          <div class="mt-7 flex justify-end">
+
+            <button
+              onclick={saveProfile}
+              disabled={saving}
+              class="px-6 py-3 rounded-full font-semibold text-black disabled:opacity-50"
+              style="background:#8CFF3D"
+            >
+              {saving ? 'Menyimpan...' : '💾 Simpan Perubahan'}
+            </button>
 
           </div>
 
         </div>
 
+      {/if}
 
-        <!-- WEBSITE + NPWP -->
-        <div class="grid md:grid-cols-2 gap-5">
-
-          <div>
-
-            <label class="text-sm font-medium">
-              Website
-            </label>
-
-            <input
-              bind:value={profile.website}
-              placeholder="https://perusahaan.com"
-              class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-            />
-
-          </div>
-
-
-          <div>
-
-            <label class="text-sm font-medium">
-              NPWP
-            </label>
-
-            <input
-              bind:value={profile.npwp}
-              placeholder="00.000.000.0-000.000"
-              class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 outline-none focus:ring-2 focus:ring-[#8CFF3D]"
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- MESSAGE -->
-        {#if message}
-
-          <div
-            class="mt-5 text-sm"
-          >
-            {message}
-          </div>
-
-        {/if}
-
-
-        <!-- SAVE -->
-        <div class="mt-7 flex justify-end">
-
-          <button
-            onclick={saveProfile}
-            disabled={saving}
-            class="px-6 py-3 rounded-full font-semibold text-black disabled:opacity-50"
-            style="background:#8CFF3D"
-          >
-            {saving ? 'Menyimpan...' : '💾 Simpan Perubahan'}
-          </button>
-
-        </div>
-
-      </div>
-
-    {/if}
-
-  </section>
-
-</main>
+    </section>
+  </main>
+</div>

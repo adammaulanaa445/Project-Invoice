@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CompanyProfileController;
 
@@ -36,5 +38,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/company-profile', [CompanyProfileController::class, 'show']);
 
     Route::post('/company-profile', [CompanyProfileController::class, 'update']);
+
+    // =========================
+    // KLIEN
+    // =========================
+
+    Route::apiResource('clients', ClientController::class);
+
+    // =========================
+    // PRODUK
+    // =========================
+
+    Route::apiResource('products', ProductController::class);
 
 });
