@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/invoices/{invoice}/send-email', [InvoiceController::class, 'sendEmail']);
 
+    Route::post('/invoices/{invoice}/schedule-email', [InvoiceController::class, 'scheduleEmail']);
+
     Route::get('/company-profile', [CompanyProfileController::class, 'show']);
 
     Route::post('/company-profile', [CompanyProfileController::class, 'update']);

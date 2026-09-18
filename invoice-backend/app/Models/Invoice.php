@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class Invoice extends Model
 {
     use HasFactory;
@@ -54,5 +55,10 @@ class Invoice extends Model
     public function getTotalAttribute(): float
     {
         return $this->subtotal - $this->discount + $this->tax;
+    }
+
+    public function scheduledEmails(): HasMany
+    {
+        return $this->hasMany(ScheduledInvoiceEmail::class);
     }
 }
