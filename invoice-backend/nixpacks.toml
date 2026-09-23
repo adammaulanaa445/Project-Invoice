@@ -1,0 +1,21 @@
+# Konfigurasi ini memberitahu Railway untuk meng-install Google Chrome
+# (dipakai Browsershot/Puppeteer buat render PDF invoice) di atas
+# environment PHP bawaan. Taruh file ini di root folder invoice-backend.
+
+[phases.setup]
+nixPkgs = [
+  "...",
+  "chromium",
+  "nodejs_20"
+]
+
+[phases.install]
+cmds = [
+  "composer install --no-dev --optimize-autoloader",
+  "npm install puppeteer-core"
+]
+
+[variables]
+# Browsershot butuh tahu di mana binary Chrome ada di server Railway.
+# Path ini standar untuk paket nix "chromium".
+CHROME_PATH = "/nix/store/*-chromium-*/bin/chromium"

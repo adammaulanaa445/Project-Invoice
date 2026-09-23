@@ -10,32 +10,26 @@ class ScheduledInvoiceEmail extends Model
         'invoice_id',
         'user_id',
         'recipient_email',
-        'scheduled_at',
-        'pdf_path',
+        'frequency',
+        'next_send_at',
+        'last_sent_at',
+        'send_count',
         'status',
-        'error_message',
-        'sent_at',
+        'last_error',
     ];
-
 
     protected $casts = [
-        'scheduled_at' => 'datetime',
-        'sent_at' => 'datetime',
+        'next_send_at' => 'datetime',
+        'last_sent_at' => 'datetime',
     ];
-
 
     public function invoice()
     {
-        return $this->belongsTo(
-            Invoice::class
-        );
+        return $this->belongsTo(Invoice::class);
     }
-
 
     public function user()
     {
-        return $this->belongsTo(
-            User::class
-        );
+        return $this->belongsTo(User::class);
     }
 }

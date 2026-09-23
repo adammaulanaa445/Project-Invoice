@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Mail\ScheduledInvoiceMail;
+use App\Models\ScheduledInvoiceEmail;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
+use Spatie\Browsershot\Browsershot;
+
+class SendScheduledInvoiceEmails extends Command
+{
+    protected $signature = 'invoices:send-scheduled';
+
+    protected $description = 'Cek jadwal kirim invoice yang sudah waktunya, generate PDF, kirim email, lalu hitung jadwal berikutnya.';
+
+    public function handle(): int
+    {
+        $dueSchedules = ScheduledInvoiceEmail::with('invoice')
+            ->where('status', 'active')
+            ->where('next_send_at', '<=', now())
+            ->get();
+
+        $this->info("Ditemukan {$dueSchedules->count()} jadwal yang harus dikirim.");
+
+        foreach ($dueSchedules as $schedule) {
+            $this->processSchedule($schedule);
+        }
+
+        return self::SUCCESS;
+    }
+
+    protected function processSchedule(ScheduledInvoiceEmail $schedule): void
+    {
+        $invoice = $schedule->invoice;
+
+        if (!$invoice) {
+            $schedule->update([
+                'status' => 'failed',
+                'last_error' => 'Invoice terkait sudah tidak ada (mungkin sudah dihapus).',
+            ]);
+
+            return;
+        }
+
+        try {
+            $pdfPath = $this->generatePdf($invoice);
+
+            Mail::to($schedule->recipient_email)->send(
+                new ScheduledInvoiceMail($invoice, $pdfPath)
+            );
+
+            $schedule->update([
+                'last_sent_at' => now(),
+                'send_count' => $schedule->send_count + 1,
+                'next_send_at' => $this->calculateNextSendAt($schedule),
+                'status' => $schedule->frequency === 'once' ? 'completed' : 'active',
+                'last_error' => null,
+            ]);
+
+            $this->info("Invoice #{$invoice->id} berhasil dikirim ke {$schedule->recipient_email}");
+        } catch (\Throwable $e) {
+            \Log::error('Gagal mengirim invoice terjadwal', [
+                'schedule_id' => $schedule->id,
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Status jadi 'failed' supaya TIDAK dicoba ulang otomatis terus-menerus
+            // tiap menit. Admin bisa cek & aktifkan lagi lewat halaman /schedules.
+            $schedule->update([
+                'status' => 'failed',
+                'last_error' => $e->getMessage(),
+            ]);
+
+            $this->error("Gagal mengirim invoice #{$invoice->id}: {$e->getMessage()}");
+        }
+    }
+
+    // =====================================================
+    // GENERATE PDF VIA HEADLESS BROWSER (BROWSERSHOT)
+    // Membuka halaman cetak khusus di frontend (SvelteKit),
+    // lalu menyimpannya sebagai PDF -- hasilnya sama persis
+    // dengan tampilan preview yang dilihat user di /editor.
+    // =====================================================
+
+    protected function generatePdf($invoice): string
+    {
+        $frontendUrl = rtrim(config('services.frontend.url'), '/');
+
+        $printUrl = "{$frontendUrl}/print/invoice/{$invoice->id}?token={$invoice->print_token}";
+
+        $fileName = "scheduled-invoices/invoice-{$invoice->id}-" . now()->timestamp . '.pdf';
+        $fullPath = storage_path("app/public/{$fileName}");
+
+        if (!is_dir(dirname($fullPath))) {
+            mkdir(dirname($fullPath), 0755, true);
+        }
+
+        $browsershot = Browsershot::url($printUrl)
+            ->waitUntilNetworkIdle()
+            ->format('A4')
+            ->showBackground();
+
+        // Kalau CHROME_PATH diset di .env (biasanya perlu di Railway),
+        // dipakai supaya Browsershot tahu lokasi binary Chrome.
+        $chromePath = config('services.browsershot.chrome_path');
+
+        if ($chromePath) {
+            $browsershot->setChromePath($chromePath);
+        }
+
+        $browsershot->save($fullPath);
+
+        return $fullPath;
+    }
+
+    protected function calculateNextSendAt(ScheduledInvoiceEmail $schedule): Carbon
+    {
+        $base = Carbon::now();
+
+        return match ($schedule->frequency) {
+            'hourly' => $base->addHour(),
+            'daily' => $base->addDay(),
+            'weekly' => $base->addWeek(),
+            'monthly' => $base->addMonthNoOverflow(),
+            default => $base, // 'once' tidak dipakai lagi karena status langsung 'completed'
+        };
+    }
+}
