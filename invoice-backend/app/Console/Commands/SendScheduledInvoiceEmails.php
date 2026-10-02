@@ -67,8 +67,6 @@ class SendScheduledInvoiceEmails extends Command
                 'error' => $e->getMessage(),
             ]);
 
-            // Status jadi 'failed' supaya TIDAK dicoba ulang otomatis terus-menerus
-            // tiap menit. Admin bisa cek & aktifkan lagi lewat halaman /schedules.
             $schedule->update([
                 'status' => 'failed',
                 'last_error' => $e->getMessage(),
@@ -77,13 +75,6 @@ class SendScheduledInvoiceEmails extends Command
             $this->error("Gagal mengirim invoice #{$invoice->id}: {$e->getMessage()}");
         }
     }
-
-    // =====================================================
-    // GENERATE PDF VIA HEADLESS BROWSER (BROWSERSHOT)
-    // Membuka halaman cetak khusus di frontend (SvelteKit),
-    // lalu menyimpannya sebagai PDF -- hasilnya sama persis
-    // dengan tampilan preview yang dilihat user di /editor.
-    // =====================================================
 
     protected function generatePdf($invoice): string
     {
@@ -103,8 +94,6 @@ class SendScheduledInvoiceEmails extends Command
             ->format('A4')
             ->showBackground();
 
-        // Kalau CHROME_PATH diset di .env (biasanya perlu di Railway),
-        // dipakai supaya Browsershot tahu lokasi binary Chrome.
         $chromePath = config('services.browsershot.chrome_path');
 
         if ($chromePath) {
@@ -125,7 +114,7 @@ class SendScheduledInvoiceEmails extends Command
             'daily' => $base->addDay(),
             'weekly' => $base->addWeek(),
             'monthly' => $base->addMonthNoOverflow(),
-            default => $base, // 'once' tidak dipakai lagi karena status langsung 'completed'
+            default => $base,
         };
     }
 }
