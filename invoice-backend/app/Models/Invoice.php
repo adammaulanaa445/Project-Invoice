@@ -13,11 +13,29 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'invoice_number', 'template_id', 'issue_date', 'due_date', 'currency',
-        'from_name', 'from_address', 'from_email', 'from_phone', 'logo_url',
-        'to_name', 'to_address', 'to_email',
-        'tax_percent', 'discount_percent', 'notes', 'status', 'payment_link',
+        'user_id',
+        'invoice_number',
+        'print_token',
+        'template_id',
+        'issue_date',
+        'due_date',
+        'currency',
+        'from_name',
+        'from_address',
+        'from_email',
+        'from_phone',
+        'logo_url',
+        'to_name',
+        'to_address',
+        'to_email',
+        'tax_percent',
+        'discount_percent',
+        'notes',
+        'status',
+        'payment_link',
     ];
+
+  
 
     protected $casts = [
         'issue_date' => 'date',
@@ -39,7 +57,7 @@ class Invoice extends Model
     // Dipakai frontend agar perhitungan subtotal/tax/total konsisten dgn komponen Svelte
     public function getSubtotalAttribute(): float
     {
-        return $this->items->sum(fn ($i) => $i->qty * $i->price);
+        return $this->items->sum(fn($i) => $i->qty * $i->price);
     }
 
     public function getDiscountAttribute(): float

@@ -91,6 +91,11 @@ class SendScheduledInvoiceEmails extends Command
 
         $browsershot = Browsershot::url($printUrl)
             ->waitUntilNetworkIdle()
+            // Tunggu sampai Svelte selesai render komponen template.
+            // waitUntilNetworkIdle() saja tidak cukup karena Svelte butuh
+            // beberapa saat untuk mount komponen setelah fetch data selesai.
+            ->waitForFunction('document.querySelector(".print-wrapper") && !document.querySelector(".print-pending")')
+            ->setDelay(500) // buffer tambahan 500ms agar CSS/font selesai dimuat
             ->format('A4')
             ->showBackground();
 
