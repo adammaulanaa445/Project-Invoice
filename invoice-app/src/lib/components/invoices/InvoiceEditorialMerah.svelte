@@ -23,7 +23,7 @@
   const emptyRows = Array.from({ length: Math.max(0, 4 - invoice.items.length) });
 </script>
 
-<div class="max-w-[820px] mx-auto bg-[#F2ECDD] px-10 md:px-14 py-10 text-[#1A1A1A]">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#F2ECDD] px-10 md:px-14 py-10 text-[#1A1A1A]">
   <div class="flex flex-wrap items-start justify-between gap-4 border-b-4 border-[#1A1A1A] pb-4">
     <h1 class="text-5xl font-black uppercase tracking-tight text-[#C81D25]">Invoice</h1>
     <div class="text-right text-xs uppercase leading-relaxed">

@@ -21,7 +21,7 @@
 </script>
 
 <!-- Opsional: font "Playfair Display" untuk judul + "Source Serif Pro" untuk isi akan memperkuat kesan editorial -->
-<div class="max-w-[820px] mx-auto bg-white p-10 md:p-14 text-[#1A1A1A]" style="font-family: Georgia, 'Times New Roman', serif;">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-white p-10 md:p-14 text-[#1A1A1A]" style="font-family: Georgia, 'Times New Roman', serif;">
   <!-- Masthead ala koran -->
   <div class="text-center border-b-4 border-black pb-4 mb-2">
     <p class="text-[10px] uppercase tracking-[0.3em] text-black/50">Edisi Tagihan · No. {invoice.invoiceNumber}</p>

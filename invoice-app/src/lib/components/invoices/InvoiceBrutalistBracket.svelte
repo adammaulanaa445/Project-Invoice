@@ -22,7 +22,7 @@
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
 
-<div class="max-w-[820px] mx-auto border-4 border-black bg-white px-10 py-8 text-black">
+<div class="invoice-light-theme max-w-[820px] mx-auto border-4 border-black bg-white px-10 py-8 text-black">
   <h1 class="border-b-4 border-black pb-3 text-3xl font-black uppercase tracking-tight">[{invoice.from.name}]</h1>
 
   <div class="mt-4 flex flex-wrap items-start justify-between gap-4 text-xs uppercase">

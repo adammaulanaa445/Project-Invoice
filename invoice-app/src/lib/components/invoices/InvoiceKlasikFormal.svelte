@@ -25,7 +25,7 @@
   Kalau mau font serif custom (mis. "Playfair Display"), import dulu di app.html / +layout.svelte:
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 -->
-<div class="max-w-[820px] mx-auto bg-white p-10 md:p-14 text-[#1A1A1A]" style="font-family: Georgia, 'Times New Roman', serif;">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-white p-10 md:p-14 text-[#1A1A1A]" style="font-family: Georgia, 'Times New Roman', serif;">
   <!-- Header dengan garis ganda ala dokumen resmi -->
   <div class="border-t-4 border-b border-black pt-4 pb-6 mb-8">
     <div class="flex justify-between items-start">

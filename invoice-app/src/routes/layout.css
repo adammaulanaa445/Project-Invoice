@@ -1,2 +1,35 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Invoice document dark mode: light invoices follow app dark toggle */
+.invoice-light-theme {
+  transition: filter 0.28s ease, background-color 0.28s ease;
+}
+.dark .invoice-light-theme {
+  filter: invert(0.94) hue-rotate(180deg) brightness(1.02) contrast(0.97);
+}
+/* keep images/logos natural */
+.dark .invoice-light-theme img,
+.dark .invoice-light-theme svg,
+.dark .invoice-light-theme canvas,
+.dark .invoice-light-theme [style*="background-image"] {
+  filter: invert(1) hue-rotate(180deg) brightness(1.04) contrast(1.02);
+}
+/* managed-dark & native-dark invoices handle their own dark, skip filter */
+.dark .invoice-managed-dark,
+.dark .invoice-dark-native {
+  filter: none !important;
+}
+.dark .invoice-managed-dark img,
+.dark .invoice-dark-native img {
+  filter: none !important;
+}
+/* PDF / print never dark */
+.pdf-export .invoice-light-theme,
+.print-wrapper .invoice-light-theme,
+.print-wrapper .invoice-managed-dark,
+.print-wrapper .invoice-dark-native {
+  filter: none !important;
+}
+.pdf-export .invoice-light-theme img,
+.print-wrapper img { filter: none !important; }

@@ -113,7 +113,7 @@
 
 
 <div
-  class="max-w-[820px] mx-auto bg-white text-slate-900 font-sans p-10 md:p-14 border border-slate-100 shadow-sm"
+  class="invoice-light-theme max-w-[820px] mx-auto bg-white text-slate-900 font-sans p-10 md:p-14 border border-slate-100 shadow-sm"
 >
 
   <!-- ==========================================

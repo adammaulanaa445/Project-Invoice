@@ -4,6 +4,7 @@
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import { scheduledEmailStore } from "$lib/scheduledEmailStore.svelte.js";
   import { theme } from "$lib/theme.svelte.js";
+  import { sidebar } from "$lib/sidebarStore.svelte.js";
 
   const menuItems = [
     { label: "Buat Invoice", icon: "▣", href: "/editor" },
@@ -13,7 +14,7 @@
     { label: "Jadwal Kirim", icon: "⏰", href: "/schedules" },
   ];
 
-  let sidebarOpen = $state(false);
+  let sidebarOpen = $derived(sidebar.open);
 
   let schedules = $state([]);
   let loading = $state(true);
@@ -114,7 +115,7 @@
 >
   <AppSidebar
     {sidebarOpen}
-    onClose={() => (sidebarOpen = false)}
+    onClose={() => sidebar.close()}
     {menuItems}
     menuLabel="Menu"
   />
@@ -132,7 +133,7 @@
       <div class="flex items-center gap-3">
         <button
           type="button"
-          onclick={() => (sidebarOpen = !sidebarOpen)}
+          onclick={() => sidebar.toggle()}
           aria-label="Toggle sidebar"
           class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
         >

@@ -22,7 +22,7 @@
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
 
-<div class="max-w-[820px] mx-auto overflow-hidden bg-white shadow-sm">
+<div class="invoice-light-theme max-w-[820px] mx-auto overflow-hidden bg-white shadow-sm">
   <div class="h-3 w-full" style="background-image: repeating-linear-gradient(45deg, #C9962C 0, #C9962C 6px, #1B2A4A 6px, #1B2A4A 12px);"></div>
 
   <div class="px-10 md:px-14 py-10 text-[#1B2A4A]">

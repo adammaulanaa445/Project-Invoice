@@ -1,5 +1,6 @@
 <script>
   import { goto } from '$app/navigation';
+  import { sidebar } from '$lib/sidebarStore.svelte.js';
   import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
@@ -46,7 +47,7 @@
   // BARU: state buka/tutup sidebar
   // =========================
 
-  let sidebarOpen = $state(true);
+  let sidebarOpen = $derived(sidebar.open);
 </script>
 
 
@@ -56,7 +57,7 @@
     {menuItems}
     menuLabel="Menu"
     {sidebarOpen}
-    onClose={() => sidebarOpen = false}
+    onClose={() => sidebar.close()}
   />
 
   <main class={sidebarOpen ? 'lg:pl-64' : ''}>
@@ -68,7 +69,7 @@
       {#if !sidebarOpen}
         <button
           type="button"
-          onclick={() => sidebarOpen = true}
+          onclick={() => sidebar.open = true}
           aria-label="Buka sidebar"
           class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition text-lg"
         >

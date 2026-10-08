@@ -20,7 +20,7 @@
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
 
-<div class="max-w-[820px] mx-auto bg-[#F8FAFC] p-6 md:p-10 font-sans text-[#1E1B4B]">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#F8FAFC] p-6 md:p-10 font-sans text-[#1E1B4B]">
   <!-- Header gradient card -->
   <div class="rounded-3xl p-8 mb-6 text-white" style="background: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);">
     <div class="flex justify-between items-start">

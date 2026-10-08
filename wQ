@@ -1,0 +1,593 @@
+[33mcommit 4cb76bcea148360e9338bbd0c57d2af52bc2e7d3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Hype <farel>
+Date:   Sat Oct 3 10:06:56 2026 +0700
+
+    tinggal deploy
+
+[33mcommit 6ec491cef5e8489831dc9be4e28ff828468d3195[m
+Author: Hype <farel>
+Date:   Fri Oct 2 18:22:49 2026 +0700
+
+    tempek
+
+[33mcommit cfd77d5e4c9e2c119dbed784dcd757c621a91222[m
+Author: Hype <farel>
+Date:   Fri Oct 2 18:15:45 2026 +0700
+
+    keknya udh selesai
+
+[33mcommit 59d50a690c746e91f583448a38abd4496c930bf3[m[33m ([m[1;31morigin/farel[m[33m, [m[1;32mfarel[m[33m)[m
+Author: Hype <farel>
+Date:   Fri Oct 2 10:28:31 2026 +0700
+
+    revisian part 1
+
+[33mcommit b39d78a65ee0b424b3fbdc3d9e916fe1750fb26d[m
+Author: Hype <farel>
+Date:   Wed Sep 23 11:19:43 2026 +0700
+
+    fix tapi AI sudah limit
+
+[33mcommit 9f7bd3f69a11f618444a05c78c4b2227710a5f0c[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Fri Sep 18 22:10:05 2026 +0700
+
+    menambahkan fitur kirim otomatis
+
+[33mcommit 77ae3d935dabfe8319629508fd827f34a77d169a[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Thu Sep 17 15:37:19 2026 +0700
+
+    membenahi ui ix
+
+[33mcommit fd6b704aa4c88882a0cf148c5b0a33e51529747c[m
+Author: Hype <farel>
+Date:   Thu Sep 17 13:23:26 2026 +0700
+
+    Revisian
+
+[33mcommit 42d685e8ba01fd3c62552050c473b42f0b728ca7[m
+Merge: bb9541a 7d6e0c9
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 14 13:58:01 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit 7d6e0c95d73df5256a934ff5b73997b3627f180a[m
+Merge: 3bd0026 cc5a195
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 14 13:14:42 2026 +0700
+
+    merge: resolve conflict invoiceStore API_BASE
+
+[33mcommit 3bd00269d86104ce33abbe7aea496797f39d125a[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 14 13:13:00 2026 +0700
+
+    fix: hapus duplikat const API_BASE
+
+[33mcommit cc5a195407817f63a33984422ab61eaeecbee906[m
+Author: Hype <farel>
+Date:   Mon Sep 14 13:10:22 2026 +0700
+
+    ubah mode development part 2
+
+[33mcommit e0fa9bf1357f05d730f76139a7d6d0faf3c85db8[m
+Author: Hype <farel>
+Date:   Mon Sep 14 13:08:40 2026 +0700
+
+    ubah mode development
+
+[33mcommit bb9541a4973af79e10a39d8575825c3bdcfaacac[m
+Merge: 067ce46 3367802
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 14 12:53:14 2026 +0700
+
+    '
+
+[33mcommit 5b4a075c40f2739ccbc4a67cf1a2f35c00253c02[m
+Merge: b23f9e2 8ba5045
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Thu Sep 10 09:53:41 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit 8ba5045ba6c759caf5fa5a01083f81de365206d2[m
+Author: Hype <farel>
+Date:   Tue Sep 8 19:03:49 2026 +0700
+
+    fixing email send
+
+[33mcommit dea8c1b66965ec6c7a1c38df909447be1590cf54[m
+Author: Hype <farel>
+Date:   Tue Sep 8 12:22:26 2026 +0700
+
+    fix gmail send
+
+[33mcommit b23f9e2b80210132ba8dc217f35bbd72e660aa06[m
+Merge: 2267c1a 3367802
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Tue Sep 8 11:56:27 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit 336780241b30c41a3882ceb65e786146c4439c17[m
+Author: Hype <farel>
+Date:   Tue Sep 8 11:54:51 2026 +0700
+
+    fix
+
+[33mcommit 067ce46035fc0142feacd35426b8fdf4db4f3dfa[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 8 11:54:42 2026 +0700
+
+    '
+
+[33mcommit 6733d164ae22c23bef78acdd477aed9aa065d913[m
+Author: Hype <farel>
+Date:   Tue Sep 8 11:50:31 2026 +0700
+
+    fix google auth part 3414
+
+[33mcommit 2267c1ad418a9210b62e79d81577d2e10e2f2f37[m
+Merge: 5f36860 5db7569
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Tue Sep 8 11:47:06 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit 5db7569bf8993759775916b1390883aed159f1d5[m
+Author: Hype <farel>
+Date:   Tue Sep 8 11:19:55 2026 +0700
+
+    fix google auth
+
+[33mcommit 1fe48b7b67d4de0b43062c6b4d1a4949bc8958b6[m
+Merge: 0fa819c 4d5152d
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 8 10:53:17 2026 +0700
+
+    '
+
+[33mcommit 0fa819c3a6906dd5d5398fe3f06e1b90a4c2440c[m
+Merge: 021ad3a 2e03c83
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 8 10:48:17 2026 +0700
+
+    '
+
+[33mcommit 4d5152d0ebefb543452f018d1c2c07662a7b6332[m
+Author: Hype <farel>
+Date:   Tue Sep 8 10:48:05 2026 +0700
+
+    deploy part 238756
+
+[33mcommit 021ad3a3c1d877bec7bdfdcdc74648286b69b2b2[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 8 10:45:21 2026 +0700
+
+    '
+
+[33mcommit 2e03c83d224e1ab9b97235474cc1cc41c2091bd9[m
+Author: Hype <farel>
+Date:   Mon Sep 7 21:35:13 2026 +0700
+
+    deploy test part 923792375
+
+[33mcommit af9ba1c89da18d5707471770f680ca2009a787a4[m
+Author: Hype <farel>
+Date:   Mon Sep 7 21:27:45 2026 +0700
+
+    deploy testing part 92399823
+
+[33mcommit 9bef081335fd64c0873b971de50ef9f7154f4290[m
+Author: Hype <farel>
+Date:   Mon Sep 7 18:49:28 2026 +0700
+
+    seting dockerfile
+
+[33mcommit e27975734da8a6ea58624b9b4461e0222c01cab7[m
+Author: Hype <farel>
+Date:   Mon Sep 7 13:06:36 2026 +0700
+
+    fahri baja rokep
+
+[33mcommit 5f368600ce2eb8a6e2ca0246360175886a1c50fe[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 12:56:58 2026 +0700
+
+    error
+
+[33mcommit c4303eec77d2989431488385a56ea2b50bd758ec[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 7 12:21:18 2026 +0700
+
+    ..
+
+[33mcommit 656a5b71e683387480eab3d36e8ede13b834fe28[m
+Merge: 86a26d3 6c07d2e
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 7 12:14:59 2026 +0700
+
+    ..
+
+[33mcommit 86a26d342eca6a92a45755000d32f7cf23e04c34[m
+Merge: d666a5b 4001538
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 7 12:12:24 2026 +0700
+
+    ..
+
+[33mcommit 6c07d2eadfa1c7afca111cc10872d1707ad20d43[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 12:08:32 2026 +0700
+
+    menambahkan fitur favorit pada template
+
+[33mcommit 400153879a0a7297854b44c6e60d593615a86f93[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:57:36 2026 +0700
+
+    oke ini pasti iso
+
+[33mcommit 580755b423292d5e344047dd039bd5267e3948a6[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:49:43 2026 +0700
+
+    oke plis fiks
+
+[33mcommit d666a5b6c3d75e7fa5f545f904b2f1f75ff5537a[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Sep 7 11:49:13 2026 +0700
+
+    ..
+
+[33mcommit 3c637c9609840da4344ff6694ef301169759d451[m
+Merge: fcbf9d3 d7ae899
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 11:43:08 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit d7ae899883f62c934137df39f034352320fc17e3[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:41:33 2026 +0700
+
+    elah jir
+
+[33mcommit fcbf9d31fb55f53acc50be1f3cfa4928f13248fd[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 11:40:33 2026 +0700
+
+    menambahkan fitur favorit
+
+[33mcommit a1b1b5d04c118fe164e97eed56128d46fcff804a[m
+Merge: 5ff9ac6 f713329
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 11:39:12 2026 +0700
+
+    menambahkan fitur favorit
+
+[33mcommit 8c486bab3e8137b74ce7fd1003ccb79e8dd9413b[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:37:40 2026 +0700
+
+    tes lagi
+
+[33mcommit 4ee28a9b59235d25729aacc55646e26501516b74[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:36:00 2026 +0700
+
+    testing deploy
+
+[33mcommit 5ff9ac6d3d12c22942fd717b6297ebb6fe8a0d19[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 11:31:47 2026 +0700
+
+    menambahkan fitur favorit
+
+[33mcommit f713329702249d56a9acde9c2a705cb470153cb3[m
+Merge: 3edcf52 bbcb46f
+Author: Hype <farel>
+Date:   Mon Sep 7 11:23:18 2026 +0700
+
+    fx
+
+[33mcommit 3edcf52ca0e21baaa1ae38e21c4e4a17d731123c[m
+Author: Hype <farel>
+Date:   Mon Sep 7 11:21:38 2026 +0700
+
+    pp
+
+[33mcommit bbcb46ff8bbcf3fdc6973987b287cabcb72253e3[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Sep 7 11:16:52 2026 +0700
+
+    mengupdate fitur pencarian
+
+[33mcommit 7714022abfa81dfb41ab615d7d243b74282da634[m
+Author: Hype <farel>
+Date:   Sun Sep 6 19:02:51 2026 +0700
+
+    benerin sidebar di editor
+
+[33mcommit 3df3797dd3b5594d0c129ca948079c4114d48418[m
+Author: Hype <farel>
+Date:   Sun Sep 6 18:31:17 2026 +0700
+
+    balikin semula
+
+[33mcommit 80d0f98b9f1dd8302e2fbb0408e2e15da484e726[m
+Author: Hype <farel>
+Date:   Sun Sep 6 18:14:00 2026 +0700
+
+    oke wok harus berhasil ini
+
+[33mcommit 944e97fc079645fb6e02b9055f0742c49cc7db45[m
+Author: Hype <farel>
+Date:   Sun Sep 6 18:11:17 2026 +0700
+
+    oke kesekian kali nya
+
+[33mcommit 9facc47774ad443392a27dc89d8bdae88e341e18[m
+Author: Hype <farel>
+Date:   Sun Sep 6 18:03:38 2026 +0700
+
+    cok error ae asu
+
+[33mcommit d1dd03c16b993e14d0a9401457e69e625302d129[m
+Author: Hype <farel>
+Date:   Sun Sep 6 17:54:40 2026 +0700
+
+    benerin fetch url error
+
+[33mcommit de3c0ccd222aacc2bbbc0f2474ccadf8fec024d4[m
+Author: Hype <farel>
+Date:   Sun Sep 6 14:36:38 2026 +0700
+
+    deploy semua online
+
+[33mcommit 5d399cd1e46bf22e8cbb1c8cf11763fbbd69be73[m
+Author: Hype <farel>
+Date:   Sun Sep 6 14:02:04 2026 +0700
+
+    benerin sidebar ga bisa ditutup
+
+[33mcommit 5e721b080cd2c9c82336f4d9f37464099beaee77[m
+Author: Hype <farel>
+Date:   Sun Sep 6 13:48:21 2026 +0700
+
+    overwriten wok
+
+[33mcommit 60d8a6415bfed6ee238d55418c188d99f4cc66e4[m
+Merge: 6f5cc04 8807a14
+Author: Hype <farel>
+Date:   Sun Sep 6 13:46:58 2026 +0700
+
+    merge conflict resolve
+
+[33mcommit 8807a144064535dfac519b52dfdbd20d2c6adee8[m
+Author: Hype <farel>
+Date:   Sun Sep 6 13:44:19 2026 +0700
+
+    benerin routing api
+
+[33mcommit 6f5cc048547d7a32d741086fcff2b8400a36e652[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Sun Sep 6 13:36:43 2026 +0700
+
+    mengubah tampilan
+
+[33mcommit dc4d8fe7c00571dcba49c7a8c354d9d647184f09[m
+Merge: f5c563f d68cdfd
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Sat Sep 5 15:01:46 2026 +0700
+
+    Merge pull request #7 from adammaulanaa445/desain-fahri
+    
+    Desain fahri
+
+[33mcommit d68cdfd92ba9e514b0ede4f32835a090266dfdaf[m[33m ([m[1;31morigin/desain-fahri[m[33m)[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Sat Sep 5 14:40:16 2026 +0700
+
+    new 10 templates
+
+[33mcommit b6368859c61b80c5dd3631804e5b18da51dc324d[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Fri Sep 4 19:42:25 2026 +0700
+
+    .
+
+[33mcommit dc4004ce33334809b7ead1f6de7176b9a5b45b49[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Fri Sep 4 17:34:46 2026 +0700
+
+    setengah
+
+[33mcommit 9d7c95ef0f3dbb09bca967200449176b2941def8[m
+Merge: 88ec41f f5c563f
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Thu Sep 3 11:10:36 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice into desain-fahri
+
+[33mcommit f5c563fe3caef501c9b0f88ba8fae35e9cf0ea65[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Thu Sep 3 11:07:43 2026 +0700
+
+    menambahkan fitur kirim email dan menambahkan fitur profil perusahaan
+
+[33mcommit 88ec41f4602672b16511930a0f843e28e84cb774[m
+Merge: f8733b8 5bbb2eb
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Thu Sep 3 11:07:31 2026 +0700
+
+    Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice into desain-fahri
+
+[33mcommit f8733b8b881dc06ed65d2cc90bab9c410feca71f[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Thu Sep 3 10:41:15 2026 +0700
+
+    setengah papat
+
+[33mcommit 5bbb2eb3039e583b39876e99cef2bf6203514e54[m
+Author: Hype <farel>
+Date:   Wed Sep 2 12:53:01 2026 +0700
+
+    konfigurasi untuk deploy
+
+[33mcommit fb56024cbbd54d26756ef73c545cdcac74f1d3c6[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Wed Sep 2 11:53:28 2026 +0700
+
+    memperbaiki google login
+
+[33mcommit 4dd8ef78d281a0185493e43adac198ecf72552f4[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Wed Sep 2 11:29:23 2026 +0700
+
+    kembalikan sistem simpan invoice & auth ke database Laravel
+
+[33mcommit d446382c6a942026b09b21426660dd080cde721b[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Tue Sep 1 12:43:56 2026 +0700
+
+    menambahkan profil ke halaman templates
+
+[33mcommit 84941d1d03f64d2eb0aba4ede11beb8f51558b8e[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Tue Sep 1 12:33:12 2026 +0700
+
+    memperbaiki login dan regis
+
+[33mcommit b7d2eb5ef946558fa45b2a608b46d9c39fdb4f39[m
+Merge: c21865e be3122a
+Author: Hype <farel>
+Date:   Tue Sep 1 12:29:44 2026 +0700
+
+    Merge branch 'farel'
+
+[33mcommit be3122a5f0d567caaeaed2bbbc7dd640eee5e0fb[m
+Author: Hype <farel>
+Date:   Tue Sep 1 12:29:04 2026 +0700
+
+    add Dockerfile
+
+[33mcommit c21865e4afd17cff788edfee85e71e1fe9388c52[m
+Merge: 122ac5f 096beb3
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Tue Sep 1 12:06:31 2026 +0700
+
+    Merge pull request #6 from adammaulanaa445/desain-fahri
+    
+    Desain fahri
+
+[33mcommit 096beb3c46df4f7b924848a5ea3b06b6305991ed[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 1 11:45:41 2026 +0700
+
+    tambah tombol login di homepage dan templates
+
+[33mcommit 5d2b74ab9c6529aba1118d8baf5a12fbafd79902[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Tue Sep 1 11:25:46 2026 +0700
+
+    menghilankan tpl
+
+[33mcommit 122ac5f927c731e27e862ab8b1e69d6c878b6646[m
+Merge: aa52d13 013ee02
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:34:57 2026 +0700
+
+    Merge branch 'desain-fahri'
+
+[33mcommit aa52d13508e4f0a2b5c88f3456167d745275cd7c[m
+Merge: 6a6207f c0d80a3
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:34:04 2026 +0700
+
+    t Merge branch 'main' of https://github.com/adammaulanaa445/Project-Invoice
+
+[33mcommit 013ee026524a2112a03f77a668a669363ed1b7db[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:33:24 2026 +0700
+
+    login dan register
+
+[33mcommit 6a6207f87b23d92e39c8c72db49021550b2f7765[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:17:41 2026 +0700
+
+    feat: update login and register
+
+[33mcommit c0d80a3907b25dedbdd4e2b3bf52d5afcd6b1052[m
+Merge: fbc599c 743e754
+Author: Hype <farel>
+Date:   Mon Aug 31 12:17:18 2026 +0700
+
+    Merge branch 'farel'
+
+[33mcommit 743e754f8503b4849aee97331b8dd31badbd0b37[m
+Author: Hype <farel>
+Date:   Mon Aug 31 12:16:20 2026 +0700
+
+    desain tipis hover
+
+[33mcommit fbc599c1e5b631f54c1a23b707351bea3ecaaefc[m
+Merge: c662336 816e7c4
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Aug 31 12:14:03 2026 +0700
+
+    Merge pull request #5 from adammaulanaa445/ubah-tampilan-awal
+    
+    Merge pull request #4 from adammaulanaa445/main
+
+[33mcommit 816e7c49323e03f80897e0ffdd09d5d77dffd258[m[33m ([m[1;31morigin/ubah-tampilan-awal[m[33m)[m
+Merge: 91f3933 c662336
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Aug 31 12:12:28 2026 +0700
+
+    Merge pull request #4 from adammaulanaa445/main
+    
+    push baru
+
+[33mcommit 5ef380c085b4eeb147d63f7ab68b58ff1769f5a1[m
+Merge: 31adb94 c662336
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:05:15 2026 +0700
+
+    login register
+
+[33mcommit 31adb9464712373f207a1d0f5e334620a1b9502f[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 12:03:20 2026 +0700
+
+    login register
+
+[33mcommit c66233687037262708a59f4839bd4c07f29cdc4f[m
+Merge: 91f3933 b34383e
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Aug 31 11:46:09 2026 +0700
+
+    Merge pull request #3 from adammaulanaa445/desain-fahri
+    
+    ganti tempaltes
+
+[33mcommit c1a1e7b4d4292fc3c0aad9f9914da9da69ab2a8d[m
+Author: Hype <farel>
+Date:   Mon Aug 31 11:23:23 2026 +0700
+
+    ganti jeneng
+
+[33mcommit b34383ef9dc94489f24e06b05340555adb03a12e[m
+Author: Fahri rijalul ihsan <fahririjalulisan28@gmail.com>
+Date:   Mon Aug 31 11:20:59 2026 +0700
+
+    ganti tempaltes
+
+[33mcommit 91f393380fd88d84356693f85562dcc985f1d679[m
+Author: adammaulanaa445 <adammaulanaaa02@gmail.com>
+Date:   Mon Aug 31 11:15:10 2026 +0700
+
+    ganti background depan

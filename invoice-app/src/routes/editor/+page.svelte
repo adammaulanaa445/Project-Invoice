@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import AppSidebar from "$lib/components/AppSidebar.svelte";
 
   import Invoice01Neat from "$lib/components/invoices/Invoice01Neat.svelte";
@@ -54,6 +54,14 @@
   import { clientStore } from "$lib/clientStore.svelte.js";
   import { productStore } from "$lib/productStore.svelte.js";
   import { scheduledEmailStore } from "$lib/scheduledEmailStore.svelte.js";
+  import { sidebar } from "$lib/sidebarStore.svelte.js";
+
+  const actionIcons = {
+    save: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`,
+    download: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>`,
+    mail: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>`,
+    close: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>`,
+  };
 
   // =====================================================
   // API
@@ -112,6 +120,50 @@
   ];
 
   let selected = $state(Number(page.url.searchParams.get("template")) || 0);
+
+  // =====================================================
+  // STEP (BARU) -- 1: info dasar, 2: klien + produk + preview
+  // =====================================================
+
+  let step = $state(1);
+  let stepError = $state("");
+
+  // Section mana saja yang ada di step 1 (sisanya otomatis step 2)
+  const STEP1_SECTIONS = ["company", "invoice"];
+
+  function sectionToStep(section) {
+    return STEP1_SECTIONS.includes(section) ? 1 : 2;
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function goNext() {
+    stepError = "";
+
+    // Validasi ringan sebelum lanjut ke step 2
+    if (!invoice.from.name.trim()) {
+      stepError = "❌ Nama perusahaan wajib diisi dulu.";
+      return;
+    }
+
+    if (!invoice.invoiceNumber.trim()) {
+      stepError = "❌ Nomor invoice wajib diisi dulu.";
+      return;
+    }
+
+    step = 2;
+    await tick();
+    scrollToTop();
+  }
+
+  async function goBack() {
+    stepError = "";
+    step = 1;
+    await tick();
+    scrollToTop();
+  }
 
   // =====================================================
   // CAROUSEL
@@ -288,7 +340,7 @@
 
   let savedInvoiceId = $state(null);
 
-  let sidebarOpen = $state(false);
+  let sidebarOpen = $derived(sidebar.open);
 
   let activeSection = $state("");
 
@@ -304,12 +356,26 @@
 
   // =====================================================
   // EVENT SECTION
+  // (sekarang otomatis pindah step sesuai section yang dituju)
   // =====================================================
 
-  function handleInvoiceSection(event) {
-    const section = event.detail;
-
+  async function focusSection(section) {
     if (!section) return;
+
+    // Pindah ke step yang memuat section tersebut
+    step = sectionToStep(section);
+
+    // Tunggu DOM selesai render step baru
+    await tick();
+
+    const element = document.getElementById(section);
+
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
 
     activeSection = section;
 
@@ -318,6 +384,10 @@
     highlightTimer = setTimeout(() => {
       activeSection = "";
     }, 1500);
+  }
+
+  function handleInvoiceSection(event) {
+    focusSection(event.detail);
   }
 
   function scrollToHash() {
@@ -327,26 +397,11 @@
 
     const section = decodeURIComponent(hash.replace("#", ""));
 
-    const element = document.getElementById(section);
-
-    if (!element) return;
-
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
-    activeSection = section;
-
-    clearTimeout(highlightTimer);
-
-    highlightTimer = setTimeout(() => {
-      activeSection = "";
-    }, 1500);
+    focusSection(section);
   }
 
   function closeSidebar() {
-    sidebarOpen = false;
+    sidebar.close();
   }
 
   // =====================================================
@@ -504,12 +559,19 @@
 
     const { jsPDF } = await import("jspdf");
 
-    const canvas = await html2canvas(previewEl, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: "#ffffff",
-    });
+    // PDF must always be light regardless of app dark mode
+    previewEl.classList.add("pdf-export");
+    let canvas;
+    try {
+      canvas = await html2canvas(previewEl, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+      });
+    } finally {
+      previewEl.classList.remove("pdf-export");
+    }
 
     const imgData = canvas.toDataURL("image/jpeg", 0.98);
 
@@ -667,12 +729,7 @@
         throw new Error("Kamu harus login terlebih dahulu.");
       }
 
-      // =================================================
       // SIMPAN INVOICE JIKA BELUM ADA ID
-      // (wajib ada ID invoice dulu, baik buat kirim langsung
-      // maupun buat jadwal otomatis)
-      // =================================================
-
       if (!savedInvoiceId) {
         const record = await invoiceStore.save(selected + 1, calculatedInvoice);
 
@@ -683,10 +740,7 @@
         }
       }
 
-      // =================================================
       // KIRIM OTOMATIS BERULANG (diproses server, bukan browser)
-      // =================================================
-
       if (autoSendEmail) {
         await scheduledEmailStore.create({
           invoice_id: savedInvoiceId,
@@ -707,10 +761,7 @@
         return;
       }
 
-      // =================================================
       // KIRIM LANGSUNG SEKARANG (PDF dibuat di browser)
-      // =================================================
-
       const pdf = await generatePDF();
 
       const pdfBlob = pdf.output("blob");
@@ -780,7 +831,7 @@
       <div class="flex items-center gap-3">
         <button
           type="button"
-          onclick={() => (sidebarOpen = !sidebarOpen)}
+          onclick={() => sidebar.toggle()}
           aria-label="Toggle sidebar"
           class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
         >
@@ -850,68 +901,64 @@
         {lang.t("et_title")}
       </h1>
 
-      <!-- TEMPLATE SELECTOR -->
+      <!-- ================================================= -->
+      <!-- STEPPER (indikator langkah) -->
+      <!-- ================================================= -->
 
-      <div class="relative max-w-6xl mx-auto mb-8">
+      <div class="max-w-md mx-auto mb-8 flex items-center gap-3">
         <button
           type="button"
-          onclick={() => scrollCarousel(-1)}
-          aria-label="Sebelumnya"
-          class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
+          onclick={goBack}
+          class="flex items-center gap-2 text-sm font-semibold {step === 1
+            ? ''
+            : 'opacity-60 hover:opacity-100'}"
         >
-          ‹
+          <span
+            class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold {step ===
+            1
+              ? 'text-black'
+              : 'border border-slate-300 dark:border-white/20'}"
+            style={step === 1 ? "background:#8CFF3D;" : ""}
+          >
+            1
+          </span>
+          Info Dasar
         </button>
 
         <div
-          bind:this={carouselEl}
-          class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-2 py-2 no-scrollbar"
+          class="flex-1 h-0.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden"
         >
-          {#each templates as t, i}
-            <button
-              type="button"
-              onclick={() => (selected = i)}
-              class="snap-start shrink-0 w-40 rounded-xl border-2 overflow-hidden transition text-left {selected ===
-              i
-                ? ''
-                : 'border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'}"
-              style={selected === i ? "border-color:#8CFF3D;" : ""}
-            >
-              <div class="relative w-40 h-52 bg-white overflow-hidden">
-                <div
-                  class="absolute top-0 left-0 origin-top-left pointer-events-none"
-                  style="width:800px; transform: scale(0.2);"
-                >
-                  <svelte:component this={t.component} invoice={calculatedInvoice} />
-                </div>
-              </div>
-
-              <div
-                class="text-[11px] font-medium text-center py-1.5 border-t border-slate-200 dark:border-white/10 truncate px-1"
-                style={selected === i ? "background:#8CFF3D; color:#000;" : ""}
-              >
-                {t.name()}
-              </div>
-            </button>
-          {/each}
+          <div
+            class="h-full transition-all duration-300"
+            style="background:#8CFF3D; width:{step === 2 ? '100%' : '0%'};"
+          ></div>
         </div>
 
-        <button
-          type="button"
-          onclick={() => scrollCarousel(1)}
-          aria-label="Selanjutnya"
-          class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
+        <div
+          class="flex items-center gap-2 text-sm font-semibold {step === 2
+            ? ''
+            : 'opacity-40'}"
         >
-          ›
-        </button>
+          <span
+            class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold {step ===
+            2
+              ? 'text-black'
+              : 'border border-slate-300 dark:border-white/20'}"
+            style={step === 2 ? "background:#8CFF3D;" : ""}
+          >
+            2
+          </span>
+          Klien, Produk &amp; Preview
+        </div>
       </div>
 
-      <!-- MAIN GRID -->
-
-      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- FORM -->
+      {#if step === 1}
+        <!-- ================================================= -->
+        <!-- STEP 1: INFO DASAR (logo, perusahaan, info invoice) -->
+        <!-- ================================================= -->
 
         <div
-          class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
+          class="max-w-2xl mx-auto bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-6"
         >
           <!-- COMPANY + LOGO -->
 
@@ -1065,249 +1112,353 @@
             </div>
           </div>
 
-          <!-- CUSTOMER -->
+          {#if stepError}
+            <p class="text-sm text-red-500 text-center">{stepError}</p>
+          {/if}
+
+          <button
+            type="button"
+            onclick={goNext}
+            class="w-full px-4 py-2.5 rounded-full font-semibold text-black"
+            style="background:#8CFF3D"
+          >
+            Lanjut ke Preview &amp; Produk →
+          </button>
+        </div>
+      {:else}
+        <!-- ================================================= -->
+        <!-- STEP 2: KLIEN + PRODUK + PREVIEW -->
+        <!-- ================================================= -->
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- FORM STEP 2 -->
 
           <div
-            id="customer"
-            class:section-highlight={activeSection === "customer"}
-            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+            class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
           >
-            <h2 class="font-semibold mb-3">
-              {lang.t("et_to")}
-            </h2>
+            <button
+              type="button"
+              onclick={goBack}
+              class="text-sm opacity-70 hover:opacity-100 transition"
+            >
+              ← Kembali ke Info Dasar
+            </button>
 
-            {#if clients.length > 0}
-              <div class="mb-2">
-                <label class="text-xs opacity-60">
-                  Pilih dari daftar klien (opsional)
-                </label>
+            <!-- CUSTOMER -->
 
-                <select
-                  value={selectedClientId}
-                  onchange={(e) => handleSelectClient(e.target.value)}
-                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-                >
-                  <option value="">-- Isi manual --</option>
+            <div
+              id="customer"
+              class:section-highlight={activeSection === "customer"}
+              class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+            >
+              <h2 class="font-semibold mb-3">
+                {lang.t("et_to")}
+              </h2>
 
-                  {#each clients as c}
-                    <option value={c.id}>{c.name}</option>
-                  {/each}
-                </select>
+              {#if clients.length > 0}
+                <div class="mb-2">
+                  <label class="text-xs opacity-60">
+                    Pilih dari daftar klien (opsional)
+                  </label>
+
+                  <select
+                    value={selectedClientId}
+                    onchange={(e) => handleSelectClient(e.target.value)}
+                    class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                  >
+                    <option value="">-- Isi manual --</option>
+
+                    {#each clients as c}
+                      <option value={c.id}>{c.name}</option>
+                    {/each}
+                  </select>
+                </div>
+              {:else}
+                <p class="text-xs opacity-50 mb-2">
+                  Belum ada klien tersimpan.
+                  <a href="/clients" class="underline" style="color:#8CFF3D">
+                    Tambah klien
+                  </a>
+                  supaya bisa dipilih langsung di sini.
+                </p>
+              {/if}
+
+              <div class="space-y-2">
+                <input
+                  placeholder={lang.t("et_client_name")}
+                  bind:value={invoice.to.name}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                />
+
+                <input
+                  placeholder={lang.t("et_address")}
+                  bind:value={invoice.to.address}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                />
+
+                <input
+                  type="email"
+                  placeholder={lang.t("et_email")}
+                  bind:value={invoice.to.email}
+                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                />
               </div>
-            {:else}
-              <p class="text-xs opacity-50 mb-2">
-                Belum ada klien tersimpan.
-                <a href="/clients" class="underline" style="color:#8CFF3D">
-                  Tambah klien
-                </a>
-                supaya bisa dipilih langsung di sini.
-              </p>
-            {/if}
+            </div>
 
-            <div class="space-y-2">
-              <input
-                placeholder={lang.t("et_client_name")}
-                bind:value={invoice.to.name}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-              />
+            <!-- ITEMS -->
+
+            <div
+              id="items"
+              class:section-highlight={activeSection === "items"}
+              class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+            >
+              <div class="flex justify-between items-center mb-3">
+                <h2 class="font-semibold">
+                  {lang.t("et_items")}
+                </h2>
+
+                <button
+                  onclick={addItem}
+                  class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+                  style="background:#8CFF3D"
+                >
+                  {lang.t("et_add_item")}
+                </button>
+              </div>
+
+              {#if products.length > 0}
+                <div class="flex gap-2 mb-3">
+                  <select
+                    bind:value={selectedProductId}
+                    class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                  >
+                    <option value="">Pilih produk...</option>
+
+                    {#each products as p}
+                      <option value={p.id}>
+                        {p.name} — Rp{Number(p.price).toLocaleString("id-ID")}
+                      </option>
+                    {/each}
+                  </select>
+
+                  <button
+                    onclick={addProductItem}
+                    disabled={!selectedProductId}
+                    class="text-xs px-3 py-1.5 font-semibold rounded-full border-2 disabled:opacity-40"
+                    style="border-color:#8CFF3D; color:#8CFF3D;"
+                  >
+                    Tambah dari Produk
+                  </button>
+                </div>
+              {:else}
+                <p class="text-xs opacity-50 mb-3">
+                  Belum ada produk tersimpan.
+                  <a href="/products" class="underline" style="color:#8CFF3D">
+                    Tambah produk
+                  </a>
+                  supaya bisa dipilih langsung di sini.
+                </p>
+              {/if}
+
+              <div class="space-y-2">
+                {#each invoice.items as item, i}
+                  <div class="flex gap-2 items-center">
+                    <input
+                      placeholder={lang.t("et_description")}
+                      bind:value={item.description}
+                      class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                    />
+
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder={lang.t("et_qty")}
+                      bind:value={item.qty}
+                      class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
+                    />
+
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder={lang.t("et_price")}
+                      bind:value={item.price}
+                      class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
+                    />
+
+                    <button
+                      onclick={() => removeItem(i)}
+                      aria-label="Hapus item invoice"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-red-500 hover:bg-red-500/10"
+                    >
+                      {@html actionIcons.close}
+                    </button>
+                  </div>
+                {/each}
+              </div>
+            </div>
+
+            <!-- TAX -->
+
+            <div
+              id="tax"
+              class:section-highlight={activeSection === "tax"}
+              class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+            >
+              <label class="text-xs opacity-60">
+                {lang.t("et_tax")}
+              </label>
 
               <input
-                placeholder={lang.t("et_address")}
-                bind:value={invoice.to.address}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
+                type="number"
+                min="0"
+                max="100"
+                bind:value={invoice.taxPercent}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
               />
+            </div>
 
-              <input
-                type="email"
-                placeholder={lang.t("et_email")}
-                bind:value={invoice.to.email}
-                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-              />
+            <!-- NOTES -->
+
+            <div
+              id="notes"
+              class:section-highlight={activeSection === "notes"}
+              class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
+            >
+              <label class="text-xs opacity-60">
+                {lang.t("et_notes")}
+              </label>
+
+              <textarea
+                bind:value={invoice.notes}
+                class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                rows="2"
+              ></textarea>
             </div>
           </div>
 
-          <!-- ITEMS -->
+          <!-- PREVIEW -->
 
-          <div
-            id="items"
-            class:section-highlight={activeSection === "items"}
-            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
-          >
-            <div class="flex justify-between items-center mb-3">
-              <h2 class="font-semibold">
-                {lang.t("et_items")}
-              </h2>
-
+          <div class="lg:sticky lg:top-6 h-fit">
+            <div class="flex gap-2 mb-3">
               <button
-                onclick={addItem}
-                class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+                onclick={saveInvoice}
+                disabled={saving || sendingEmail}
+                class="flex-1 inline-flex items-center justify-center gap-2 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
                 style="background:#8CFF3D"
               >
-                {lang.t("et_add_item")}
+                <span class="shrink-0">{@html actionIcons.save}</span>
+                <span>{saving ? lang.t("saving_invoice") : lang.t("save_invoice")}</span>
+              </button>
+
+              <button
+                onclick={downloadPDF}
+                disabled={downloading || sendingEmail}
+                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
+                style="border-color:#8CFF3D; color:#8CFF3D;"
+              >
+                <span class="shrink-0">{@html actionIcons.download}</span>
+                <span>{downloading ? lang.t("generating_pdf") : lang.t("download_pdf")}</span>
               </button>
             </div>
 
-            {#if products.length > 0}
-              <div class="flex gap-2 mb-3">
-                <select
-                  bind:value={selectedProductId}
-                  class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-                >
-                  <option value="">Pilih produk...</option>
+            <div class="mb-3">
+              <button
+                onclick={openEmailModal}
+                disabled={saving || downloading || sendingEmail}
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
+                style="border-color:#8CFF3D; color:#8CFF3D;"
+              >
+                <span class="shrink-0">{@html actionIcons.mail}</span>
+                <span>Kirim Email</span>
+              </button>
+            </div>
 
-                  {#each products as p}
-                    <option value={p.id}>
-                      {p.name} — Rp{Number(p.price).toLocaleString("id-ID")}
-                    </option>
-                  {/each}
-                </select>
-
-                <button
-                  onclick={addProductItem}
-                  disabled={!selectedProductId}
-                  class="text-xs px-3 py-1.5 font-semibold rounded-full border-2 disabled:opacity-40"
-                  style="border-color:#8CFF3D; color:#8CFF3D;"
-                >
-                  Tambah dari Produk
-                </button>
-              </div>
-            {:else}
-              <p class="text-xs opacity-50 mb-3">
-                Belum ada produk tersimpan.
-                <a href="/products" class="underline" style="color:#8CFF3D">
-                  Tambah produk
-                </a>
-                supaya bisa dipilih langsung di sini.
+            {#if saveMessage}
+              <p
+                class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
+                  ? 'text-emerald-500'
+                  : 'text-red-500'}"
+              >
+                {saveMessage}
               </p>
             {/if}
 
-            <div class="space-y-2">
-              {#each invoice.items as item, i}
-                <div class="flex gap-2 items-center">
-                  <input
-                    placeholder={lang.t("et_description")}
-                    bind:value={item.description}
-                    class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-                  />
-
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder={lang.t("et_qty")}
-                    bind:value={item.qty}
-                    class="w-16 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
-                  />
-
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder={lang.t("et_price")}
-                    bind:value={item.price}
-                    class="w-28 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-2 py-1.5 text-sm"
-                  />
-
-                  <button
-                    onclick={() => removeItem(i)}
-                    class="text-red-500 text-sm px-2"
-                  >
-                    ✕
-                  </button>
-                </div>
-              {/each}
+            <div bind:this={previewEl} class="rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-transparent dark:border-white/10">
+              <svelte:component
+                this={templates[selected].component}
+                invoice={calculatedInvoice}
+              />
             </div>
           </div>
-
-          <!-- TAX -->
-
-          <div
-            id="tax"
-            class:section-highlight={activeSection === "tax"}
-            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
-          >
-            <label class="text-xs opacity-60">
-              {lang.t("et_tax")}
-            </label>
-
-            <input
-              type="number"
-              min="0"
-              max="100"
-              bind:value={invoice.taxPercent}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-            />
-          </div>
-
-          <!-- NOTES -->
-
-          <div
-            id="notes"
-            class:section-highlight={activeSection === "notes"}
-            class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
-          >
-            <label class="text-xs opacity-60">
-              {lang.t("et_notes")}
-            </label>
-
-            <textarea
-              bind:value={invoice.notes}
-              class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-              rows="2"
-            ></textarea>
-          </div>
         </div>
 
-        <!-- PREVIEW -->
+        <!-- ================================================= -->
+        <!-- PILIH TEMPLATE (dipindah ke bawah editor) -->
+        <!-- ================================================= -->
 
-        <div class="lg:sticky lg:top-6 h-fit">
-          <div class="flex gap-2 mb-3">
+        <div class="max-w-6xl mx-auto mt-12">
+          <h2 class="text-lg font-semibold text-center mb-1">
+            Ganti Template Invoice
+          </h2>
+
+          <p class="text-xs opacity-60 text-center mb-4">
+            Geser untuk melihat template lain, klik untuk menerapkan ke preview.
+          </p>
+
+          <div class="relative">
             <button
-              onclick={saveInvoice}
-              disabled={saving || sendingEmail}
-              class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
-              style="background:#8CFF3D"
+              type="button"
+              onclick={() => scrollCarousel(-1)}
+              aria-label="Sebelumnya"
+              class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
             >
-              {saving ? lang.t("saving_invoice") : lang.t("save_invoice")}
+              ‹
             </button>
 
+            <div
+              bind:this={carouselEl}
+              class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-2 py-2 no-scrollbar"
+            >
+              {#each templates as t, i}
+                <button
+                  type="button"
+                  onclick={() => (selected = i)}
+                  class="snap-start shrink-0 w-40 rounded-xl border-2 overflow-hidden transition text-left {selected ===
+                  i
+                    ? ''
+                    : 'border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'}"
+                  style={selected === i ? "border-color:#8CFF3D;" : ""}
+                >
+                  <div class="relative w-40 h-52 bg-white dark:bg-slate-900 overflow-hidden">
+                    <div
+                      class="absolute top-0 left-0 origin-top-left pointer-events-none"
+                      style="width:800px; transform: scale(0.2);"
+                    >
+                      <svelte:component this={t.component} invoice={calculatedInvoice} />
+                    </div>
+                  </div>
+
+                  <div
+                    class="text-[11px] font-medium text-center py-1.5 border-t border-slate-200 dark:border-white/10 truncate px-1"
+                    style={selected === i ? "background:#8CFF3D; color:#000;" : ""}
+                  >
+                    {t.name()}
+                  </div>
+                </button>
+              {/each}
+            </div>
+
             <button
-              onclick={downloadPDF}
-              disabled={downloading || sendingEmail}
-              class="flex-1 px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50"
-              style="border-color:#8CFF3D; color:#8CFF3D;"
+              type="button"
+              onclick={() => scrollCarousel(1)}
+              aria-label="Selanjutnya"
+              class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 shadow-md hover:scale-105 transition"
             >
-              {downloading ? lang.t("generating_pdf") : lang.t("download_pdf")}
+              ›
             </button>
-          </div>
-
-          <div class="mb-3">
-            <button
-              onclick={openEmailModal}
-              disabled={saving || downloading || sendingEmail}
-              class="w-full px-4 py-2 rounded-full font-semibold border-2 disabled:opacity-50 transition"
-              style="border-color:#8CFF3D; color:#8CFF3D;"
-            >
-              📧 Kirim Email
-            </button>
-          </div>
-
-          {#if saveMessage}
-            <p
-              class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
-                ? 'text-emerald-500'
-                : 'text-red-500'}"
-            >
-              {saveMessage}
-            </p>
-          {/if}
-
-          <div bind:this={previewEl} class="rounded-2xl overflow-hidden bg-white">
-            <svelte:component
-              this={templates[selected].component}
-              invoice={calculatedInvoice}
-            />
           </div>
         </div>
-      </div>
+      {/if}
     </div>
 
     <!-- ================================================= -->
@@ -1327,14 +1478,18 @@
           class="w-full max-w-md bg-white dark:bg-[#111] text-slate-900 dark:text-white rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-white/10 max-h-[90vh] overflow-y-auto"
         >
           <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold">📧 Kirim Invoice</h2>
+            <h2 class="flex items-center gap-2 text-xl font-bold">
+              <span class="shrink-0">{@html actionIcons.mail}</span>
+              <span>Kirim Invoice</span>
+            </h2>
 
             <button
               onclick={closeEmailModal}
               disabled={sendingEmail}
-              class="text-xl opacity-60 hover:opacity-100 disabled:opacity-30"
+              aria-label="Tutup dialog kirim invoice"
+              class="flex h-8 w-8 items-center justify-center rounded-lg opacity-60 hover:bg-slate-100 hover:opacity-100 dark:hover:bg-white/10 disabled:opacity-30"
             >
-              ✕
+              {@html actionIcons.close}
             </button>
           </div>
 
@@ -1355,9 +1510,7 @@
             disabled={sendingEmail}
           />
 
-          <!-- ================================================= -->
           <!-- KIRIM OTOMATIS BERULANG -->
-          <!-- ================================================= -->
 
           <div
             class="mt-5 p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#161616]"
@@ -1433,8 +1586,9 @@
               </div>
             {:else}
               <div class="mt-3 pt-3 border-t border-slate-200 dark:border-white/10">
-                <p class="text-xs opacity-60 leading-relaxed">
-                  📩 Invoice akan langsung dikirim sekarang ke:
+                <p class="flex items-center gap-2 text-xs opacity-60 leading-relaxed">
+                  <span class="shrink-0">{@html actionIcons.mail}</span>
+                  <span>Invoice akan langsung dikirim sekarang ke:</span>
                 </p>
 
                 <p class="text-xs font-semibold mt-1">

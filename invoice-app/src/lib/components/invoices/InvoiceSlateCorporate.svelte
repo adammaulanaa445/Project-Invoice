@@ -21,7 +21,7 @@
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
 
-<div class="max-w-[820px] mx-auto bg-[#F8FAFC] px-10 md:px-14 py-10 text-[#1E293B] border border-[#E2E8F0]">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#F8FAFC] px-10 md:px-14 py-10 text-[#1E293B] border border-[#E2E8F0]">
   <div class="flex items-start justify-between border-b-2 border-[#1E293B] pb-6">
     <div>
       {#if invoice.logoUrl}<img src={invoice.logoUrl} alt="logo" class="h-9 mb-2" />{/if}

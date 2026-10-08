@@ -3,6 +3,7 @@
   import { theme } from "$lib/theme.svelte.js";
   import { lang } from "$lib/lang.svelte.js";
   import { onMount } from "svelte";
+  import { sidebar } from "$lib/sidebarStore.svelte.js";
 
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import TemplatePreview from "$lib/components/TemplatePreview.svelte";
@@ -353,7 +354,7 @@
   // SIDEBAR
   // =========================
 
-  let sidebarOpen = $state(true);
+  let sidebarOpen = $derived(sidebar.open);
 
   // =========================
   // TEMPLATE FAVORIT
@@ -449,7 +450,7 @@
     menuItems={dashboardMenuItems}
     menuLabel="Menu"
     {sidebarOpen}
-    onClose={() => (sidebarOpen = false)}
+    onClose={() => sidebar.close()}
   />
 
   <div class={sidebarOpen ? "lg:pl-64" : ""}>
@@ -462,7 +463,7 @@
           {#if !sidebarOpen}
             <button
               type="button"
-              onclick={() => (sidebarOpen = true)}
+              onclick={() => sidebar.open = true}
               aria-label="Buka sidebar"
               class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition text-lg shrink-0"
             >

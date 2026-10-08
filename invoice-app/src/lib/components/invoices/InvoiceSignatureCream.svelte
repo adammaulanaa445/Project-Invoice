@@ -23,7 +23,7 @@
   const initials = invoice.from.name.split(' ').map(w => w[0]).join('').slice(0, 2);
 </script>
 
-<div class="max-w-[820px] mx-auto bg-[#F1EAE2] px-10 md:px-14 py-12 text-[#26221d]">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#F1EAE2] px-10 md:px-14 py-12 text-[#26221d]">
   <div class="flex items-start justify-between">
     <div class="flex items-center gap-2">
       {#if invoice.logoUrl}

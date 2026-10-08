@@ -59,7 +59,7 @@
     }).format(Number(n) || 0);
 </script>
 
-<div class="max-w-[820px] mx-auto bg-[#FAF7F2] text-[#1E3A5F] font-serif shadow-sm">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#FAF7F2] text-[#1E3A5F] font-serif shadow-sm">
 
   <div class="bg-[#1E3A5F] text-[#FAF7F2] px-10 md:px-14 py-8 flex justify-between items-center">
     <div>

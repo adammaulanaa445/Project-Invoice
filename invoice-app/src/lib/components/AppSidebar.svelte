@@ -11,6 +11,8 @@
   // =====================================================
 
   const icons = {
+    home: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+
     invoice: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`,
 
     template: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>`,
@@ -34,6 +36,8 @@
     note: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
 
     logout: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+
+    close: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>`,
   };
 
   // =====================================================
@@ -43,26 +47,12 @@
   // =====================================================
 
   const globalMenuItems = [
-    { label: 'Buat Invoice', icon: 'invoice', href: '/editor' },
+    { label: 'Beranda', icon: 'home', href: '/' },
     { label: 'Template', icon: 'template', href: '/templates' },
     { label: 'Klien', icon: 'clients', href: '/clients' },
     { label: 'Produk', icon: 'products', href: '/products' },
     { label: 'Jadwal Kirim', icon: 'schedule', href: '/schedules' },
     { label: 'Profile', icon: 'settings', href: '/profile' },
-  ];
-
-  // =====================================================
-  // MENU BAGIAN INVOICE - HANYA muncul kalau sedang di /editor,
-  // scroll ke section di halaman yang sama (perilaku lama).
-  // =====================================================
-
-  const editorSectionItems = [
-    { label: 'Informasi Invoice', icon: 'invoice', section: 'invoice' },
-    { label: 'Perusahaan', icon: 'building', section: 'company' },
-    { label: 'Pelanggan', icon: 'user', section: 'customer' },
-    { label: 'Item Invoice', icon: 'list', section: 'items' },
-    { label: 'Pajak & Diskon', icon: 'percent', section: 'tax' },
-    { label: 'Catatan', icon: 'note', section: 'notes' },
   ];
 
   // props: hanya buka/tutup sidebar. Menu TIDAK lagi dioper dari
@@ -72,8 +62,6 @@
   $effect(() => {
     currentUser = authStore.getCurrentUser();
   });
-
-  let isEditorPage = $derived($page.url.pathname.startsWith('/editor'));
 
   function isActive(item) {
     if (item.href) {
@@ -86,29 +74,6 @@
     if (item.href) {
       goto(item.href);
       return;
-    }
-    if (item.section) {
-      goToSection(item.section);
-    }
-  }
-
-  // perilaku scroll-to-section, TIDAK diubah dari versi asli
-  function goToSection(section) {
-    const element = document.getElementById(section);
-
-    if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-
-      window.history.replaceState(null, '', `/editor#${section}`);
-
-      window.dispatchEvent(
-        new CustomEvent('invoice-section', { detail: section })
-      );
-    } else {
-      goto(`/editor#${section}`);
     }
   }
 
@@ -168,12 +133,12 @@
       aria-label="Tutup sidebar"
       class="w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition"
     >
-      ✕
+      {@html icons.close}
     </button>
   </div>
 
   <!-- MENU (scrollable kalau konten panjang) -->
-  <nav class="flex-1 px-3 overflow-y-auto">
+  <nav class="sidebar-menu flex-1 min-h-0 px-3 overflow-x-hidden overflow-y-auto">
     <!-- MENU GLOBAL -->
     <p class="px-3 mb-3 text-[10px] uppercase tracking-wider text-white/40">
       Menu
@@ -201,30 +166,6 @@
       {/each}
     </div>
 
-    <!-- MENU BAGIAN INVOICE (hanya di /editor) -->
-    {#if isEditorPage}
-      <p class="px-3 mb-3 text-[10px] uppercase tracking-wider text-white/40">
-        Bagian Invoice
-      </p>
-
-      <div class="space-y-1">
-        {#each editorSectionItems as item}
-          <button
-            type="button"
-            onclick={() => handleItemClick(item)}
-            class="
-              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-              transition text-left text-white/70 hover:text-white hover:bg-white/5
-            "
-          >
-            <span class="shrink-0 text-white/60">
-              {@html icons[item.icon]}
-            </span>
-            <span>{item.label}</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
   </nav>
 
   <!-- BOTTOM -->
@@ -281,3 +222,28 @@
     {/if}
   </div>
 </aside>
+
+<style>
+  /* Scroll tetap tersedia, tetapi tampil tipis dan selaras dengan sidebar gelap. */
+  .sidebar-menu {
+    scrollbar-color: rgb(255 255 255 / 0.24) transparent;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgb(255 255 255 / 0.2);
+    border-radius: 999px;
+  }
+
+  .sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: rgb(255 255 255 / 0.38);
+  }
+</style>

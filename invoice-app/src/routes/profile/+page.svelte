@@ -5,6 +5,7 @@
   import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import { sidebar } from '$lib/sidebarStore.svelte.js';
 
 
   const API_BASE = 'http://localhost:8000/api';
@@ -22,7 +23,7 @@
     { label: 'Profile', icon: '⚙', href: '/profile' }
   ];
 
-  let sidebarOpen = $state(false);
+  let sidebarOpen = $derived(sidebar.open);
 
   let currentUser = $state(null);
 
@@ -216,7 +217,7 @@
 >
   <AppSidebar
     {sidebarOpen}
-    onClose={() => (sidebarOpen = false)}
+    onClose={() => sidebar.close()}
     {menuItems}
     menuLabel="Menu"
   />
@@ -234,7 +235,7 @@
       <div class="flex items-center gap-3">
         <button
           type="button"
-          onclick={() => (sidebarOpen = !sidebarOpen)}
+          onclick={() => sidebar.toggle()}
           aria-label="Toggle sidebar"
           class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
         >

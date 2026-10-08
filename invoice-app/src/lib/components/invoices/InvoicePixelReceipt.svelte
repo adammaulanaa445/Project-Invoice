@@ -24,7 +24,7 @@
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
 
-<div class="max-w-[420px] mx-auto bg-[#0A0A0A] dark:bg-black p-8 rounded-xl">
+<div class="invoice-dark-native max-w-[420px] mx-auto bg-[#0A0A0A] dark:bg-black p-8 rounded-xl">
   <!-- gerigi atas -->
   <div class="h-4 bg-white" style="mask-image: linear-gradient(135deg, transparent 8px, black 0), linear-gradient(-135deg, transparent 8px, black 0); mask-size: 16px 100%; mask-repeat: repeat-x; mask-position: bottom;"></div>
 

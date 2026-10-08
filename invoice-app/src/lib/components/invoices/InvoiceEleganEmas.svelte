@@ -24,7 +24,7 @@
   Opsional: font serif elegan seperti "Cormorant Garamond" atau "Playfair Display" akan makin memperkuat kesan mewah.
   Import via Google Fonts di layout utama project.
 -->
-<div class="max-w-[820px] mx-auto bg-[#0F0F0F] p-12 md:p-16 text-[#EDE4D3]" style="font-family: 'Cormorant Garamond', Georgia, serif;">
+<div class="invoice-dark-native max-w-[820px] mx-auto bg-[#0F0F0F] p-12 md:p-16 text-[#EDE4D3]" style="font-family: 'Cormorant Garamond', Georgia, serif;">
   <div class="text-center mb-10">
     <p class="text-[10px] tracking-[0.4em] uppercase text-[#C9A24B] mb-2">Invoice</p>
     <h1 class="text-4xl font-semibold text-[#EDE4D3]">{invoice.from.name}</h1>

@@ -21,7 +21,7 @@
 </script>
 
 <!-- Opsional: font mesin tik seperti "Courier Prime" atau "Special Elite" via Google Fonts akan menambah kesan vintage -->
-<div class="max-w-[820px] mx-auto bg-[#E9DFC9] p-10 md:p-14 font-mono text-[#3B3226] border-[6px] border-double border-[#8B7355] relative">
+<div class="invoice-light-theme max-w-[820px] mx-auto bg-[#E9DFC9] p-10 md:p-14 font-mono text-[#3B3226] border-[6px] border-double border-[#8B7355] relative">
   <!-- Stempel PAID/UNPAID -->
   <div class="absolute top-10 right-10 w-24 h-24 border-4 border-[#B91C1C] rounded-full flex items-center justify-center rotate-[-15deg] opacity-70">
     <span class="text-[#B91C1C] text-xs font-bold uppercase text-center leading-tight">{invoice.status}</span>
