@@ -1,5 +1,7 @@
 <script>
   import { onMount, tick } from "svelte";
+  import html2canvas from "html2canvas-pro";
+  import { jsPDF } from "jspdf";
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import Combobox from "$lib/components/Combobox.svelte";
@@ -588,10 +590,6 @@
     if (!previewEl) {
       throw new Error("Preview invoice tidak ditemukan.");
     }
-
-    const { default: html2canvas } = await import("html2canvas-pro");
-
-    const { jsPDF } = await import("jspdf");
 
     // PDF must always be light regardless of app dark mode
     previewEl.classList.add("pdf-export");
