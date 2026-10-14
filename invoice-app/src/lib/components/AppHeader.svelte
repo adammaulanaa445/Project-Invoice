@@ -7,9 +7,9 @@
 </script>
 
 <header
-  class="fixed top-0 left-0 {sidebarOpen
-    ? 'lg:left-64'
-    : 'lg:left-0'} right-0 z-40 border-b border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 backdrop-blur px-4 sm:px-8 py-4 flex justify-between items-center gap-3"
+  class="fixed top-0 {sidebarOpen
+    ? 'left-56 sm:left-64'
+    : 'left-0'} right-0 z-40 border-b border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 backdrop-blur px-4 sm:px-8 py-4 flex justify-between items-center gap-3"
 >
   <div class="flex items-center gap-3 min-w-0">
     <button

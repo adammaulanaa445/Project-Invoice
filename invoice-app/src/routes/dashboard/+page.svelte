@@ -35,7 +35,7 @@
 
 <div class="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white">
   <AppSidebar {sidebarOpen} onClose={() => sidebar.close()} />
-  <main class="min-h-screen transition-all duration-300 {sidebarOpen ? 'lg:ml-64' : ''}">
+  <main class="min-h-screen transition-all duration-300 {sidebarOpen ? 'ml-56 sm:ml-64' : ''}">
     <AppHeader title="Dashboard" />
 
     <div class="max-w-6xl mx-auto px-4 sm:px-8 pt-28 pb-8">

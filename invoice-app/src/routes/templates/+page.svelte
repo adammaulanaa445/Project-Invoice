@@ -454,8 +454,8 @@
     onClose={() => sidebar.close()}
   />
 
-  <div class={sidebarOpen ? "lg:pl-64" : ""}>
-    <div class="px-6 md:px-10 pt-28 pb-10">
+  <div class={sidebarOpen ? "pl-56 sm:pl-64" : ""}>
+    <div class="px-4 sm:px-6 md:px-10 pt-24 sm:pt-28 pb-8 sm:pb-10">
 
       <AppHeader title="Pilih Template Invoice" />
 
@@ -541,7 +541,7 @@
       </div>
 
       <!-- GRID TEMPLATE -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
 
         {#each filteredTemplates as t (t.index)}
 

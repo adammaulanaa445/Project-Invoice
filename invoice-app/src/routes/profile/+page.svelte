@@ -7,8 +7,8 @@
   import { sidebar } from '$lib/sidebarStore.svelte.js';
 
 
-  const API_BASE = 'https://project-invoice-production-df00.up.railway.app/api';
-  const STORAGE_BASE = 'https://project-invoice-production-df00.up.railway.app/storage';
+  const API_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api';
+  const STORAGE_BASE = 'https://project-invoice-production-e8ba.up.railway.app/storage';
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -230,7 +230,7 @@
 
     <!-- CONTENT -->
 
-    <section class="max-w-4xl mx-auto px-6 pt-28 pb-10">
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-8 sm:pb-10">
 
       <div class="mb-8">
 

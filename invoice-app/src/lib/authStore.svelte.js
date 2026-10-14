@@ -6,8 +6,8 @@
 // di sini — jadi tetap arahkan langsung ke domain backend asli.
 // Di development, fallback ke localhost:8000
 
-const API_BASE = 'https://project-invoice-production-df00.up.railway.app/api';
-const API_BASE_DIRECT = 'https://project-invoice-production-df00.up.railway.app/api';
+const API_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api';
+const API_BASE_DIRECT = 'https://project-invoice-production-e8ba.up.railway.app/api';
 
 
 

@@ -68,8 +68,8 @@
   // API
   // =====================================================
 
-  const API_BASE = "https://project-invoice-production-df00.up.railway.app/api";
-  const STORAGE_BASE = "https://project-invoice-production-df00.up.railway.app";
+  const API_BASE = "https://project-invoice-production-e8ba.up.railway.app/api";
+  const STORAGE_BASE = "https://project-invoice-production-e8ba.up.railway.app";
 
   // =====================================================
   // TEMPLATE
@@ -826,14 +826,14 @@
 
   <main
     class="min-h-screen transition-all duration-300 {sidebarOpen
-      ? 'ml-64'
+      ? 'lg:ml-64'
       : 'ml-0'}"
   >
     <AppHeader title={lang.t("et_title")} />
 
     <!-- CONTENT -->
 
-    <div class="pt-28 pb-8 px-4">
+    <div class="pt-24 sm:pt-28 pb-6 sm:pb-8 px-4">
       <h1 class="text-2xl font-bold text-center mb-6">
         {lang.t("et_title")}
       </h1>
@@ -895,7 +895,7 @@
         <!-- ================================================= -->
 
         <div
-          class="max-w-2xl mx-auto bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-6"
+          class="max-w-2xl mx-auto bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-4 sm:p-6 space-y-6"
         >
           <!-- COMPANY + LOGO -->
 
@@ -1067,11 +1067,11 @@
         <!-- STEP 2: KLIEN + PRODUK + PREVIEW -->
         <!-- ================================================= -->
 
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <!-- FORM STEP 2 -->
 
           <div
-            class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-5 h-fit"
+            class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-4 sm:p-6 space-y-5 h-fit"
           >
             <button
               type="button"
@@ -1182,7 +1182,7 @@
 
               <div class="space-y-2">
                 {#each invoice.items as item, i}
-                  <div class="flex gap-2 items-center">
+                  <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
                     <input
                       placeholder={lang.t("et_description")}
                       bind:value={item.description}

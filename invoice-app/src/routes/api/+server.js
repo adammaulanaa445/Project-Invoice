@@ -1,5 +1,5 @@
 
-const BACKEND_URL = 'https://project-invoice-production-df00.up.railway.app';
+const BACKEND_URL = 'https://project-invoice-production-e8ba.up.railway.app';
 
 /**
  * Fungsi umum untuk meneruskan (forward) requst apapun ke backend Laravel.
@@ -9,7 +9,7 @@ async function forwardRequest(event, method) {
 	const { params, request, url } = event;
 
 	// Gabungkan path yang diminta frontend + query string asli
-	// Contoh: /api/proxy/login -> diteruskan ke https://project-invoice-production-df00.up.railway.app/api/login (dev) atau domain production
+	// Contoh: /api/proxy/login -> diteruskan ke https://project-invoice-production-e8ba.up.railway.app/api/login (dev) atau domain production
 	const targetUrl = `${BACKEND_URL}/${params.path}${url.search}`;
 
 	// Ambil body request kalau method-nya bukan GET/HEAD

@@ -129,7 +129,7 @@
 
     <!-- CONTENT -->
 
-    <div class="pt-28 pb-8 px-4 max-w-4xl mx-auto">
+    <div class="pt-24 sm:pt-28 pb-6 sm:pb-8 px-4 max-w-4xl mx-auto">
       <h1 class="text-2xl font-bold text-center mb-2">Jadwal Kirim Otomatis</h1>
 
       <p class="text-center text-sm opacity-60 mb-6">

@@ -1,4 +1,4 @@
-const API_BASE = 'https://project-invoice-production-df00.up.railway.app/api';
+const API_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api';
 
 
 function getToken() {

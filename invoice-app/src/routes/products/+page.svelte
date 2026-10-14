@@ -188,7 +188,7 @@
 
     <!-- CONTENT -->
 
-    <div class="pt-28 pb-8 px-4 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-6 items-start">
+    <div class="pt-24 sm:pt-28 pb-6 sm:pb-8 px-4 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-6 items-start">
       <aside class="hidden lg:block space-y-4 pt-16">
         <div class="rounded-2xl bg-lime-50 dark:bg-lime-400/10 p-4 border border-lime-200 dark:border-lime-400/20"><span class="text-2xl">▱</span><p class="font-semibold mt-2">Produk aktif</p><p class="text-3xl font-bold mt-1">{products.length}</p></div>
         <div class="rounded-2xl bg-slate-100 dark:bg-white/5 p-4 text-sm opacity-70">Kelola jasa dan harga dari satu tempat.</div>
@@ -199,7 +199,7 @@
 
       <!-- FORM -->
 
-      <div class="flex gap-3 mb-4">
+      <div class="flex flex-col sm:flex-row gap-3 mb-4">
         <input bind:value={search} placeholder="Cari produk..." class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full px-4 py-2 text-sm" />
         <button onclick={() => { resetForm(); showFormModal = true; }} class="px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D">+ Tambah Produk</button>
       </div>

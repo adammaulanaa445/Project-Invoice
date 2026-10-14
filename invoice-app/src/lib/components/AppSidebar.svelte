@@ -107,7 +107,7 @@
     top-0
     z-40
     h-screen
-    w-64
+    w-56 sm:w-64
     flex
     flex-col
     bg-[#111111]
