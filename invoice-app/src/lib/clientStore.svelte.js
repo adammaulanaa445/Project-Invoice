@@ -1,6 +1,6 @@
 // Semua request di sini pakai fetch() biasa, mengikuti pola invoiceStore.svelte.js
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'https://project-invoice-production-df00.up.railway.app/api';
 
 function getToken() {
   return localStorage.getItem('auth_token');

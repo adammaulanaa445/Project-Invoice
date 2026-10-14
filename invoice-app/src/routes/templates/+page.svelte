@@ -1,11 +1,12 @@
 <script>
   import { goto } from "$app/navigation";
-  import { theme } from "$lib/theme.svelte.js";
   import { lang } from "$lib/lang.svelte.js";
   import { onMount } from "svelte";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
+  import { Search } from "@lucide/svelte";
 
   import AppSidebar from "$lib/components/AppSidebar.svelte";
+  import AppHeader from "$lib/components/AppHeader.svelte";
   import TemplatePreview from "$lib/components/TemplatePreview.svelte";
 
   import Invoice01Neat from "$lib/components/invoices/Invoice01Neat.svelte";
@@ -454,45 +455,13 @@
   />
 
   <div class={sidebarOpen ? "lg:pl-64" : ""}>
-    <div class="p-6 md:p-10">
+    <div class="px-6 md:px-10 pt-28 pb-10">
 
-      <!-- HEADER -->
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
+      <AppHeader title="Pilih Template Invoice" />
 
-          {#if !sidebarOpen}
-            <button
-              type="button"
-              onclick={() => sidebar.open = true}
-              aria-label="Buka sidebar"
-              class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition text-lg shrink-0"
-            >
-              ☰
-            </button>
-          {/if}
-
-          <div>
-            <h1 class="text-2xl font-bold">
-              Pilih Template Invoice
-            </h1>
-
-            <p class="text-sm opacity-60 mt-1">
-              Temukan desain invoice yang cocok untuk bisnis kamu.
-            </p>
-          </div>
-
-        </div>
-
-        <!-- DARK MODE -->
-        <button
-          type="button"
-          onclick={() => theme.toggle()}
-          class="text-lg"
-          aria-label="Toggle dark mode"
-        >
-          {theme.dark ? "☀️" : "🌙"}
-        </button>
-      </div>
+      <p class="text-sm opacity-60 mb-6">
+        Temukan desain invoice yang cocok untuk bisnis kamu.
+      </p>
 
       <!-- SEARCH + FAVORIT -->
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
@@ -503,7 +472,7 @@
           <span
             class="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-sm"
           >
-            🔍
+            <Search size={16} />
           </span>
 
           <input

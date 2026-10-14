@@ -1,7 +1,7 @@
 <script>
   // === "Pill Rows Indigo" — baris item berbentuk pill/kapsul, header tabel gelap.
   let { invoice = {
-    invoiceNumber: "INV-0001", issueDate: "2026-08-14", dueDate: "2026-08-28",
+    invoiceNumber: "INV-0001", issueDate: new Date().toISOString().slice(0, 10), dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
     currency: "IDR", logoUrl: "",
     from: { name: "PT Contoh Jaya", address: "Jl. Merdeka No.1, Surabaya", email: "hello@contoh.co", phone: "08123456789" },
     to: { name: "Budi Santoso", address: "Jl. Sudirman No.5, Jakarta", email: "budi@klien.com" },
@@ -14,9 +14,9 @@
     status: "unpaid"
   } } = $props();
 
-  let subtotal = invoice.items.reduce((s, i) => s + i.qty * i.price, 0);
-  let discount = subtotal * (invoice.discountPercent / 100);
-  let tax = (subtotal - discount) * (invoice.taxPercent / 100);
+  let subtotal = invoice.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.price) || 0), 0);
+  let discount = subtotal * ((Number(invoice.discountPercent) || 0) / 100);
+  let tax = (subtotal - discount) * ((Number(invoice.taxPercent) || 0) / 100);
   let total = subtotal - discount + tax;
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>
@@ -64,7 +64,7 @@
     <div class="grid grid-cols-2 items-center rounded-full bg-white px-4 py-2 text-xs shadow-sm">
       <span class="opacity-60">Subtotal</span><span class="text-right">{fmt(subtotal, invoice.currency)}</span>
     </div>
-    {#if invoice.discountPercent > 0}
+    {#if (Number(invoice.discountPercent) || 0) > 0}
       <div class="grid grid-cols-2 items-center rounded-full bg-white px-4 py-2 text-xs shadow-sm">
         <span class="opacity-60">Discount</span><span class="text-right">-{fmt(discount, invoice.currency)}</span>
       </div>

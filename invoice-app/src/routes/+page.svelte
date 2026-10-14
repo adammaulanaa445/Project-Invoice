@@ -1,8 +1,8 @@
 <script>
   import { goto } from '$app/navigation';
   import { sidebar } from '$lib/sidebarStore.svelte.js';
-  import { theme } from '$lib/theme.svelte.js';
   import { lang } from '$lib/lang.svelte.js';
+  import AppHeader from '$lib/components/AppHeader.svelte';
   import { authStore } from '$lib/authStore.svelte.js';
   import TemplatePreview from '$lib/components/TemplatePreview.svelte';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
@@ -62,63 +62,10 @@
 
   <main class={sidebarOpen ? 'lg:pl-64' : ''}>
 
-    <!-- TOP UTILITY BAR: toggle sidebar + bahasa + dark mode -->
-    <div class="flex justify-between items-center gap-2 px-4 sm:px-6 pt-4">
-
-      <!-- TOMBOL BUKA SIDEBAR (cuma tampil kalau sidebar sedang tertutup) -->
-      {#if !sidebarOpen}
-        <button
-          type="button"
-          onclick={() => sidebar.open = true}
-          aria-label="Buka sidebar"
-          class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition text-lg"
-        >
-          ☰
-        </button>
-      {:else}
-        <span></span>
-      {/if}
-
-      <div class="flex items-center gap-2">
-
-        <div class="relative">
-          <select
-            value={lang.current}
-            onchange={(e) => lang.set(e.target.value)}
-            aria-label="Select language"
-            class="appearance-none bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs sm:text-sm outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-white/10 transition"
-          >
-            {#each Object.entries(lang.options) as [code, label]}
-              <option value={code} class="bg-white text-slate-900">
-                {label}
-              </option>
-            {/each}
-          </select>
-
-          <span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs opacity-60">
-            ▾
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onclick={() => theme.toggle()}
-          aria-label="Toggle dark mode"
-          title="Toggle dark mode"
-          class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition"
-        >
-          <span class="text-base">
-            {theme.dark ? '☀️' : '🌙'}
-          </span>
-        </button>
-
-      </div>
-
-    </div>
-
+    <AppHeader title="Beranda" />
 
     <!-- ================= HERO CARD ================= -->
-    <section class="px-4 pt-2">
+    <section class="px-4 pt-28">
 
       <div class="max-w-5xl mx-auto rounded-[2rem] overflow-hidden bg-[#111] dark:bg-white text-white dark:text-[#111] transition-colors">
 

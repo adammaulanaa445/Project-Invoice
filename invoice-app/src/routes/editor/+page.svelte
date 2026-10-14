@@ -1,6 +1,8 @@
 <script>
   import { onMount, tick } from "svelte";
   import AppSidebar from "$lib/components/AppSidebar.svelte";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
 
   import Invoice01Neat from "$lib/components/invoices/Invoice01Neat.svelte";
   import Invoice02Corporate from "$lib/components/invoices/Invoice02Corporate.svelte";
@@ -48,7 +50,6 @@
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
 
-  import { theme } from "$lib/theme.svelte.js";
   import { lang } from "$lib/lang.svelte.js";
   import { invoiceStore } from "$lib/invoiceStore.svelte.js";
   import { clientStore } from "$lib/clientStore.svelte.js";
@@ -67,8 +68,8 @@
   // API
   // =====================================================
 
-  const API_BASE = "http://localhost:8000/api";
-  const STORAGE_BASE = "http://localhost:8000";
+  const API_BASE = "https://project-invoice-production-df00.up.railway.app/api";
+  const STORAGE_BASE = "https://project-invoice-production-df00.up.railway.app";
 
   // =====================================================
   // TEMPLATE
@@ -186,10 +187,36 @@
   // INVOICE DATA
   // =====================================================
 
+  function todayIso() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
+  }
+
+  function addDaysIso(dateString, days) {
+    const date = new Date(`${dateString}T00:00:00`);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function parseMoney(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    const normalized = String(value ?? "")
+      .replace(/Rp/gi, "")
+      .replace(/\s/g, "")
+      .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+      .replace(/,/g, ".")
+      .replace(/[^\d.-]/g, "");
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  const issueDate = todayIso();
+
   let invoice = $state({
     invoiceNumber: "INV-0001",
-    issueDate: "2026-08-14",
-    dueDate: "2026-08-28",
+    issueDate,
+    dueDate: addDaysIso(issueDate, 14),
     currency: "IDR",
     logoUrl: "",
 
@@ -221,8 +248,8 @@
 
   let subtotal = $derived(
     invoice.items.reduce((sum, item) => {
-      const q = Number(item.qty) || 0;
-      const p = Number(item.price) || 0;
+      const q = parseMoney(item.qty);
+      const p = parseMoney(item.price);
 
       return sum + q * p;
     }, 0),
@@ -238,8 +265,8 @@
     ...invoice,
 
     items: invoice.items.map((item) => {
-      const qty = Number(item.qty) || 0;
-      const price = Number(item.price) || 0;
+      const qty = parseMoney(item.qty);
+      const price = parseMoney(item.price);
 
       return {
         ...item,
@@ -275,6 +302,13 @@
 
   let selectedClientId = $state("");
   let selectedProductId = $state("");
+  let clientOptions = $derived(
+    clients.map((c) => ({ value: String(c.id), label: c.name, sublabel: c.email || "" })),
+  );
+
+  let productOptions = $derived(
+    products.map((p) => ({ value: String(p.id), label: p.name, sublabel: `Rp${Number(p.price).toLocaleString("id-ID")}` })),
+  );
 
   async function loadClientsAndProducts() {
     try {
@@ -313,7 +347,7 @@
       {
         description: product.name,
         qty: 1,
-        price: Number(product.price) || 0,
+        price: parseMoney(product.price),
       },
     ];
 
@@ -783,34 +817,6 @@
     }
   }
 
-  // =====================================================
-  // LOGOUT
-  // =====================================================
-
-  async function handleLogout() {
-    const token = localStorage.getItem("auth_token");
-
-    if (token) {
-      try {
-        await fetch(`${API_BASE}/logout`, {
-          method: "POST",
-
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    localStorage.removeItem("auth_token");
-
-    localStorage.removeItem("user");
-
-    goto("/login");
-  }
 </script>
 
 <div
@@ -823,80 +829,11 @@
       ? 'ml-64'
       : 'ml-0'}"
   >
-    <!-- NAVBAR -->
-
-    <nav
-      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-4 py-4 flex justify-between items-center"
-    >
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          onclick={() => sidebar.toggle()}
-          aria-label="Toggle sidebar"
-          class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <rect y="2" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="8" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="14" width="18" height="2" rx="1" fill="currentColor" />
-          </svg>
-        </button>
-
-        <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
-          InvoiceKita
-        </a>
-      </div>
-
-      <div class="flex gap-4 items-center text-sm">
-        <a href="/templates" class="opacity-70 hover:opacity-100 transition">
-          {lang.t("nav_templates")}
-        </a>
-
-        <a href="/clients" class="opacity-70 hover:opacity-100 transition">
-          Klien
-        </a>
-
-        <a href="/products" class="opacity-70 hover:opacity-100 transition">
-          Produk
-        </a>
-
-        <a href="/schedules" class="opacity-70 hover:opacity-100 transition">
-          Jadwal Kirim
-        </a>
-
-        <select
-          value={lang.current}
-          onchange={(e) => lang.set(e.target.value)}
-          class="bg-transparent text-sm border border-slate-300 dark:border-white/20 rounded-lg px-2 py-1"
-        >
-          {#each Object.entries(lang.options) as [code, label]}
-            <option value={code} class="text-slate-900">
-              {label}
-            </option>
-          {/each}
-        </select>
-
-        <button
-          onclick={() => theme.toggle()}
-          class="text-lg"
-          aria-label="Toggle dark mode"
-        >
-          {theme.dark ? "☀️" : "🌙"}
-        </button>
-
-        <button
-          onclick={handleLogout}
-          class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-full"
-        >
-          {lang.t("logout")}
-        </button>
-      </div>
-    </nav>
+    <AppHeader title={lang.t("et_title")} />
 
     <!-- CONTENT -->
 
-    <div class="py-8 px-4">
+    <div class="pt-28 pb-8 px-4">
       <h1 class="text-2xl font-bold text-center mb-6">
         {lang.t("et_title")}
       </h1>
@@ -1161,17 +1098,9 @@
                     Pilih dari daftar klien (opsional)
                   </label>
 
-                  <select
-                    value={selectedClientId}
-                    onchange={(e) => handleSelectClient(e.target.value)}
-                    class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
-                  >
-                    <option value="">-- Isi manual --</option>
-
-                    {#each clients as c}
-                      <option value={c.id}>{c.name}</option>
-                    {/each}
-                  </select>
+                  <div class="mt-1">
+                    <Combobox options={clientOptions} bind:value={selectedClientId} onselect={handleSelectClient} placeholder="-- Pilih klien --" searchPlaceholder="Cari klien..." emptyText="Klien tidak ditemukan" />
+                  </div>
                 </div>
               {:else}
                 <p class="text-xs opacity-50 mb-2">
@@ -1228,18 +1157,9 @@
 
               {#if products.length > 0}
                 <div class="flex gap-2 mb-3">
-                  <select
-                    bind:value={selectedProductId}
-                    class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-                  >
-                    <option value="">Pilih produk...</option>
-
-                    {#each products as p}
-                      <option value={p.id}>
-                        {p.name} — Rp{Number(p.price).toLocaleString("id-ID")}
-                      </option>
-                    {/each}
-                  </select>
+                  <div class="flex-1">
+                    <Combobox options={productOptions} bind:value={selectedProductId} placeholder="Pilih produk..." searchPlaceholder="Cari produk..." emptyText="Produk tidak ditemukan" />
+                  </div>
 
                   <button
                     onclick={addProductItem}

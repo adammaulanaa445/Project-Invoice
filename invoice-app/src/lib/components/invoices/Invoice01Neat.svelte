@@ -6,8 +6,8 @@
   let {
     invoice = {
       invoiceNumber: "INV-0001",
-      issueDate: "2026-08-14",
-      dueDate: "2026-08-28",
+      issueDate: new Date().toISOString().slice(0, 10),
+      dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
       currency: "IDR",
       logoUrl: "",
 

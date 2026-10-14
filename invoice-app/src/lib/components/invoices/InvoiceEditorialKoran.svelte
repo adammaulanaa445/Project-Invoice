@@ -1,7 +1,7 @@
 <script>
   // Tema: Editorial / Koran — layout ala halaman koran/majalah, serif tebal, garis kolom vertikal
   let { invoice = {
-    invoiceNumber: "INV-0001", issueDate: "2026-08-14", dueDate: "2026-08-28",
+    invoiceNumber: "INV-0001", issueDate: new Date().toISOString().slice(0, 10), dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
     currency: "IDR", logoUrl: "",
     from: { name: "Studio Kata", address: "Jl. Merdeka No.1, Surabaya", email: "hi@studiokata.co", phone: "08123456789" },
     to: { name: "Budi Santoso", address: "Jl. Sudirman No.5, Jakarta", email: "budi@klien.com" },
@@ -14,8 +14,8 @@
     status: "unpaid"
   } } = $props();
 
-  let subtotal = $derived(invoice.items.reduce((s, i) => s + i.qty * i.price, 0));
-  let tax = $derived(subtotal * (invoice.taxPercent / 100));
+  let subtotal = $derived(invoice.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.price) || 0), 0));
+  let tax = $derived(subtotal * ((Number(invoice.taxPercent) || 0) / 100));
   let total = $derived(subtotal + tax);
   const fmt = (n, cur) => new Intl.NumberFormat("id-ID", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
 </script>

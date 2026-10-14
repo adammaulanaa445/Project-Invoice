@@ -1,15 +1,14 @@
 <script>
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { theme } from '$lib/theme.svelte.js';
-  import { lang } from '$lib/lang.svelte.js';
   import { authStore } from '$lib/authStore.svelte.js';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import AppHeader from '$lib/components/AppHeader.svelte';
   import { sidebar } from '$lib/sidebarStore.svelte.js';
 
 
-  const API_BASE = 'http://localhost:8000/api';
-  const STORAGE_BASE = 'http://localhost:8000/storage';
+  const API_BASE = 'https://project-invoice-production-df00.up.railway.app/api';
+  const STORAGE_BASE = 'https://project-invoice-production-df00.up.railway.app/storage';
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -227,55 +226,11 @@
       ? 'ml-64'
       : 'ml-0'}"
   >
-    <!-- NAVBAR -->
-
-    <nav
-      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-4 py-4 flex justify-between items-center"
-    >
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          onclick={() => sidebar.toggle()}
-          aria-label="Toggle sidebar"
-          class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect y="2" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="8" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="14" width="18" height="2" rx="1" fill="currentColor" />
-          </svg>
-        </button>
-
-        <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
-          InvoiceKita
-        </a>
-      </div>
-
-      <div class="flex gap-4 items-center text-sm">
-        <a href="/templates" class="opacity-70 hover:opacity-100 transition">
-          {lang.t('nav_templates')}
-        </a>
-
-        <button
-          onclick={() => theme.toggle()}
-          class="text-lg"
-          aria-label="Toggle dark mode"
-        >
-          {theme.dark ? '☀️' : '🌙'}
-        </button>
-      </div>
-    </nav>
+    <AppHeader title="Profile" />
 
     <!-- CONTENT -->
 
-    <section class="max-w-4xl mx-auto px-6 py-10">
+    <section class="max-w-4xl mx-auto px-6 pt-28 pb-10">
 
       <div class="mb-8">
 

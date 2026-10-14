@@ -4,7 +4,7 @@
   import { templates } from "$lib/invoiceTemplates.js";
 
   // GANTI ke URL backend production (Railway) kalau sudah deploy.
-  const API_BASE = "http://localhost:8000/api";
+  const API_BASE = "https://project-invoice-production-df00.up.railway.app/api";
 
   let invoice = $state(null);
   let templateId = $state(1);

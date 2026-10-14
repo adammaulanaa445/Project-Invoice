@@ -3,8 +3,8 @@
   import { goto } from "$app/navigation";
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import { productStore } from "$lib/productStore.svelte.js";
-  import { theme } from "$lib/theme.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
+  import AppHeader from "$lib/components/AppHeader.svelte";
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -24,11 +24,22 @@
   // =====================================================
 
   let products = $state([]);
+  let search = $state("");
   let loading = $state(true);
+
+  let filteredProducts = $derived(
+    products.filter((product) =>
+      [product.name, product.description]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+    ),
+  );
   let saving = $state(false);
   let message = $state("");
 
   let editingId = $state(null);
+  let showFormModal = $state(false);
 
   let form = $state({
     name: "",
@@ -38,6 +49,7 @@
 
   function resetForm() {
     editingId = null;
+    showFormModal = false;
 
     form = {
       name: "",
@@ -137,7 +149,7 @@
       price: product.price || 0,
     };
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    showFormModal = true;
   }
 
   async function deleteProduct(id) {
@@ -172,62 +184,30 @@
       ? 'ml-64'
       : 'ml-0'}"
   >
-    <!-- NAVBAR -->
-
-    <nav
-      class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black px-4 py-4 flex justify-between items-center"
-    >
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          onclick={() => sidebar.toggle()}
-          aria-label="Toggle sidebar"
-          class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect y="2" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="8" width="18" height="2" rx="1" fill="currentColor" />
-            <rect y="14" width="18" height="2" rx="1" fill="currentColor" />
-          </svg>
-        </button>
-
-        <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <span class="w-3 h-3 rounded-full" style="background:#8CFF3D"></span>
-          InvoiceKita
-        </a>
-      </div>
-
-      <div class="flex gap-4 items-center text-sm">
-        <a href="/editor" class="opacity-70 hover:opacity-100 transition">
-          Buat Invoice
-        </a>
-
-        <button
-          onclick={() => theme.toggle()}
-          class="text-lg"
-          aria-label="Toggle dark mode"
-        >
-          {theme.dark ? "☀️" : "🌙"}
-        </button>
-      </div>
-    </nav>
+    <AppHeader title="Kelola Produk" />
 
     <!-- CONTENT -->
 
-    <div class="py-8 px-4 max-w-3xl mx-auto">
+    <div class="pt-28 pb-8 px-4 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-6 items-start">
+      <aside class="hidden lg:block space-y-4 pt-16">
+        <div class="rounded-2xl bg-lime-50 dark:bg-lime-400/10 p-4 border border-lime-200 dark:border-lime-400/20"><span class="text-2xl">▱</span><p class="font-semibold mt-2">Produk aktif</p><p class="text-3xl font-bold mt-1">{products.length}</p></div>
+        <div class="rounded-2xl bg-slate-100 dark:bg-white/5 p-4 text-sm opacity-70">Kelola jasa dan harga dari satu tempat.</div>
+      </aside>
+
+      <section>
       <h1 class="text-2xl font-bold text-center mb-6">Kelola Produk</h1>
 
       <!-- FORM -->
 
-      <div
-        class="bg-slate-50 dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 mb-6"
-      >
+      <div class="flex gap-3 mb-4">
+        <input bind:value={search} placeholder="Cari produk..." class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full px-4 py-2 text-sm" />
+        <button onclick={() => { resetForm(); showFormModal = true; }} class="px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D">+ Tambah Produk</button>
+      </div>
+
+      {#if showFormModal}
+      <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onclick={(event) => event.target === event.currentTarget && resetForm()}>
+      <div id="product-form"
+        class="w-full max-w-lg bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl">
         <h2 class="font-semibold mb-3">
           {editingId ? "Edit Produk" : "Tambah Produk Baru"}
         </h2>
@@ -291,6 +271,8 @@
           </p>
         {/if}
       </div>
+      </div>
+      {/if}
 
       <!-- LIST -->
 
@@ -302,7 +284,7 @@
         </p>
       {:else}
         <div class="space-y-3">
-          {#each products as product (product.id)}
+          {#each filteredProducts as product (product.id)}
             <div
               class="bg-slate-50 dark:bg-[#111] rounded-xl border border-slate-200 dark:border-white/10 p-4 flex justify-between items-start gap-4"
             >
@@ -339,6 +321,12 @@
           {/each}
         </div>
       {/if}
+      </section>
+
+      <aside class="hidden lg:block space-y-4 pt-16">
+        <div class="rounded-2xl bg-slate-100 dark:bg-white/5 p-4 border border-slate-200 dark:border-white/10"><span class="text-2xl">⌕</span><p class="font-semibold mt-2">Cari cepat</p><p class="text-sm opacity-60 mt-1">Temukan produk berdasarkan nama atau deskripsi.</p></div>
+        <div class="rounded-2xl bg-black dark:bg-white text-white dark:text-black p-4 text-sm">Tip: harga tersimpan otomatis dalam data produk.</div>
+      </aside>
     </div>
   </main>
 </div>
