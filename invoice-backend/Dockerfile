@@ -19,13 +19,13 @@ RUN npm ci --omit=dev
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts
 
 COPY . .
 
-RUN npm install --omit=dev
-RUN composer dump-autoload --optimize
-RUN chmod -R 775 storage bootstrap/cache
+RUN npm install --omit=dev \
+    && composer dump-autoload --optimize \
+    && chmod -R 775 storage bootstrap/cache
 
 ENV PHP_CLI_SERVER_WORKERS=4
 
