@@ -78,9 +78,13 @@ class SendScheduledInvoiceEmails extends Command
 
     protected function generatePdf($invoice): string
     {
-        $frontendUrl = rtrim(config('services.frontend.url'), '/');
+        $frontendUrl = rtrim((string) config('services.frontend.url'), '/');
 
-        $printUrl = "{$frontendUrl}/print/invoice/{$invoice->id}?token={$invoice->print_token}";
+        if ($frontendUrl === '' || !filter_var($frontendUrl, FILTER_VALIDATE_URL)) {
+            throw new \RuntimeException('FRONTEND_URL harus berupa URL absolut yang valid.');
+        }
+
+        $printUrl = "{$frontendUrl}/print/invoice/{$invoice->id}?token=" . rawurlencode($invoice->print_token);
 
         $fileName = "scheduled-invoices/invoice-{$invoice->id}-" . now()->timestamp . '.pdf';
         $fullPath = storage_path("app/public/{$fileName}");

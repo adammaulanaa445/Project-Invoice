@@ -3,15 +3,27 @@ FROM php:8.2-cli
 WORKDIR /var/www
 
 RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev \
+    git unzip libzip-dev curl ca-certificates \
+    chromium fonts-liberation \
+    nodejs npm \
     && docker-php-ext-install pdo pdo_mysql zip bcmath \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV CHROME_PATH=/usr/bin/chromium
+
+RUN node --version && npm --version && chromium --version
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+RUN npm install --omit=dev
+RUN composer dump-autoload --optimize
 RUN chmod -R 775 storage bootstrap/cache
 
 ENV PHP_CLI_SERVER_WORKERS=4
