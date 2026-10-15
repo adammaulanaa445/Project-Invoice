@@ -106,7 +106,7 @@
     left-0
     top-0
     z-40
-    h-screen
+    h-[100dvh]
     w-56 sm:w-64
     flex
     flex-col
