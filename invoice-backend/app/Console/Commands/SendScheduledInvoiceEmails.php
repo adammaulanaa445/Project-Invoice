@@ -94,6 +94,10 @@ class SendScheduledInvoiceEmails extends Command
         }
 
         $browsershot = Browsershot::url($printUrl)
+            ->addChromiumArguments([
+                'no-sandbox',
+                'disable-setuid-sandbox',
+            ])
             ->waitUntilNetworkIdle()
             // Tunggu sampai Svelte selesai render komponen template.
             // waitUntilNetworkIdle() saja tidak cukup karena Svelte butuh
