@@ -30,6 +30,16 @@ class CompanyProfileController extends Controller
         return response()->json($profile);
     }
 
+    public function logo(CompanyProfile $companyProfile)
+    {
+        abort_unless($companyProfile->logo_path, 404);
+
+        $path = Storage::disk('public')->path($companyProfile->logo_path);
+        abort_unless(is_file($path), 404);
+
+        return response()->file($path);
+    }
+
     /**
      * Menyimpan / mengubah profile perusahaan.
      */

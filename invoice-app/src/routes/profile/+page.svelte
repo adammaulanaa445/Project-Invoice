@@ -8,7 +8,7 @@
 
 
   const API_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api';
-  const STORAGE_BASE = 'https://project-invoice-production-e8ba.up.railway.app/storage';
+  const STORAGE_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api/public/company-profile';
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -88,7 +88,7 @@
       };
 
       if (data.logo_path) {
-        logoPreview = `${STORAGE_BASE}/${data.logo_path}`;
+        logoPreview = `${STORAGE_BASE}/${data.id}/logo`;
       }
 
     } catch (error) {
@@ -191,7 +191,7 @@
 
       if (data.profile.logo_path) {
         logoPreview =
-          `${STORAGE_BASE}/${data.profile.logo_path}`;
+          `${STORAGE_BASE}/${data.profile.id}/logo`;
       }
 
       logoFile = null;

@@ -49,6 +49,7 @@
   const globalMenuItems = [
     { label: 'Beranda', icon: 'home', href: '/dashboard' },
     { label: 'Template', icon: 'template', href: '/templates' },
+    { label: 'Invoice Tersimpan', icon: 'list', href: '/invoices' },
     { label: 'Klien', icon: 'clients', href: '/clients' },
     { label: 'Produk', icon: 'products', href: '/products' },
     { label: 'Jadwal Kirim', icon: 'schedule', href: '/schedules' },

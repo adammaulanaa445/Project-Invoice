@@ -92,13 +92,35 @@ class InvoiceController extends Controller
 
         $data = $request->validate([
             'template_id' => 'sometimes|integer|min:1',
-            'status' => 'sometimes|in:unpaid,paid,overdue',
+            'issue_date' => 'sometimes|date',
+            'due_date' => 'sometimes|date|after_or_equal:issue_date',
+            'currency' => 'sometimes|string|size:3',
+            'from_name' => 'sometimes|required|string|max:255',
+            'from_address' => 'nullable|string',
+            'from_email' => 'nullable|email',
+            'from_phone' => 'nullable|string|max:30',
+            'logo_url' => 'nullable|string',
+            'to_name' => 'sometimes|required|string|max:255',
+            'to_address' => 'nullable|string',
+            'to_email' => 'nullable|email',
             'tax_percent' => 'sometimes|numeric|min:0|max:100',
             'discount_percent' => 'sometimes|numeric|min:0|max:100',
             'notes' => 'nullable|string',
+            'status' => 'sometimes|in:unpaid,paid,overdue',
+            'items' => 'sometimes|array|min:1',
+            'items.*.description' => 'required|string|max:255',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
         ]);
 
+        $items = $data['items'] ?? null;
+        unset($data['items']);
         $invoice->update($data);
+
+        if ($items !== null) {
+            $invoice->items()->delete();
+            $invoice->items()->createMany($items);
+        }
 
         return $invoice->load('items');
     }

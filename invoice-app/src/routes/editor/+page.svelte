@@ -507,6 +507,25 @@
     }
   }
 
+  async function loadSavedInvoice(id) {
+    const saved = (await invoiceStore.getAll()).find((item) => String(item.id) === String(id));
+    if (!saved) return;
+
+    savedInvoiceId = saved.id;
+    selected = Math.max(0, Number(saved.template_id || 1) - 1);
+    invoice.invoiceNumber = saved.invoice_number || invoice.invoiceNumber;
+    invoice.issueDate = String(saved.issue_date || "").slice(0, 10);
+    invoice.dueDate = String(saved.due_date || "").slice(0, 10);
+    invoice.currency = saved.currency || "IDR";
+    invoice.logoUrl = saved.logo_url || invoice.logoUrl;
+    invoice.from = { name: saved.from_name || "", address: saved.from_address || "", email: saved.from_email || "", phone: saved.from_phone || "" };
+    invoice.to = { name: saved.to_name || "", address: saved.to_address || "", email: saved.to_email || "" };
+    invoice.taxPercent = Number(saved.tax_percent) || 0;
+    invoice.notes = saved.notes || "";
+    invoice.status = saved.status || "unpaid";
+    invoice.items = (saved.items || []).map((item) => ({ description: item.description || "", qty: item.qty || 1, price: item.price || 0 }));
+  }
+
   // =====================================================
   // ON MOUNT
   // =====================================================
@@ -517,6 +536,9 @@
     window.addEventListener("invoice-section", handleInvoiceSection);
 
     await loadCompanyProfile();
+
+    const savedId = page.url.searchParams.get("invoice");
+    if (savedId) await loadSavedInvoice(savedId);
 
     await loadClientsAndProducts();
 
@@ -712,7 +734,9 @@
     saveMessage = "";
 
     try {
-      const record = await invoiceStore.save(selected + 1, calculatedInvoice);
+      const record = savedInvoiceId
+        ? await invoiceStore.update(savedInvoiceId, selected + 1, calculatedInvoice)
+        : await invoiceStore.save(selected + 1, calculatedInvoice);
 
       savedInvoiceId = record.id;
 

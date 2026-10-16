@@ -234,6 +234,48 @@ export const invoiceStore = {
   },
 
 
+  async update(invoiceId, templateId, invoiceData) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login terlebih dahulu.');
+
+    const payload = {
+      template_id: templateId,
+      issue_date: invoiceData.issueDate,
+      due_date: invoiceData.dueDate,
+      currency: invoiceData.currency,
+      from_name: invoiceData.from.name,
+      from_address: invoiceData.from.address,
+      from_email: invoiceData.from.email,
+      from_phone: invoiceData.from.phone,
+      logo_url: invoiceData.logoUrl || null,
+      to_name: invoiceData.to.name,
+      to_address: invoiceData.to.address,
+      to_email: invoiceData.to.email,
+      tax_percent: Number(invoiceData.taxPercent) || 0,
+      discount_percent: Number(invoiceData.discountPercent) || 0,
+      notes: invoiceData.notes,
+      status: invoiceData.status,
+      items: invoiceData.items.map((item) => ({
+        description: item.description,
+        qty: Number(item.qty) || 1,
+        price: Number(item.price) || 0,
+      })),
+    };
+
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal memperbarui invoice.');
+    return { id: data.id, invoiceNumber: data.invoice_number, raw: data };
+  },
+
   // =====================================================
   // KIRIM EMAIL SEKARANG
   // =====================================================

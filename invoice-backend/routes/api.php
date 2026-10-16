@@ -31,6 +31,7 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 // =========================
 
 Route::get('/public/invoices/{invoice}', [PublicInvoiceController::class, 'show']);
+Route::get('/public/company-profile/{companyProfile}/logo', [CompanyProfileController::class, 'logo']);
 
 
 // =========================
