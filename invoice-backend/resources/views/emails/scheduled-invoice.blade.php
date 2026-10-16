@@ -1,1 +1,1 @@
-@include('emails.invoice')
+@include('emails.invoice', ['previewImageData' => null])
