@@ -11,6 +11,11 @@
   let loading = $state(true);
   let error = $state("");
 
+  function normalizeDate(value) {
+    const match = String(value ?? "").match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : "";
+  }
+
   onMount(async () => {
     const id = page.params.id;
     const token = page.url.searchParams.get("token");
@@ -28,8 +33,8 @@
 
       invoice = {
         invoiceNumber: data.invoice_number,
-        issueDate: data.issue_date,
-        dueDate: data.due_date,
+        issueDate: normalizeDate(data.issue_date),
+        dueDate: normalizeDate(data.due_date),
         currency: data.currency,
         logoUrl: data.logo_url || "",
 

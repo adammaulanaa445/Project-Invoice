@@ -23,6 +23,7 @@
   let reactivateDate = $state("");
   let editingId = $state(null);
   let editDate = $state("");
+  let editFrequency = $state("daily");
 
   function toLocalInput(value) {
     if (!value) return "";
@@ -34,12 +35,13 @@
   function startEdit(schedule) {
     editingId = schedule.id;
     editDate = toLocalInput(schedule.next_send_at);
+    editFrequency = schedule.frequency ?? "daily";
   }
 
   async function saveEdit(id) {
     if (!editDate) return;
     try {
-      await scheduledEmailStore.update(id, new Date(editDate).toISOString());
+      await scheduledEmailStore.update(id, new Date(editDate).toISOString(), editFrequency);
       editingId = null;
       await loadSchedules();
     } catch (error) {
@@ -239,8 +241,15 @@
               </div>
 
               {#if editingId === schedule.id}
-                <div class="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 flex gap-2 items-center">
-                  <input type="datetime-local" bind:value={editDate} class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm" />
+                <div class="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto_auto] gap-2 items-center">
+                  <input type="datetime-local" bind:value={editDate} class="border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm" />
+                  <select bind:value={editFrequency} class="border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm">
+                    <option value="once">Sekali</option>
+                    <option value="hourly">Setiap jam</option>
+                    <option value="daily">Setiap hari</option>
+                    <option value="weekly">Setiap minggu</option>
+                    <option value="monthly">Setiap bulan</option>
+                  </select>
                   <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 font-semibold text-black rounded-full" style="background:#8CFF3D">Simpan</button>
                   <button onclick={() => (editingId = null)} class="text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-white/20">Batal</button>
                 </div>

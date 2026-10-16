@@ -83,7 +83,7 @@ export const scheduledEmailStore = {
   // EDIT TANGGAL/JAM JADWAL
   // =========================
 
-  async update(id, nextSendAt) {
+  async update(id, nextSendAt, frequency) {
     const token = getToken();
     if (!token) throw new Error('Kamu harus login dulu.');
 
@@ -94,7 +94,7 @@ export const scheduledEmailStore = {
         'Accept': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ next_send_at: nextSendAt })
+      body: JSON.stringify({ next_send_at: nextSendAt, frequency })
     });
 
     const data = await res.json().catch(() => ({}));

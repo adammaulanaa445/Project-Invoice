@@ -73,10 +73,12 @@ class ScheduledInvoiceEmailController extends Controller
 
         $data = $request->validate([
             'next_send_at' => 'required|date',
+            'frequency' => 'required|in:once,hourly,daily,weekly,monthly',
         ]);
 
         $scheduledInvoiceEmail->update([
             'next_send_at' => $data['next_send_at'],
+            'frequency' => $data['frequency'],
             'status' => 'active',
             'last_error' => null,
         ]);
