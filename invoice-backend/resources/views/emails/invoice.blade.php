@@ -6,6 +6,11 @@
     <title>Invoice {{ $invoice->invoice_number }}</title>
 </head>
 <body style="margin:0;padding:24px 12px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#172033;">
+@if($previewImageData)
+    <div style="max-width:720px;margin:0 auto 16px;text-align:center;background:#fff;border-radius:16px;padding:12px;">
+        <img src="{{ $message->embedData(base64_decode($previewImageData), 'invoice-preview.jpg', 'image/jpeg') }}" alt="Invoice {{ $invoice->invoice_number }}" style="display:block;width:100%;height:auto;border-radius:10px;">
+    </div>
+@endif
 <div style="max-width:720px;margin:0 auto;">
     <div style="background:#111827;padding:28px 32px;border-radius:16px 16px 0 0;color:#fff;">
         <table width="100%" cellpadding="0" cellspacing="0"><tr>

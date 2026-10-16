@@ -135,6 +135,7 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'email' => 'required|email',
             'pdf' => 'required|file|mimes:pdf|max:10240',
+            'preview_image' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         try {
@@ -146,11 +147,16 @@ class InvoiceController extends Controller
                 $request->file('pdf')->getRealPath()
             );
 
+            $previewImageData = $request->hasFile('preview_image')
+                ? base64_encode(file_get_contents($request->file('preview_image')->getRealPath()))
+                : null;
+
             // Kirim email
             Mail::to($data['email'])->send(
                 new InvoiceMail(
                     $invoice,
-                    $pdfData
+                    $pdfData,
+                    $previewImageData
                 )
             );
 

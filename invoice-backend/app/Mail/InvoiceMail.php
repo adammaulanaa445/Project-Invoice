@@ -16,7 +16,8 @@ class InvoiceMail extends Mailable
 
     public function __construct(
         public Invoice $invoice,
-        public string $pdfData
+        public string $pdfData,
+        public ?string $previewImageData = null
     ) {}
 
     public function envelope(): Envelope
@@ -40,6 +41,12 @@ class InvoiceMail extends Mailable
                 fn () => $this->pdfData,
                 'Invoice-' . $this->invoice->invoice_number . '.pdf'
             )->withMime('application/pdf'),
+            ...($this->previewImageData ? [
+                Attachment::fromData(
+                    fn () => base64_decode($this->previewImageData),
+                    'Invoice-' . $this->invoice->invoice_number . '.jpg'
+                )->withMime('image/jpeg'),
+            ] : []),
         ];
     }
 }

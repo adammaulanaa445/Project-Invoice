@@ -201,6 +201,12 @@
     return date.toISOString().slice(0, 10);
   }
 
+  function generateInvoiceNumber() {
+    const date = todayIso().replaceAll("-", "");
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `INV-${date}-${random}`;
+  }
+
   function parseMoney(value) {
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
     const normalized = String(value ?? "")
@@ -216,7 +222,7 @@
   const issueDate = todayIso();
 
   let invoice = $state({
-    invoiceNumber: "INV-0001",
+    invoiceNumber: generateInvoiceNumber(),
     issueDate,
     dueDate: addDaysIso(issueDate, 14),
     currency: "IDR",
@@ -586,6 +592,25 @@
   // sendiri lewat Browsershot -- browser tidak perlu bikin PDF.)
   // =====================================================
 
+  async function generatePreviewImage() {
+    if (!previewEl) {
+      throw new Error("Preview invoice tidak ditemukan.");
+    }
+
+    previewEl.classList.add("pdf-export");
+    try {
+      const canvas = await html2canvas(previewEl, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+      });
+      return await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+    } finally {
+      previewEl.classList.remove("pdf-export");
+    }
+  }
+
   async function generatePDF() {
     if (!previewEl) {
       throw new Error("Preview invoice tidak ditemukan.");
@@ -797,8 +822,9 @@
       const pdf = await generatePDF();
 
       const pdfBlob = pdf.output("blob");
+      const previewImageBlob = await generatePreviewImage();
 
-      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob);
+      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob, previewImageBlob);
 
       emailMessage = "✅ Invoice berhasil dikirim!";
 
@@ -1002,8 +1028,9 @@
 
                 <input
                   bind:value={invoice.invoiceNumber}
-                  class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm mt-1"
+                  class="w-full border border-lime-300 dark:border-lime-400/40 bg-lime-50/60 dark:bg-lime-400/10 rounded-lg px-3 py-1.5 text-sm mt-1 font-semibold tracking-wide text-slate-800 dark:text-white shadow-sm focus:border-lime-500 focus:ring-2 focus:ring-lime-400/30 outline-none"
                 />
+                <p class="text-[10px] text-lime-700 dark:text-lime-300 mt-1">Otomatis dibuat unik. Bisa kamu ubah manual.</p>
               </div>
 
               <div>

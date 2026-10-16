@@ -241,7 +241,8 @@ export const invoiceStore = {
   async sendEmail(
     invoiceId,
     recipientEmail,
-    pdfBlob
+    pdfBlob,
+    previewImageBlob
   ) {
 
     const token = getToken();
@@ -269,6 +270,13 @@ export const invoiceStore = {
       `Invoice-${invoiceId}.pdf`
     );
 
+    if (previewImageBlob) {
+      formData.append(
+        'preview_image',
+        previewImageBlob,
+        `Invoice-${invoiceId}.jpg`
+      );
+    }
 
     const res = await fetch(
       `${API_BASE}/invoices/${invoiceId}/send-email`,
