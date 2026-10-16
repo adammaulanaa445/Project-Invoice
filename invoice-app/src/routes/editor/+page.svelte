@@ -605,7 +605,11 @@
         allowTaint: false,
         backgroundColor: "#ffffff",
       });
-      return await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+      if (!blob) {
+        throw new Error("Gagal membuat gambar preview invoice.");
+      }
+      return blob;
     } finally {
       previewEl.classList.remove("pdf-export");
     }
