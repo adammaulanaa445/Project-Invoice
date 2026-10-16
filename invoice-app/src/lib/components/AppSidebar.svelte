@@ -169,7 +169,7 @@
   </nav>
 
   <!-- BOTTOM -->
-  <div class="p-3">
+  <div class="shrink-0 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
     {#if currentUser}
       <!-- PROFILE -->
       <button
@@ -198,7 +198,7 @@
       <button
         type="button"
         onclick={handleLogout}
-        class="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition text-left"
+        class="w-full min-h-11 flex items-center gap-3 px-3 py-2.5 mt-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition text-left"
       >
         <span class="shrink-0">{@html icons.logout}</span>
         <span>Logout</span>
