@@ -21,6 +21,31 @@
 
   let reactivatingId = $state(null);
   let reactivateDate = $state("");
+  let editingId = $state(null);
+  let editDate = $state("");
+
+  function toLocalInput(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function startEdit(schedule) {
+    editingId = schedule.id;
+    editDate = toLocalInput(schedule.next_send_at);
+  }
+
+  async function saveEdit(id) {
+    if (!editDate) return;
+    try {
+      await scheduledEmailStore.update(id, new Date(editDate).toISOString());
+      editingId = null;
+      await loadSchedules();
+    } catch (error) {
+      alert(error.message || "Gagal mengubah jadwal.");
+    }
+  }
 
   const frequencyLabel = {
     once: "Sekali",
@@ -190,6 +215,12 @@
                 <div class="flex gap-2 shrink-0">
                   {#if schedule.status === "active"}
                     <button
+                      onclick={() => startEdit(schedule)}
+                      class="text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10"
+                    >
+                      Edit Waktu
+                    </button>
+                    <button
                       onclick={() => cancelSchedule(schedule.id)}
                       class="text-xs px-3 py-1.5 rounded-full border border-red-300 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
                     >
@@ -206,6 +237,14 @@
                   {/if}
                 </div>
               </div>
+
+              {#if editingId === schedule.id}
+                <div class="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 flex gap-2 items-center">
+                  <input type="datetime-local" bind:value={editDate} class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm" />
+                  <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 font-semibold text-black rounded-full" style="background:#8CFF3D">Simpan</button>
+                  <button onclick={() => (editingId = null)} class="text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-white/20">Batal</button>
+                </div>
+              {/if}
 
               <!-- FORM AKTIFKAN LAGI -->
 

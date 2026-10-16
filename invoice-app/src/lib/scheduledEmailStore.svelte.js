@@ -80,6 +80,29 @@ export const scheduledEmailStore = {
   },
 
   // =========================
+  // EDIT TANGGAL/JAM JADWAL
+  // =========================
+
+  async update(id, nextSendAt) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login dulu.');
+
+    const res = await fetch(`${API_BASE}/scheduled-emails/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ next_send_at: nextSendAt })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal mengubah jadwal.');
+    return data;
+  },
+
+  // =========================
   // AKTIFKAN LAGI JADWAL YANG GAGAL (status 'failed')
   // =========================
 

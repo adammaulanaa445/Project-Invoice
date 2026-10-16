@@ -61,8 +61,31 @@ class ScheduledInvoiceEmailController extends Controller
         return $scheduledInvoiceEmail;
     }
 
+    // PUT /api/scheduled-emails/{scheduledInvoiceEmail}
+    // Ubah tanggal/jam kirim tanpa membuat invoice baru.
+    public function update(Request $request, ScheduledInvoiceEmail $scheduledInvoiceEmail)
+    {
+        if ($scheduledInvoiceEmail->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses ke jadwal ini.'
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'next_send_at' => 'required|date',
+        ]);
+
+        $scheduledInvoiceEmail->update([
+            'next_send_at' => $data['next_send_at'],
+            'status' => 'active',
+            'last_error' => null,
+        ]);
+
+        return $scheduledInvoiceEmail->load('invoice:id,invoice_number,to_name');
+    }
+
     // POST /api/scheduled-emails/{scheduledInvoiceEmail}/reactivate
-    // Kalau jadwal gagal terkirim (status 'failed'), admin bisa aktifkan lagi
+    // Kalau jadwal gagal terkirim (status 'failed'), admin bisa aktifkan lagi dengan waktu kirim baru.
     // dengan waktu kirim baru.
     public function reactivate(Request $request, ScheduledInvoiceEmail $scheduledInvoiceEmail)
     {

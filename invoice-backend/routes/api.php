@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/scheduled-emails', [ScheduledInvoiceEmailController::class, 'index']);
     Route::post('/scheduled-emails', [ScheduledInvoiceEmailController::class, 'store']);
+    Route::put('/scheduled-emails/{scheduledInvoiceEmail}', [ScheduledInvoiceEmailController::class, 'update']);
     Route::post('/scheduled-emails/{scheduledInvoiceEmail}/cancel', [ScheduledInvoiceEmailController::class, 'cancel']);
     Route::post('/scheduled-emails/{scheduledInvoiceEmail}/reactivate', [ScheduledInvoiceEmailController::class, 'reactivate']);
 
