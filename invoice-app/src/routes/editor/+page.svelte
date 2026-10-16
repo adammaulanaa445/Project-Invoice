@@ -499,8 +499,8 @@
         invoice.from.phone = profile.phone;
       }
 
-      if (profile.logo_path) {
-        invoice.logoUrl = `${STORAGE_BASE}/${profile.logo_path}`;
+      if (profile.logo_path && profile.id) {
+        invoice.logoUrl = `${API_BASE}/public/company-profile/${profile.id}/logo`;
       }
     } catch (error) {
       console.error("Load company profile error:", error);
