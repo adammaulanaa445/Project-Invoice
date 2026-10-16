@@ -135,7 +135,7 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'email' => 'required|email',
             'pdf' => 'required|file|mimes:pdf|max:10240',
-            'preview_image' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+            'preview_image' => 'required|file|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         try {
