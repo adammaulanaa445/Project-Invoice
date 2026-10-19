@@ -30,12 +30,7 @@ class InvoiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.invoice-preview',
-            with: [
-                'invoice' => $this->invoice,
-                'previewImageData' => app(InvoiceEmailTemplateRenderer::class)
-                    ->renderPreviewImage($this->invoice),
-            ],
+            htmlString: app(InvoiceEmailTemplateRenderer::class)->render($this->invoice),
         );
     }
 
