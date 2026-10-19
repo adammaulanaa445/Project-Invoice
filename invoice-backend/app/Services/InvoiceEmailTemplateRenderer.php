@@ -30,42 +30,17 @@ class InvoiceEmailTemplateRenderer
             $browser->setChromePath($chromePath);
         }
 
-        // JSON.stringify guarantees the Chromium response is a string. This
-        // avoids Browsershot v5.4 assigning an array response to its string
-        // result property, while keeping the selected template as copyable
-        // HTML with the computed styles inlined.
-        $payload = $browser->evaluate(<<<'JS'
-() => {
-    const source = document.querySelector('.print-wrapper');
-    if (!source) throw new Error('Preview invoice tidak ditemukan.');
+        // bodyHtml() mengambil DOM yang sudah dirender oleh Svelte sebagai
+        // string. Berbeda dengan evaluate(), jalur ini tidak menerima hasil
+        // Puppeteer sebagai array pada Chromium/Puppeteer versi server.
+        $html = $browser->bodyHtml();
 
-    const clone = source.cloneNode(true);
-    const sourceNodes = [source, ...source.querySelectorAll('*')];
-    const cloneNodes = [clone, ...clone.querySelectorAll('*')];
-
-    sourceNodes.forEach((node, index) => {
-        const target = cloneNodes[index];
-        const style = window.getComputedStyle(node);
-        const inline = Array.from(style).map((property) => `${property}:${style.getPropertyValue(property)};`).join('');
-        target.setAttribute('style', inline);
-        target.removeAttribute('class');
-        target.removeAttribute('id');
-    });
-
-    clone.querySelectorAll('script, style, link, button, input, textarea, select').forEach((node) => node.remove());
-
-    return JSON.stringify({
-        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;padding:24px 12px;background:#f4f6f8;">${clone.outerHTML}</body></html>`
-    });
-}
-JS
-        );
-
-        $html = json_decode($payload, true, 512, JSON_THROW_ON_ERROR)['html'] ?? null;
-
-        if (! is_string($html)) {
-            throw new \RuntimeException('HTML preview invoice tidak valid.');
-        }
+        // HTML yang dikirim email tidak memerlukan JavaScript untuk tampil.
+        // CSS dan struktur template tetap dipertahankan supaya desainnya
+        // mengikuti template invoice yang dipilih dan teks tetap bisa disalin.
+        $html = preg_replace('/<script\\b[^>]*>.*?<\\/script>/is', '', $html) ?? $html;
+        $html = str_replace(['href="/_app/', "href='/_app/"], ["href=\"{$frontendUrl}/_app/", "href='{$frontendUrl}/_app/"], $html);
+        $html = str_replace(['src="/_app/', "src='/_app/"], ["src=\"{$frontendUrl}/_app/", "src='{$frontendUrl}/_app/"], $html);
 
         return $html;
     }
