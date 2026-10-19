@@ -9,7 +9,6 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Services\InvoiceEmailTemplateRenderer;
 
 class InvoiceMail extends Mailable
 {
@@ -30,7 +29,13 @@ class InvoiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            htmlString: app(InvoiceEmailTemplateRenderer::class)->render($this->invoice),
+            // Render email with Blade instead of evaluating the frontend in a
+            // headless browser. Browsershot's evaluate response can be an
+            // array with newer Chromium/Puppeteer combinations, while the
+            // package expects a string. The invoice email already has a
+            // dedicated, email-safe Blade template.
+            view: 'emails.invoice',
+            with: ['invoice' => $this->invoice],
         );
     }
 
