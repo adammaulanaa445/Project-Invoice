@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Services\InvoiceEmailTemplateRenderer;
 
 class InvoiceMail extends Mailable
 {
@@ -29,10 +30,7 @@ class InvoiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.invoice',
-            with: [
-                'invoice' => $this->invoice,
-            ],
+            htmlString: app(InvoiceEmailTemplateRenderer::class)->render($this->invoice),
         );
     }
 

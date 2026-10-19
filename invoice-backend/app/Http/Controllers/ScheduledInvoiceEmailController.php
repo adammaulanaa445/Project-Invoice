@@ -99,14 +99,30 @@ class ScheduledInvoiceEmailController extends Controller
 
         $data = $request->validate([
             'next_send_at' => 'required|date',
+            'frequency' => 'required|in:once,hourly,daily,weekly,monthly',
         ]);
 
         $scheduledInvoiceEmail->update([
             'status' => 'active',
             'next_send_at' => $data['next_send_at'],
+            'frequency' => $data['frequency'],
             'last_error' => null,
         ]);
 
         return $scheduledInvoiceEmail;
+    }
+
+    // DELETE /api/scheduled-emails/{scheduledInvoiceEmail}
+    public function destroy(Request $request, ScheduledInvoiceEmail $scheduledInvoiceEmail)
+    {
+        if ($scheduledInvoiceEmail->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses ke jadwal ini.'
+            ], 403);
+        }
+
+        $scheduledInvoiceEmail->delete();
+
+        return response()->noContent();
     }
 }

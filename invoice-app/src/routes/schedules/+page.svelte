@@ -6,7 +6,7 @@
   import { sidebar } from "$lib/sidebarStore.svelte.js";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import { notify } from "$lib/alerts.js";
-  import { Ban, Check, Clock3, Pencil, RotateCcw } from "@lucide/svelte";
+  import { Ban, Check, Clock3, Pencil, RotateCcw, Search } from "@lucide/svelte";
 
   function showFailure(error, fallback) {
     return notify.error("Proses gagal", error?.message || fallback);
@@ -28,11 +28,26 @@
 
   let sidebarOpen = $derived(sidebar.open);
 
+  const PAGE_SIZE = 10;
   let schedules = $state([]);
   let loading = $state(true);
+  let search = $state("");
+  let currentPage = $state(1);
+  let filteredSchedules = $derived(
+    schedules.filter((schedule) =>
+      [schedule.invoice?.invoice_number, schedule.recipient_email, schedule.frequency, schedule.status]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+    ),
+  );
+  let totalPages = $derived(Math.max(1, Math.ceil(filteredSchedules.length / PAGE_SIZE)));
+  let paginatedSchedules = $derived(filteredSchedules.slice((Math.min(currentPage, totalPages) - 1) * PAGE_SIZE, Math.min(currentPage, totalPages) * PAGE_SIZE));
 
   let reactivatingId = $state(null);
+  let reactivateSchedule = $state(null);
   let reactivateDate = $state("");
+  let reactivateFrequency = $state("daily");
   let editingId = $state(null);
   let editDate = $state("");
   let editFrequency = $state("daily");
@@ -126,23 +141,42 @@
   }
 
   function startReactivate(schedule) {
-    reactivatingId = schedule.id;
-
-    // Default: 5 menit dari sekarang
-    const d = new Date(Date.now() + 5 * 60 * 1000);
-    reactivateDate = d.toISOString().slice(0, 16);
+    reactivateSchedule = schedule;
+    reactivateFrequency = schedule.frequency ?? "daily";
+    reactivateDate = toLocalInput(schedule.next_send_at) || new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
   }
 
-  async function confirmReactivate(id) {
-    if (!validateDate(reactivateDate, "Pilih waktu kirim baru sebelum mengaktifkan jadwal.")) return;
+  async function confirmReactivate() {
+    if (!reactivateSchedule || !validateDate(reactivateDate, "Pilih waktu kirim baru sebelum mengaktifkan jadwal.")) return;
 
     try {
-      await scheduledEmailStore.reactivate(id, new Date(reactivateDate).toISOString());
-      reactivatingId = null;
+      await scheduledEmailStore.reactivate(
+        reactivateSchedule.id,
+        new Date(reactivateDate).toISOString(),
+        reactivateFrequency,
+      );
+      reactivateSchedule = null;
       await loadSchedules();
-      await notify.success("Jadwal diaktifkan", "Pengiriman otomatis sudah dijadwalkan kembali.");
+      await notify.success("Jadwal diaktifkan", "Frekuensi dan waktu kirim baru sudah disimpan.");
     } catch (error) {
       await showFailure(error, "Gagal mengaktifkan ulang jadwal.");
+    }
+  }
+
+  async function deleteSchedule(schedule) {
+    const confirmed = await notify.confirm(
+      "Hapus jadwal?",
+      `Jadwal ke ${schedule.recipient_email} akan dihapus permanen.`,
+      "Ya, hapus",
+    );
+    if (!confirmed) return;
+
+    try {
+      await scheduledEmailStore.remove(schedule.id);
+      await loadSchedules();
+      await notify.success("Jadwal dihapus", "Jadwal kirim sudah dihapus permanen.");
+    } catch (error) {
+      await showFailure(error, "Gagal menghapus jadwal.");
     }
   }
 
@@ -157,7 +191,7 @@
 </script>
 
 <div
-  class="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white transition-colors"
+  class="min-h-screen bg-gradient-to-b from-teal-50 via-white to-sky-50 dark:from-[#071817] dark:via-black dark:to-[#091225] text-slate-900 dark:text-white transition-colors"
 >
   <AppSidebar
     {sidebarOpen}
@@ -183,6 +217,11 @@
         frekuensinya, sampai kamu batalkan.
       </p>
 
+      <label class="relative block mb-4">
+        <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60" aria-hidden="true" />
+        <input value={search} oninput={(event) => { search = event.currentTarget.value; currentPage = 1; }} placeholder="Cari invoice, email, frekuensi, atau status..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
+      </label>
+
       {#if loading}
         <p class="text-center opacity-60">Memuat jadwal...</p>
       {:else if schedules.length === 0}
@@ -193,9 +232,11 @@
           </a>
           → tombol "Kirim Email" → centang "Kirim otomatis berulang".
         </p>
+      {:else if !filteredSchedules.length}
+        <p class="text-center opacity-60">Jadwal tidak ditemukan.</p>
       {:else}
         <div class="space-y-3">
-          {#each schedules as schedule (schedule.id)}
+          {#each paginatedSchedules as schedule (schedule.id)}
             <div
               class="bg-slate-50 dark:bg-[#111] rounded-xl border border-slate-200 dark:border-white/10 p-4"
             >
@@ -247,13 +288,19 @@
                     >
                       Batalkan
                     </button>
-                  {:else if schedule.status === "failed"}
+                  {:else if schedule.status === "cancelled" || schedule.status === "failed"}
                     <button
                       onclick={() => startReactivate(schedule)}
-                      class="text-xs px-3 py-1.5 rounded-full border-2"
-                      style="border-color:#8CFF3D; color:#8CFF3D;"
+                      class="text-xs px-3 py-1.5 rounded-lg font-semibold text-white"
+                      style="background:linear-gradient(135deg,#0f766e,#2563eb);"
                     >
                       Aktifkan Lagi
+                    </button>
+                    <button
+                      onclick={() => deleteSchedule(schedule)}
+                      class="text-xs px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    >
+                      Hapus
                     </button>
                   {/if}
                 </div>
@@ -269,42 +316,83 @@
                     <option value="weekly">Setiap minggu</option>
                     <option value="monthly">Setiap bulan</option>
                   </select>
-                  <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 font-semibold text-black rounded-full" style="background:#8CFF3D">Simpan</button>
+                  <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 font-semibold text-white rounded-lg shadow-sm" style="background:linear-gradient(135deg,#0f766e,#2563eb);">Simpan</button>
                   <button onclick={() => (editingId = null)} class="text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-white/20">Batal</button>
                 </div>
               {/if}
 
-              <!-- FORM AKTIFKAN LAGI -->
-
-              {#if reactivatingId === schedule.id}
+              <!-- MODAL AKTIFKAN LAGI -->
+              {#if reactivateSchedule}
                 <div
-                  class="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 flex gap-2 items-center"
+                  class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                  onclick={(e) => { if (e.target === e.currentTarget) reactivateSchedule = null; }}
+                  onkeydown={(e) => { if (e.key === "Escape") reactivateSchedule = null; }}
+                  role="dialog"
+                  aria-modal="true"
+                  tabindex="-1"
                 >
-                  <input
-                    type="datetime-local"
-                    bind:value={reactivateDate}
-                    class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-1.5 text-sm"
-                  />
+                  <div class="w-full max-w-md bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl space-y-4">
+                    <div>
+                      <h2 class="font-semibold text-lg">Aktifkan Kembali Jadwal</h2>
+                      <p class="text-xs opacity-60 mt-1">
+                        Penerima: <strong>{reactivateSchedule.recipient_email}</strong> (email tetap). Atur waktu dan frekuensi baru.
+                      </p>
+                    </div>
 
-                  <button
-                    onclick={() => confirmReactivate(schedule.id)}
-                    class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
-                    style="background:#8CFF3D"
-                  >
-                    Simpan
-                  </button>
+                    <div class="space-y-3">
+                      <div>
+                        <label for="reactivate-date" class="block text-xs font-medium opacity-70 mb-1">Waktu Kirim Pertama</label>
+                        <input
+                          id="reactivate-date"
+                          type="datetime-local"
+                          bind:value={reactivateDate}
+                          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm"
+                        />
+                      </div>
 
-                  <button
-                    onclick={() => (reactivatingId = null)}
-                    class="text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-white/20"
-                  >
-                    Batal
-                  </button>
+                      <div>
+                        <label for="reactivate-freq" class="block text-xs font-medium opacity-70 mb-1">Frekuensi Pengiriman</label>
+                        <select
+                          id="reactivate-freq"
+                          bind:value={reactivateFrequency}
+                          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="once">Sekali saja</option>
+                          <option value="hourly">Setiap jam</option>
+                          <option value="daily">Setiap hari</option>
+                          <option value="weekly">Setiap minggu</option>
+                          <option value="monthly">Setiap bulan</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                      <button
+                        onclick={confirmReactivate}
+                        class="flex-1 px-4 py-2 text-sm rounded-lg font-semibold text-white shadow-sm"
+                        style="background: linear-gradient(135deg, #0f766e, #2563eb);"
+                      >
+                        Simpan &amp; Aktifkan
+                      </button>
+                      <button
+                        onclick={() => (reactivateSchedule = null)}
+                        class="px-4 py-2 text-sm rounded-lg border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
                 </div>
               {/if}
             </div>
           {/each}
         </div>
+        {#if totalPages > 1}
+          <nav class="mt-5 flex items-center justify-between gap-3 text-sm" aria-label="Pagination jadwal">
+            <span class="opacity-60">{filteredSchedules.length} jadwal · Halaman {Math.min(currentPage, totalPages)} dari {totalPages}</span>
+            <div class="flex gap-2"><button type="button" onclick={() => (currentPage = Math.max(1, currentPage - 1))} disabled={currentPage <= 1} class="rounded-lg border border-slate-300 dark:border-white/20 px-3 py-1.5 disabled:opacity-40">Sebelumnya</button><button type="button" onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} class="rounded-lg border border-slate-300 dark:border-white/20 px-3 py-1.5 disabled:opacity-40">Berikutnya</button></div>
+          </nav>
+        {/if}
       {/if}
     </div>
   </main>

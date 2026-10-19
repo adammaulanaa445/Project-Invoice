@@ -47,6 +47,8 @@
   let search = $state("");
   let loading = $state(true);
 
+  const PAGE_SIZE = 10;
+  let currentPage = $state(1);
   let filteredProducts = $derived(
     products.filter((product) =>
       [product.name, product.description]
@@ -55,6 +57,8 @@
         .includes(search.toLowerCase()),
     ),
   );
+  let totalPages = $derived(Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE)));
+  let paginatedProducts = $derived(filteredProducts.slice((Math.min(currentPage, totalPages) - 1) * PAGE_SIZE, Math.min(currentPage, totalPages) * PAGE_SIZE));
   let saving = $state(false);
 
   let editingId = $state(null);
@@ -207,7 +211,7 @@
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
         <label class="relative flex-1">
           <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60" aria-hidden="true" />
-          <input bind:value={search} placeholder="Cari produk..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
+          <input value={search} oninput={(event) => { search = event.currentTarget.value; currentPage = 1; }} placeholder="Cari produk..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
         </label>
         <button onclick={() => { resetForm(); showFormModal = true; }} class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D"><Plus size={18} aria-hidden="true" />Tambah Produk</button>
       </div>
@@ -292,7 +296,7 @@
         </p>
       {:else}
         <div class="space-y-3">
-          {#each filteredProducts as product (product.id)}
+          {#each paginatedProducts as product (product.id)}
             <div
               class="bg-slate-50 dark:bg-[#111] rounded-xl border border-slate-200 dark:border-white/10 p-4 flex justify-between items-start gap-4"
             >
@@ -328,6 +332,12 @@
             </div>
           {/each}
         </div>
+        {#if totalPages > 1}
+          <nav class="mt-5 flex items-center justify-between gap-3 text-sm" aria-label="Pagination produk">
+            <span class="opacity-60">{filteredProducts.length} produk · Halaman {Math.min(currentPage, totalPages)} dari {totalPages}</span>
+            <div class="flex gap-2"><button type="button" onclick={() => (currentPage = Math.max(1, currentPage - 1))} disabled={currentPage <= 1} class="rounded-lg border border-slate-300 dark:border-white/20 px-3 py-1.5 disabled:opacity-40">Sebelumnya</button><button type="button" onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} class="rounded-lg border border-slate-300 dark:border-white/20 px-3 py-1.5 disabled:opacity-40">Berikutnya</button></div>
+          </nav>
+        {/if}
       {/if}
       </section>
 

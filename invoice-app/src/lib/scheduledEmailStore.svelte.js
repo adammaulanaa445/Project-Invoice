@@ -106,7 +106,7 @@ export const scheduledEmailStore = {
   // AKTIFKAN LAGI JADWAL YANG GAGAL (status 'failed')
   // =========================
 
-  async reactivate(id, nextSendAt) {
+  async reactivate(id, nextSendAt, frequency) {
     const token = getToken();
     if (!token) throw new Error('Kamu harus login dulu.');
 
@@ -117,7 +117,7 @@ export const scheduledEmailStore = {
         'Accept': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ next_send_at: nextSendAt })
+      body: JSON.stringify({ next_send_at: nextSendAt, frequency })
     });
 
     const data = await res.json().catch(() => ({}));
@@ -127,5 +127,17 @@ export const scheduledEmailStore = {
     }
 
     return data;
+  },
+
+  async remove(id) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login dulu.');
+
+    const res = await fetch(`${API_BASE}/scheduled-emails/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal menghapus jadwal.');
   }
 };

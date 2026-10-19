@@ -276,6 +276,18 @@ export const invoiceStore = {
     return { id: data.id, invoiceNumber: data.invoice_number, raw: data };
   },
 
+  async remove(invoiceId) {
+    const token = getToken();
+    if (!token) throw new Error('Kamu harus login terlebih dahulu.');
+
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Gagal menghapus invoice.');
+  },
+
   // =====================================================
   // KIRIM EMAIL SEKARANG
   // =====================================================
