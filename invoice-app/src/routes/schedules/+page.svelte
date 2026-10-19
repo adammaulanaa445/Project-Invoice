@@ -323,7 +323,7 @@
               <!-- MODAL AKTIFKAN LAGI -->
               {#if reactivateSchedule}
                 <div
-                  class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                  class="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center p-4"
                   onclick={(e) => { if (e.target === e.currentTarget) reactivateSchedule = null; }}
                   onkeydown={(e) => { if (e.key === "Escape") reactivateSchedule = null; }}
                   role="dialog"
