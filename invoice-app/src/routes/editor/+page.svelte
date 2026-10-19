@@ -58,6 +58,33 @@
   import { productStore } from "$lib/productStore.svelte.js";
   import { scheduledEmailStore } from "$lib/scheduledEmailStore.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
+  import { notify } from "$lib/alerts.js";
+
+  function showFailure(error, fallback) {
+    return notify.error("Proses gagal", error?.message || fallback);
+  }
+
+  function validateInvoiceItems() {
+    if (invoice.items.length) return true;
+    notify.warning("Item invoice belum ada", "Tambahkan minimal satu item invoice sebelum melanjutkan.");
+    return false;
+  }
+
+  function validateEmailSchedule() {
+    if (!recipientEmail.trim()) {
+      notify.warning("Email penerima belum diisi", "Masukkan alamat email penerima sebelum mengirim.");
+      return false;
+    }
+
+    if (!validateInvoiceItems()) return false;
+
+    if (autoSendEmail && !scheduleFirstSendAt) {
+      notify.warning("Waktu pengiriman belum dipilih", "Pilih waktu pengiriman pertama.");
+      return false;
+    }
+
+    return true;
+  }
 
   const actionIcons = {
     save: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`,
@@ -299,7 +326,6 @@
 
   let downloading = $state(false);
   let saving = $state(false);
-  let saveMessage = $state("");
 
   // =====================================================
   // KLIEN & PRODUK
@@ -368,7 +394,6 @@
 
   let sendingEmail = $state(false);
   let showEmailModal = $state(false);
-  let emailMessage = $state("");
   let recipientEmail = $state("");
 
   // TRUE = kirim otomatis berulang (bukan kirim sekali di masa depan)
@@ -705,11 +730,7 @@
     } catch (error) {
       console.error("Generate PDF error:", error);
 
-      saveMessage = "❌ Gagal membuat PDF.";
-
-      setTimeout(() => {
-        saveMessage = "";
-      }, 4000);
+      await showFailure(error, "Gagal membuat PDF.");
     } finally {
       downloading = false;
     }
@@ -720,18 +741,9 @@
   // =====================================================
 
   async function saveInvoice() {
-    if (!invoice.items.length) {
-      saveMessage = "❌ Tambahkan minimal 1 item invoice terlebih dahulu.";
-
-      setTimeout(() => {
-        saveMessage = "";
-      }, 4000);
-
-      return;
-    }
+    if (!validateInvoiceItems()) return;
 
     saving = true;
-    saveMessage = "";
 
     try {
       const record = savedInvoiceId
@@ -744,17 +756,12 @@
         invoice.invoiceNumber = record.invoiceNumber;
       }
 
-      saveMessage = "✅ Invoice berhasil disimpan!";
+      await notify.success("Invoice disimpan", "Data invoice sudah tersimpan.");
     } catch (e) {
       console.error("Save invoice error:", e);
-
-      saveMessage = "❌ Gagal menyimpan: " + (e.message || "Terjadi kesalahan.");
+      await showFailure(e, "Gagal menyimpan invoice.");
     } finally {
       saving = false;
-
-      setTimeout(() => {
-        saveMessage = "";
-      }, 4000);
     }
   }
 
@@ -764,8 +771,6 @@
 
   function openEmailModal() {
     recipientEmail = invoice.to.email || "";
-
-    emailMessage = "";
 
     autoSendEmail = false;
     scheduleFrequency = "daily";
@@ -781,7 +786,6 @@
     if (sendingEmail) return;
 
     showEmailModal = false;
-    emailMessage = "";
   }
 
   // =====================================================
@@ -789,23 +793,9 @@
   // =====================================================
 
   async function sendEmail() {
-    if (!recipientEmail.trim()) {
-      emailMessage = "❌ Masukkan email penerima.";
-      return;
-    }
-
-    if (!invoice.items.length) {
-      emailMessage = "❌ Tambahkan minimal 1 item invoice terlebih dahulu.";
-      return;
-    }
-
-    if (autoSendEmail && !scheduleFirstSendAt) {
-      emailMessage = "❌ Pilih waktu pengiriman pertama.";
-      return;
-    }
+    if (!validateEmailSchedule()) return;
 
     sendingEmail = true;
-    emailMessage = "";
 
     try {
       const token = localStorage.getItem("auth_token");
@@ -834,14 +824,13 @@
           next_send_at: new Date(scheduleFirstSendAt).toISOString(),
         });
 
-        emailMessage =
+        await notify.success(
+          "Invoice dijadwalkan",
           scheduleFrequency === "once"
-            ? "✅ Invoice dijadwalkan untuk dikirim sekali sesuai waktu yang dipilih."
-            : `✅ Invoice akan dikirim otomatis ${frequencyLabel[scheduleFrequency].toLowerCase()}, mulai dari waktu yang dipilih. Kelola/batalkan lewat halaman "Jadwal Kirim".`;
-
-        setTimeout(() => {
-          closeEmailModal();
-        }, 3500);
+            ? "Invoice akan dikirim sesuai waktu yang dipilih."
+            : `Invoice akan dikirim ${frequencyLabel[scheduleFrequency].toLowerCase()} mulai waktu yang dipilih.`,
+        );
+        closeEmailModal();
 
         return;
       }
@@ -854,16 +843,12 @@
 
       await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob, previewImageBlob);
 
-      emailMessage = "✅ Invoice berhasil dikirim!";
-
-      setTimeout(() => {
-        closeEmailModal();
-      }, 2500);
+      await notify.success("Invoice dikirim", "Email invoice sudah dikirim ke penerima.");
+      closeEmailModal();
     } catch (error) {
       console.error("Send email error:", error);
 
-      emailMessage =
-        "❌ " + (error.message || "Gagal mengirim atau menjadwalkan email.");
+      await showFailure(error, "Gagal mengirim atau menjadwalkan email.");
     } finally {
       sendingEmail = false;
     }
@@ -1346,15 +1331,6 @@
               </button>
             </div>
 
-            {#if saveMessage}
-              <p
-                class="text-center text-sm mb-3 {saveMessage.startsWith('✅')
-                  ? 'text-emerald-500'
-                  : 'text-red-500'}"
-              >
-                {saveMessage}
-              </p>
-            {/if}
 
             <div bind:this={previewEl} class="rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-transparent dark:border-white/10">
               <svelte:component
@@ -1571,17 +1547,6 @@
             {/if}
           </div>
 
-          {#if emailMessage}
-            <div
-              class="mt-4 p-3 rounded-lg {emailMessage.startsWith('✅')
-                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-                : 'bg-red-50 dark:bg-red-900/20 text-red-500'}"
-            >
-              <p class="text-sm">
-                {emailMessage}
-              </p>
-            </div>
-          {/if}
 
           <div class="flex gap-2 mt-6">
             <button

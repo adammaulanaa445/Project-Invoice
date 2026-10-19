@@ -5,6 +5,33 @@
   import { clientStore } from "$lib/clientStore.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
   import AppHeader from "$lib/components/AppHeader.svelte";
+  import { notify } from "$lib/alerts.js";
+  import { Pencil, Plus, Search, Trash2, Users } from "@lucide/svelte";
+
+  function errorMessage(error, fallback) {
+    return error?.message || fallback;
+  }
+
+  function validateClient() {
+    if (form.name.trim()) return true;
+    notify.warning("Nama klien belum diisi", "Isi nama klien sebelum menyimpan.");
+    return false;
+  }
+
+  function showSaveResult(isEditing) {
+    return notify.success(
+      isEditing ? "Klien diperbarui" : "Klien ditambahkan",
+      isEditing ? "Perubahan data klien sudah tersimpan." : "Data klien baru sudah tersimpan.",
+    );
+  }
+
+  function showFailure(error, fallback) {
+    return notify.error("Proses gagal", errorMessage(error, fallback));
+  }
+
+  function confirmDelete() {
+    return notify.confirm("Hapus klien?", "Data klien yang dihapus tidak dapat dikembalikan.", "Ya, hapus");
+  }
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -36,7 +63,6 @@
     ),
   );
   let saving = $state(false);
-  let message = $state("");
 
   let editingId = $state(null);
   let showFormModal = $state(false);
@@ -92,43 +118,26 @@
   // =====================================================
 
   async function handleSubmit() {
-    if (!form.name.trim()) {
-      message = "❌ Nama klien wajib diisi.";
-
-      setTimeout(() => {
-        message = "";
-      }, 4000);
-
-      return;
-    }
+    if (!validateClient()) return;
 
     saving = true;
-    message = "";
+    const isEditing = Boolean(editingId);
 
     try {
-      if (editingId) {
+      if (isEditing) {
         await clientStore.update(editingId, form);
-
-        message = "✅ Klien berhasil diperbarui!";
       } else {
         await clientStore.create(form);
-
-        message = "✅ Klien berhasil ditambahkan!";
       }
 
       resetForm();
-
       await loadClients();
+      await showSaveResult(isEditing);
     } catch (error) {
       console.error("Save client error:", error);
-
-      message = "❌ " + (error.message || "Terjadi kesalahan.");
+      await showFailure(error, "Gagal menyimpan data klien.");
     } finally {
       saving = false;
-
-      setTimeout(() => {
-        message = "";
-      }, 4000);
     }
   }
 
@@ -150,14 +159,14 @@
   }
 
   async function deleteClient(id) {
-    if (!confirm("Yakin ingin menghapus klien ini?")) return;
+    if (!(await confirmDelete())) return;
 
     try {
       await clientStore.remove(id);
-
       await loadClients();
+      await notify.success("Klien dihapus", "Data klien sudah dihapus.");
     } catch (error) {
-      alert(error.message || "Gagal menghapus klien.");
+      await showFailure(error, "Gagal menghapus klien.");
     }
   }
 </script>
@@ -193,8 +202,11 @@
       <!-- FORM -->
 
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
-        <input bind:value={search} placeholder="Cari klien..." class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full px-4 py-2 text-sm" />
-        <button onclick={() => { resetForm(); showFormModal = true; }} class="px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D">+ Tambah Klien</button>
+        <label class="relative flex-1">
+          <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60" aria-hidden="true" />
+          <input bind:value={search} placeholder="Cari klien..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
+        </label>
+        <button onclick={() => { resetForm(); showFormModal = true; }} class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D"><Plus size={18} aria-hidden="true" />Tambah Klien</button>
       </div>
 
       {#if showFormModal}
@@ -258,15 +270,6 @@
           {/if}
         </div>
 
-        {#if message}
-          <p
-            class="text-center text-sm mt-3 {message.startsWith('✅')
-              ? 'text-emerald-500'
-              : 'text-red-500'}"
-          >
-            {message}
-          </p>
-        {/if}
       </div>
       </div>
       {/if}

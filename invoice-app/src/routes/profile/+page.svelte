@@ -5,6 +5,12 @@
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import AppHeader from '$lib/components/AppHeader.svelte';
   import { sidebar } from '$lib/sidebarStore.svelte.js';
+  import { notify } from '$lib/alerts.js';
+  import { Building2, Save, UserRound } from '@lucide/svelte';
+
+  function showFailure(error, fallback) {
+    return notify.error('Proses gagal', error?.message || fallback);
+  }
 
 
   const API_BASE = 'https://project-invoice-production-e8ba.up.railway.app/api';
@@ -40,7 +46,6 @@
   let logoPreview = $state('');
   let loading = $state(true);
   let saving = $state(false);
-  let message = $state('');
 
   onMount(async () => {
     currentUser = authStore.getCurrentUser();
@@ -93,7 +98,7 @@
 
     } catch (error) {
       console.error(error);
-      message = '❌ Gagal mengambil data profile.';
+      await showFailure(error, 'Gagal mengambil data profile.');
     } finally {
       loading = false;
     }
@@ -105,12 +110,12 @@
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      message = '❌ File harus berupa gambar.';
+      notify.warning('File tidak valid', 'Pilih file gambar untuk logo perusahaan.');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      message = '❌ Ukuran logo maksimal 2MB.';
+      notify.warning('Ukuran logo terlalu besar', 'Ukuran logo maksimal 2MB.');
       return;
     }
 
@@ -118,12 +123,10 @@
 
     logoPreview = URL.createObjectURL(file);
 
-    message = '';
   }
 
   async function saveProfile() {
     saving = true;
-    message = '';
 
     try {
       const token = localStorage.getItem('auth_token');
@@ -195,15 +198,10 @@
       }
 
       logoFile = null;
-
-      message = '✅ Profile berhasil disimpan.';
-
+      await notify.success('Profile disimpan', 'Informasi perusahaan sudah diperbarui.');
     } catch (error) {
       console.error(error);
-
-      message =
-        '❌ ' +
-        (error.message || 'Gagal menyimpan profile.');
+      await showFailure(error, 'Gagal menyimpan profile.');
 
     } finally {
       saving = false;
@@ -465,18 +463,6 @@
             </div>
 
           </div>
-
-
-          <!-- MESSAGE -->
-          {#if message}
-
-            <div
-              class="mt-5 text-sm"
-            >
-              {message}
-            </div>
-
-          {/if}
 
 
           <!-- SAVE -->

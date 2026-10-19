@@ -5,6 +5,26 @@
   import { productStore } from "$lib/productStore.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
   import AppHeader from "$lib/components/AppHeader.svelte";
+  import { notify } from "$lib/alerts.js";
+  import { Package, Pencil, Plus, Search, Trash2 } from "@lucide/svelte";
+
+  function errorMessage(error, fallback) {
+    return error?.message || fallback;
+  }
+
+  function validateProduct() {
+    if (form.name.trim()) return true;
+    notify.warning("Nama produk belum diisi", "Isi nama produk atau jasa sebelum menyimpan.");
+    return false;
+  }
+
+  function showFailure(error, fallback) {
+    return notify.error("Proses gagal", errorMessage(error, fallback));
+  }
+
+  function confirmDelete() {
+    return notify.confirm("Hapus produk?", "Data produk yang dihapus tidak dapat dikembalikan.", "Ya, hapus");
+  }
 
   // =====================================================
   // MENU SIDEBAR (halaman ini, bukan section-scroll seperti /editor)
@@ -36,7 +56,6 @@
     ),
   );
   let saving = $state(false);
-  let message = $state("");
 
   let editingId = $state(null);
   let showFormModal = $state(false);
@@ -90,18 +109,10 @@
   // =====================================================
 
   async function handleSubmit() {
-    if (!form.name.trim()) {
-      message = "❌ Nama produk wajib diisi.";
-
-      setTimeout(() => {
-        message = "";
-      }, 4000);
-
-      return;
-    }
+    if (!validateProduct()) return;
 
     saving = true;
-    message = "";
+    const isEditing = Boolean(editingId);
 
     try {
       const payload = {
@@ -110,29 +121,23 @@
         price: Number(form.price) || 0,
       };
 
-      if (editingId) {
+      if (isEditing) {
         await productStore.update(editingId, payload);
-
-        message = "✅ Produk berhasil diperbarui!";
       } else {
         await productStore.create(payload);
-
-        message = "✅ Produk berhasil ditambahkan!";
       }
 
       resetForm();
-
       await loadProducts();
+      await notify.success(
+        isEditing ? "Produk diperbarui" : "Produk ditambahkan",
+        isEditing ? "Perubahan produk sudah tersimpan." : "Produk baru sudah tersimpan.",
+      );
     } catch (error) {
       console.error("Save product error:", error);
-
-      message = "❌ " + (error.message || "Terjadi kesalahan.");
+      await showFailure(error, "Gagal menyimpan produk.");
     } finally {
       saving = false;
-
-      setTimeout(() => {
-        message = "";
-      }, 4000);
     }
   }
 
@@ -153,14 +158,14 @@
   }
 
   async function deleteProduct(id) {
-    if (!confirm("Yakin ingin menghapus produk ini?")) return;
+    if (!(await confirmDelete())) return;
 
     try {
       await productStore.remove(id);
-
       await loadProducts();
+      await notify.success("Produk dihapus", "Data produk sudah dihapus.");
     } catch (error) {
-      alert(error.message || "Gagal menghapus produk.");
+      await showFailure(error, "Gagal menghapus produk.");
     }
   }
 
@@ -200,8 +205,11 @@
       <!-- FORM -->
 
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
-        <input bind:value={search} placeholder="Cari produk..." class="flex-1 border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full px-4 py-2 text-sm" />
-        <button onclick={() => { resetForm(); showFormModal = true; }} class="px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D">+ Tambah Produk</button>
+        <label class="relative flex-1">
+          <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60" aria-hidden="true" />
+          <input bind:value={search} placeholder="Cari produk..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
+        </label>
+        <button onclick={() => { resetForm(); showFormModal = true; }} class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D"><Plus size={18} aria-hidden="true" />Tambah Produk</button>
       </div>
 
       {#if showFormModal}

@@ -5,6 +5,18 @@
   import { scheduledEmailStore } from "$lib/scheduledEmailStore.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
   import AppHeader from "$lib/components/AppHeader.svelte";
+  import { notify } from "$lib/alerts.js";
+  import { Ban, Check, Clock3, Pencil, RotateCcw } from "@lucide/svelte";
+
+  function showFailure(error, fallback) {
+    return notify.error("Proses gagal", error?.message || fallback);
+  }
+
+  function validateDate(value, message) {
+    if (value) return true;
+    notify.warning("Waktu belum dipilih", message);
+    return false;
+  }
 
   const menuItems = [
     { label: "Buat Invoice", icon: "▣", href: "/editor" },
@@ -39,13 +51,15 @@
   }
 
   async function saveEdit(id) {
-    if (!editDate) return;
+    if (!validateDate(editDate, "Pilih waktu kirim baru sebelum menyimpan.")) return;
+
     try {
       await scheduledEmailStore.update(id, new Date(editDate).toISOString(), editFrequency);
       editingId = null;
       await loadSchedules();
+      await notify.success("Jadwal diperbarui", "Waktu pengiriman sudah disimpan.");
     } catch (error) {
-      alert(error.message || "Gagal mengubah jadwal.");
+      await showFailure(error, "Gagal mengubah jadwal.");
     }
   }
 
@@ -95,13 +109,19 @@
   });
 
   async function cancelSchedule(id) {
-    if (!confirm("Batalkan jadwal ini? Jadwal tidak akan dikirim lagi.")) return;
+    const confirmed = await notify.confirm(
+      "Batalkan jadwal?",
+      "Invoice tidak akan dikirim lagi dari jadwal ini.",
+      "Ya, batalkan",
+    );
+    if (!confirmed) return;
 
     try {
       await scheduledEmailStore.cancel(id);
       await loadSchedules();
+      await notify.success("Jadwal dibatalkan", "Pengiriman otomatis sudah dihentikan.");
     } catch (error) {
-      alert(error.message || "Gagal membatalkan jadwal.");
+      await showFailure(error, "Gagal membatalkan jadwal.");
     }
   }
 
@@ -114,16 +134,15 @@
   }
 
   async function confirmReactivate(id) {
-    if (!reactivateDate) return;
+    if (!validateDate(reactivateDate, "Pilih waktu kirim baru sebelum mengaktifkan jadwal.")) return;
 
     try {
       await scheduledEmailStore.reactivate(id, new Date(reactivateDate).toISOString());
-
       reactivatingId = null;
-
       await loadSchedules();
+      await notify.success("Jadwal diaktifkan", "Pengiriman otomatis sudah dijadwalkan kembali.");
     } catch (error) {
-      alert(error.message || "Gagal mengaktifkan ulang jadwal.");
+      await showFailure(error, "Gagal mengaktifkan ulang jadwal.");
     }
   }
 
