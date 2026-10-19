@@ -57,7 +57,15 @@ class InvoiceEmailTemplateRenderer
 JS
         );
 
-        $html = json_decode($payload, true, 512, JSON_THROW_ON_ERROR)['html'] ?? null;
+        $decodedPayload = json_decode($payload, true);
+        $html = is_array($decodedPayload) ? ($decodedPayload['html'] ?? null) : null;
+
+        // Chromium/Puppeteer tertentu mengembalikan hasil evaluate langsung
+        // sebagai string HTML, bukan string JSON. Keduanya valid dan harus
+        // dipakai tanpa memunculkan JsonException "Syntax error".
+        if (! is_string($html) && str_contains($payload, '<')) {
+            $html = $payload;
+        }
 
         if (! is_string($html)) {
             throw new \RuntimeException('HTML preview invoice tidak valid.');
