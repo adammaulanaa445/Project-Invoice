@@ -17,7 +17,6 @@ class InvoiceMail extends Mailable
     public function __construct(
         public Invoice $invoice,
         public string $pdfData,
-        public ?string $previewImageData = null
     ) {}
 
     public function envelope(): Envelope
@@ -33,7 +32,6 @@ class InvoiceMail extends Mailable
             view: 'emails.invoice',
             with: [
                 'invoice' => $this->invoice,
-                'previewImageData' => $this->previewImageData,
             ],
         );
     }

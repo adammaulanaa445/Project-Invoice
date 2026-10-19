@@ -46,15 +46,11 @@ class SendScheduledInvoiceEmails extends Command
 
         try {
             $pdfPath = $this->generatePdf($invoice);
-            $previewPath = $this->generatePreviewImage($invoice);
             $pdfData = file_get_contents($pdfPath);
-            $previewImageData = base64_encode(file_get_contents($previewPath));
 
             Mail::to($schedule->recipient_email)->send(
-                new InvoiceMail($invoice, $pdfData, $previewImageData)
+                new InvoiceMail($invoice, $pdfData)
             );
-
-            @unlink($previewPath);
 
             $schedule->update([
                 'last_sent_at' => now(),
@@ -114,41 +110,6 @@ class SendScheduledInvoiceEmails extends Command
 
         $chromePath = config('services.browsershot.chrome_path');
 
-        if ($chromePath) {
-            $browsershot->setChromePath($chromePath);
-        }
-
-        $browsershot->save($fullPath);
-
-        return $fullPath;
-    }
-
-    protected function generatePreviewImage($invoice): string
-    {
-        $frontendUrl = rtrim((string) config('services.frontend.url'), '/');
-
-        if ($frontendUrl === '' || !filter_var($frontendUrl, FILTER_VALIDATE_URL)) {
-            throw new \RuntimeException('FRONTEND_URL harus berupa URL absolut yang valid.');
-        }
-
-        $printUrl = "{$frontendUrl}/print/invoice/{$invoice->id}?token=" . rawurlencode($invoice->print_token);
-        $fileName = "scheduled-invoices/invoice-{$invoice->id}-" . now()->timestamp . '.jpg';
-        $fullPath = storage_path("app/public/{$fileName}");
-
-        if (!is_dir(dirname($fullPath))) {
-            mkdir(dirname($fullPath), 0755, true);
-        }
-
-        $browsershot = Browsershot::url($printUrl)
-            ->addChromiumArguments(['no-sandbox', 'disable-setuid-sandbox'])
-            ->waitUntilNetworkIdle()
-            ->waitForFunction('document.querySelector(".print-wrapper") && !document.querySelector(".print-pending")')
-            ->setDelay(500)
-            ->showBackground()
-            ->setScreenshotType('jpeg', 90)
-            ->fullPage();
-
-        $chromePath = config('services.browsershot.chrome_path');
         if ($chromePath) {
             $browsershot->setChromePath($chromePath);
         }

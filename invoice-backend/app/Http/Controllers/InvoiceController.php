@@ -153,11 +153,10 @@ class InvoiceController extends Controller
             ], 403);
         }
 
-        // Validasi data email dan PDF
+        // Preview email dirender sebagai HTML dari data invoice. Hanya PDF perlu diunggah.
         $data = $request->validate([
             'email' => 'required|email',
             'pdf' => 'required|file|mimes:pdf|max:10240',
-            'preview_image' => 'required|file|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         try {
@@ -169,17 +168,9 @@ class InvoiceController extends Controller
                 $request->file('pdf')->getRealPath()
             );
 
-            $previewImageData = $request->hasFile('preview_image')
-                ? base64_encode(file_get_contents($request->file('preview_image')->getRealPath()))
-                : null;
-
-            // Kirim email
+            // Kirim email dengan preview HTML berbasis data invoice.
             Mail::to($data['email'])->send(
-                new InvoiceMail(
-                    $invoice,
-                    $pdfData,
-                    $previewImageData
-                )
+                new InvoiceMail($invoice, $pdfData)
             );
 
             return response()->json([

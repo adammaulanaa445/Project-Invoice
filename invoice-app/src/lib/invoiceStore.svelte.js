@@ -284,7 +284,6 @@ export const invoiceStore = {
     invoiceId,
     recipientEmail,
     pdfBlob,
-    previewImageBlob
   ) {
 
     const token = getToken();
@@ -310,16 +309,6 @@ export const invoiceStore = {
       'pdf',
       pdfBlob,
       `Invoice-${invoiceId}.pdf`
-    );
-
-    if (!previewImageBlob) {
-      throw new Error('Gambar preview invoice tidak berhasil dibuat.');
-    }
-
-    formData.append(
-      'preview_image',
-      previewImageBlob,
-      `Invoice-${invoiceId}.jpg`
     );
 
     const res = await fetch(

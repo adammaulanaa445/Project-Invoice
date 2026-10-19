@@ -367,11 +367,11 @@
     invoice.to.email = client.email || "";
   }
 
-  function addProductItem() {
-    if (!selectedProductId) return;
+  function addProductItem(id = selectedProductId) {
+    if (!id) return;
 
     const product = products.find(
-      (p) => String(p.id) === String(selectedProductId),
+      (p) => String(p.id) === String(id),
     );
 
     if (!product) return;
@@ -639,29 +639,6 @@
   // sendiri lewat Browsershot -- browser tidak perlu bikin PDF.)
   // =====================================================
 
-  async function generatePreviewImage() {
-    if (!previewEl) {
-      throw new Error("Preview invoice tidak ditemukan.");
-    }
-
-    previewEl.classList.add("pdf-export");
-    try {
-      const canvas = await html2canvas(previewEl, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-      });
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
-      if (!blob) {
-        throw new Error("Gagal membuat gambar preview invoice.");
-      }
-      return blob;
-    } finally {
-      previewEl.classList.remove("pdf-export");
-    }
-  }
-
   async function generatePDF() {
     if (!previewEl) {
       throw new Error("Preview invoice tidak ditemukan.");
@@ -839,9 +816,8 @@
       const pdf = await generatePDF();
 
       const pdfBlob = pdf.output("blob");
-      const previewImageBlob = await generatePreviewImage();
 
-      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob, previewImageBlob);
+      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob);
 
       showEmailModal = false;
       await notify.success("Invoice dikirim", "Email invoice sudah dikirim ke penerima.");
@@ -1105,7 +1081,7 @@
         <!-- STEP 2: KLIEN + PRODUK + PREVIEW -->
         <!-- ================================================= -->
 
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] gap-4 sm:gap-6">
           <!-- FORM STEP 2 -->
 
           <div
@@ -1179,34 +1155,22 @@
               class:section-highlight={activeSection === "items"}
               class="scroll-mt-6 rounded-xl p-2 -m-2 transition-all duration-500"
             >
-              <div class="flex justify-between items-center mb-3">
+              <div class="mb-3">
                 <h2 class="font-semibold">
                   {lang.t("et_items")}
                 </h2>
-
-                <button
-                  onclick={addItem}
-                  class="text-xs px-3 py-1.5 font-semibold text-black rounded-full"
-                  style="background:#8CFF3D"
-                >
-                  {lang.t("et_add_item")}
-                </button>
+                <p class="mt-1 text-xs opacity-60">
+                  Pilih produk tersimpan atau buat item manual.
+                </p>
               </div>
 
               {#if products.length > 0}
-                <div class="flex gap-2 mb-3">
-                  <div class="flex-1">
-                    <Combobox options={productOptions} bind:value={selectedProductId} placeholder="Pilih produk..." searchPlaceholder="Cari produk..." emptyText="Produk tidak ditemukan" />
-                  </div>
-
-                  <button
-                    onclick={addProductItem}
-                    disabled={!selectedProductId}
-                    class="text-xs px-3 py-1.5 font-semibold rounded-full border-2 disabled:opacity-40"
-                    style="border-color:#8CFF3D; color:#8CFF3D;"
-                  >
-                    Tambah dari Produk
-                  </button>
+                <div class="mb-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-3">
+                  <label class="mb-2 block text-xs font-medium opacity-70">
+                    Tambahkan produk tersimpan
+                  </label>
+                  <Combobox options={productOptions} bind:value={selectedProductId} onselect={addProductItem} placeholder="Cari lalu pilih produk..." searchPlaceholder="Cari produk..." emptyText="Produk tidak ditemukan" />
+                  <p class="mt-2 text-xs opacity-50">Produk langsung masuk ke daftar item setelah dipilih.</p>
                 </div>
               {:else}
                 <p class="text-xs opacity-50 mb-3">
@@ -1217,6 +1181,14 @@
                   supaya bisa dipilih langsung di sini.
                 </p>
               {/if}
+
+              <button
+                onclick={addItem}
+                class="mb-3 text-xs px-3 py-1.5 font-semibold text-black rounded-full"
+                style="background:#8CFF3D"
+              >
+                + Buat item manual
+              </button>
 
               <div class="space-y-2">
                 {#each invoice.items as item, i}
