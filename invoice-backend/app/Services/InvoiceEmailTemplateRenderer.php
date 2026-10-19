@@ -57,20 +57,50 @@ class InvoiceEmailTemplateRenderer
 JS
         );
 
-        $decodedPayload = json_decode($payload, true);
-        $html = is_array($decodedPayload) ? ($decodedPayload['html'] ?? null) : null;
-
-        // Chromium/Puppeteer tertentu mengembalikan hasil evaluate langsung
-        // sebagai string HTML, bukan string JSON. Keduanya valid dan harus
-        // dipakai tanpa memunculkan JsonException "Syntax error".
-        if (! is_string($html) && str_contains($payload, '<')) {
-            $html = $payload;
-        }
+        $html = $this->extractHtml($payload);
 
         if (! is_string($html)) {
             throw new \RuntimeException('HTML preview invoice tidak valid.');
         }
 
         return $html;
+    }
+
+    private function extractHtml(string $payload): ?string
+    {
+        $candidates = [$payload];
+
+        while ($candidate = array_shift($candidates)) {
+            if (is_string($candidate)) {
+                $decoded = json_decode($candidate, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $candidates[] = $decoded;
+
+                    continue;
+                }
+
+                if (str_contains($candidate, '<')) {
+                    return $candidate;
+                }
+
+                continue;
+            }
+
+            if (! is_array($candidate)) {
+                continue;
+            }
+
+            if (isset($candidate['html']) && is_string($candidate['html'])) {
+                $candidates[] = $candidate['html'];
+            }
+
+            foreach ($candidate as $value) {
+                if (is_string($value) || is_array($value)) {
+                    $candidates[] = $value;
+                }
+            }
+        }
+
+        return null;
     }
 }
