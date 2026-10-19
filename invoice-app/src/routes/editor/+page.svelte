@@ -824,13 +824,13 @@
           next_send_at: new Date(scheduleFirstSendAt).toISOString(),
         });
 
+        showEmailModal = false;
         await notify.success(
           "Invoice dijadwalkan",
           scheduleFrequency === "once"
             ? "Invoice akan dikirim sesuai waktu yang dipilih."
             : `Invoice akan dikirim ${frequencyLabel[scheduleFrequency].toLowerCase()} mulai waktu yang dipilih.`,
         );
-        closeEmailModal();
 
         return;
       }
@@ -843,8 +843,8 @@
 
       await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob, previewImageBlob);
 
+      showEmailModal = false;
       await notify.success("Invoice dikirim", "Email invoice sudah dikirim ke penerima.");
-      closeEmailModal();
     } catch (error) {
       console.error("Send email error:", error);
 
