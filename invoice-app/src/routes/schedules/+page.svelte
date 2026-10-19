@@ -44,10 +44,6 @@
   let totalPages = $derived(Math.max(1, Math.ceil(filteredSchedules.length / PAGE_SIZE)));
   let paginatedSchedules = $derived(filteredSchedules.slice((Math.min(currentPage, totalPages) - 1) * PAGE_SIZE, Math.min(currentPage, totalPages) * PAGE_SIZE));
 
-  let reactivatingId = $state(null);
-  let reactivateSchedule = $state(null);
-  let reactivateDate = $state("");
-  let reactivateFrequency = $state("daily");
   let editingId = $state(null);
   let editDate = $state("");
   let editFrequency = $state("daily");
@@ -137,29 +133,6 @@
       await notify.success("Jadwal dibatalkan", "Pengiriman otomatis sudah dihentikan.");
     } catch (error) {
       await showFailure(error, "Gagal membatalkan jadwal.");
-    }
-  }
-
-  function startReactivate(schedule) {
-    reactivateSchedule = schedule;
-    reactivateFrequency = schedule.frequency ?? "daily";
-    reactivateDate = toLocalInput(schedule.next_send_at) || new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
-  }
-
-  async function confirmReactivate() {
-    if (!reactivateSchedule || !validateDate(reactivateDate, "Pilih waktu kirim baru sebelum mengaktifkan jadwal.")) return;
-
-    try {
-      await scheduledEmailStore.reactivate(
-        reactivateSchedule.id,
-        new Date(reactivateDate).toISOString(),
-        reactivateFrequency,
-      );
-      reactivateSchedule = null;
-      await loadSchedules();
-      await notify.success("Jadwal diaktifkan", "Frekuensi dan waktu kirim baru sudah disimpan.");
-    } catch (error) {
-      await showFailure(error, "Gagal mengaktifkan ulang jadwal.");
     }
   }
 
@@ -290,7 +263,7 @@
                     </button>
                   {:else if schedule.status === "cancelled" || schedule.status === "failed"}
                     <button
-                      onclick={() => startReactivate(schedule)}
+                      onclick={() => startEdit(schedule)}
                       class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-800 font-medium text-white hover:bg-slate-700 dark:border-white/20 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
                     >
                       Aktifkan Lagi
@@ -315,71 +288,8 @@
                     <option value="weekly">Setiap minggu</option>
                     <option value="monthly">Setiap bulan</option>
                   </select>
-                  <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 font-medium text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">Simpan</button>
+                  <button onclick={() => saveEdit(schedule.id)} class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 font-medium text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">{schedule.status === "active" ? "Simpan" : "Simpan & Aktifkan"}</button>
                   <button onclick={() => (editingId = null)} class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10">Batal</button>
-                </div>
-              {/if}
-
-              <!-- MODAL AKTIFKAN LAGI -->
-              {#if reactivateSchedule}
-                <div
-                  class="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center p-4"
-                  onclick={(e) => { if (e.target === e.currentTarget) reactivateSchedule = null; }}
-                  onkeydown={(e) => { if (e.key === "Escape") reactivateSchedule = null; }}
-                  role="dialog"
-                  aria-modal="true"
-                  tabindex="-1"
-                >
-                  <div class="w-full max-w-md bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl space-y-4">
-                    <div>
-                      <h2 class="font-semibold text-lg">Aktifkan Kembali Jadwal</h2>
-                      <p class="text-xs opacity-60 mt-1">
-                        Penerima: <strong>{reactivateSchedule.recipient_email}</strong> (email tetap). Atur waktu dan frekuensi baru.
-                      </p>
-                    </div>
-
-                    <div class="space-y-3">
-                      <div>
-                        <label for="reactivate-date" class="block text-xs font-medium opacity-70 mb-1">Waktu Kirim Pertama</label>
-                        <input
-                          id="reactivate-date"
-                          type="datetime-local"
-                          bind:value={reactivateDate}
-                          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm"
-                        />
-                      </div>
-
-                      <div>
-                        <label for="reactivate-freq" class="block text-xs font-medium opacity-70 mb-1">Frekuensi Pengiriman</label>
-                        <select
-                          id="reactivate-freq"
-                          bind:value={reactivateFrequency}
-                          class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-lg px-3 py-2 text-sm"
-                        >
-                          <option value="once">Sekali saja</option>
-                          <option value="hourly">Setiap jam</option>
-                          <option value="daily">Setiap hari</option>
-                          <option value="weekly">Setiap minggu</option>
-                          <option value="monthly">Setiap bulan</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="flex gap-2 pt-2">
-                      <button
-                        onclick={confirmReactivate}
-                        class="flex-1 px-4 py-2 text-sm rounded-lg bg-slate-800 font-medium text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-                      >
-                        Simpan &amp; Aktifkan
-                      </button>
-                      <button
-                        onclick={() => (reactivateSchedule = null)}
-                        class="px-4 py-2 text-sm rounded-lg border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10"
-                      >
-                        Batal
-                      </button>
-                    </div>
-                  </div>
                 </div>
               {/if}
             </div>
