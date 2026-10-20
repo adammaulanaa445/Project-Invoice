@@ -59,6 +59,7 @@
   import { scheduledEmailStore } from "$lib/scheduledEmailStore.svelte.js";
   import { sidebar } from "$lib/sidebarStore.svelte.js";
   import { notify } from "$lib/alerts.js";
+  import { buildEmailPreviewHtml } from "$lib/emailPreview.js";
 
   function showFailure(error, fallback) {
     return notify.error("Proses gagal", error?.message || fallback);
@@ -821,12 +822,19 @@
         throw new Error("Preview invoice tidak ditemukan.");
       }
 
-      // Ambil HTML preview persis seperti yang terlihat di editor.
+      // Ambil HTML preview DENGAN DESAIN ASLI (inline computed style).
+      // Ini bukan outerHTML mentah (yang cuma class Tailwind tanpa CSS),
+      // melainkan hasil render asli: warna/font/spacing sudah jadi
+      // inline style rgb/px sehingga tampil di Gmail/Outlook.
       // Backend production memvalidasi field `preview_html` ini —
       // kalau kosong / terlalu pendek backend menjawab 422
       // "HTML preview invoice tidak valid."
       await tick();
-      const previewHtml = previewEl.outerHTML || "";
+      const previewHtml = buildEmailPreviewHtml(previewEl, {
+        invoiceNumber: invoice.invoiceNumber,
+        fromName: invoice.from.name,
+        toName: invoice.to.name,
+      });
 
       await invoiceStore.sendEmail(
         savedInvoiceId,

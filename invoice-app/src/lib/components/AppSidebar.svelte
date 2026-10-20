@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { authStore } from '$lib/authStore.svelte.js';
+  import { sidebar } from '$lib/sidebarStore.svelte.js';
 
   let currentUser = $state(null);
 
@@ -58,7 +59,12 @@
 
   // props: hanya buka/tutup sidebar. Menu TIDAK lagi dioper dari
   // luar supaya konsisten di semua halaman.
-  let { sidebarOpen = true, onClose = () => {} } = $props();
+  // CATATAN: AppSidebar dipanggil di banyak halaman dengan
+  // `<AppSidebar {sidebarOpen} ... />` (bukan `open=`).
+  // Terima KEDUA nama prop supaya backdrop/translate tidak ngaco:
+  // kalau salah baca, backdrop z-30 bisa nutupin tombol "Tambah Produk".
+  let { sidebarOpen = undefined, open = undefined, menuItems = undefined, menuLabel = 'Menu', onClose = () => {} } = $props();
+  let isOpen = $derived(sidebarOpen ?? open ?? sidebar.open);
 
   $effect(() => {
     currentUser = authStore.getCurrentUser();
@@ -92,7 +98,7 @@
   BACKDROP / OVERLAY GELAP
   Hanya muncul di layar mobile (lg:hidden) saat sidebar terbuka.
 -->
-{#if sidebarOpen}
+{#if isOpen}
   <button
     type="button"
     aria-label="Tutup sidebar"
@@ -118,7 +124,7 @@
     transition-transform
     duration-300
     ease-in-out
-    {sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+    {isOpen ? 'translate-x-0' : '-translate-x-full'}
   "
 >
   <!-- LOGO + CLOSE BUTTON -->

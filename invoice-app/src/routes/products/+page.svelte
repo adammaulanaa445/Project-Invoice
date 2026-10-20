@@ -70,6 +70,8 @@
     price: 0,
   });
 
+  let message = $state("");
+
   function resetForm() {
     editingId = null;
     showFormModal = false;
@@ -208,12 +210,12 @@
 
       <!-- FORM -->
 
-      <div class="flex flex-col sm:flex-row gap-3 mb-4">
+      <div class="relative z-10 flex flex-col sm:flex-row gap-3 mb-4">
         <label class="relative flex-1">
-          <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60" aria-hidden="true" />
+          <Search size={18} class="absolute left-4 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none" aria-hidden="true" />
           <input value={search} oninput={(event) => { search = event.currentTarget.value; currentPage = 1; }} placeholder="Cari produk..." class="w-full border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161616] rounded-full py-2 pl-11 pr-4 text-sm" />
         </label>
-        <button onclick={() => { resetForm(); showFormModal = true; }} class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap" style="background:#8CFF3D"><Plus size={18} aria-hidden="true" />Tambah Produk</button>
+        <button type="button" onclick={() => { resetForm(); showFormModal = true; }} class="relative z-10 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold text-black whitespace-nowrap cursor-pointer" style="background:#8CFF3D"><Plus size={18} aria-hidden="true" />Tambah Produk</button>
       </div>
 
       {#if showFormModal}
@@ -251,9 +253,10 @@
 
         <div class="flex gap-2 mt-4">
           <button
+            type="button"
             onclick={handleSubmit}
             disabled={saving}
-            class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50"
+            class="flex-1 text-black px-4 py-2 rounded-full font-semibold disabled:opacity-50 cursor-pointer"
             style="background:#8CFF3D"
           >
             {saving
@@ -265,8 +268,17 @@
 
           {#if editingId}
             <button
+              type="button"
               onclick={resetForm}
-              class="px-4 py-2 rounded-full border border-slate-300 dark:border-white/20"
+              class="px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 cursor-pointer"
+            >
+              Batal
+            </button>
+          {:else}
+            <button
+              type="button"
+              onclick={resetForm}
+              class="px-4 py-2 rounded-full border border-slate-300 dark:border-white/20 cursor-pointer"
             >
               Batal
             </button>
