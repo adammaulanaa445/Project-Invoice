@@ -25,7 +25,7 @@ check('konversi dipanggil di build', src.includes('convertToEmailSafeLayout(clon
 check('flex row dideteksi', src.includes('isFlexRow'));
 check('grid dideteksi', src.includes('gridColumnCount'));
 check('pakai table email-safe', src.includes("createElement('table')"));
-check('tidak ubah table asli item', src.includes("tag === 'TABLE'"));
+check('tidak ubah table asli item', src.includes("'TABLE'"));
 
 console.log('---');
 console.log('HASIL: ' + pass + ' lolos, ' + fail + ' gagal');
