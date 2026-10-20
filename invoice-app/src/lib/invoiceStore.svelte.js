@@ -362,9 +362,16 @@ export const invoiceStore = {
     );
 
 
-    const data =
-      await res.json().catch(() => ({}));
+    console.log('[EMAIL DEBUG] Response status:', res.status, res.statusText);
+    console.log('[EMAIL DEBUG] Response headers:', Object.fromEntries(res.headers.entries()));
 
+    const data =
+      await res.json().catch((err) => {
+        console.warn('[EMAIL DEBUG] Failed to parse JSON response:', err);
+        return {};
+      });
+
+    console.log('[EMAIL DEBUG] Response data:', data);
 
     if (res.status === 401) {
 

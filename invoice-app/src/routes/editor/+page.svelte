@@ -836,6 +836,9 @@
         toName: invoice.to.name,
       });
 
+      console.log('[EMAIL DEBUG] Preview HTML size:', previewHtml.length, 'bytes');
+      console.log('[EMAIL DEBUG] Preview HTML preview:', previewHtml.slice(0, 500));
+
       await invoiceStore.sendEmail(
         savedInvoiceId,
         recipientEmail,
