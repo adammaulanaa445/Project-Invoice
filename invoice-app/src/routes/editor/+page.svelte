@@ -812,12 +812,28 @@
         return;
       }
 
-      // KIRIM LANGSUNG SEKARANG (PDF dibuat di browser)
+      // KIRIM LANGSUNG SEKARANG (PDF + preview HTML dibuat di browser)
       const pdf = await generatePDF();
 
       const pdfBlob = pdf.output("blob");
 
-      await invoiceStore.sendEmail(savedInvoiceId, recipientEmail, pdfBlob);
+      if (!previewEl) {
+        throw new Error("Preview invoice tidak ditemukan.");
+      }
+
+      // Ambil HTML preview persis seperti yang terlihat di editor.
+      // Backend production memvalidasi field `preview_html` ini —
+      // kalau kosong / terlalu pendek backend menjawab 422
+      // "HTML preview invoice tidak valid."
+      await tick();
+      const previewHtml = previewEl.outerHTML || "";
+
+      await invoiceStore.sendEmail(
+        savedInvoiceId,
+        recipientEmail,
+        pdfBlob,
+        previewHtml,
+      );
 
       showEmailModal = false;
       await notify.success("Invoice dikirim", "Email invoice sudah dikirim ke penerima.");

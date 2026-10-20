@@ -296,6 +296,7 @@ export const invoiceStore = {
     invoiceId,
     recipientEmail,
     pdfBlob,
+    previewHtml = '',
   ) {
 
     const token = getToken();
@@ -307,6 +308,18 @@ export const invoiceStore = {
     }
 
 
+    const cleanPreview = String(previewHtml ?? '').trim();
+
+    if (
+      !cleanPreview ||
+      cleanPreview.length < 100 ||
+      !/<(div|table|section|article)/i.test(cleanPreview)
+    ) {
+      throw new Error(
+        'HTML preview invoice tidak valid.'
+      );
+    }
+
     const formData =
       new FormData();
 
@@ -314,6 +327,13 @@ export const invoiceStore = {
     formData.append(
       'email',
       recipientEmail.trim()
+    );
+
+    // Backend production (Railway) memvalidasi field ini.
+    // Tanpa ini backend menjawab 422 "HTML preview invoice tidak valid."
+    formData.append(
+      'preview_html',
+      cleanPreview
     );
 
 
