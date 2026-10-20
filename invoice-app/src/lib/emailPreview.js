@@ -1,15 +1,17 @@
 // =====================================================
 // EMAIL PREVIEW EXPORTER
 // Mengubah preview invoice di editor menjadi HTML email yang
-// aman & membawa DESAIN ASLI (bukan teks polos).
-// Kompatibel: Gmail, Outlook, Apple Mail, Yahoo Mail.
+// 100% AMAN, RAPI, TIDAK SALING MENUMPUK, dan PERSIS
+// SESUAI DENGAN DESAIN TEMPLATE YANG DIPILIH USER.
+// Kompatibel: Gmail Web, Gmail App, Outlook, Apple Mail, Yahoo.
 // =====================================================
 
-// Properti yang AMAN di-inline ke email.
+// Properti CSS yang aman dan penting disalin dari computed style ke inline style email.
 const INLINE_PROPS = [
   'display',
+  'box-sizing',
   'width', 'min-width', 'max-width',
-  'height', 'min-height',
+  'min-height',
   'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
   'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
   'color', 'background', 'background-color',
@@ -17,7 +19,7 @@ const INLINE_PROPS = [
   'line-height', 'letter-spacing',
   'text-align', 'text-transform', 'text-decoration',
   'text-decoration-line', 'text-decoration-color', 'text-decoration-style',
-  'vertical-align', 'white-space',
+  'vertical-align', 'white-space', 'word-break',
   'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
   'border-color', 'border-top-color', 'border-right-color',
   'border-bottom-color', 'border-left-color',
@@ -31,8 +33,8 @@ const INLINE_PROPS = [
   'table-layout',
 ];
 
-// Properti TIDAK BOLEH lolos ke email karena bikin teks numpuk / hilang.
-const EMAIL_UNSAFE_PATTERNS = [
+// Properti yang TIDAK AMAN di email client karena menyebabkan teks saling menumpuk.
+export const EMAIL_UNSAFE_PATTERNS = [
   /^position$/i,
   /^inset(-(top|right|bottom|left))?$/i,
   /^(top|right|bottom|left|z-index)$/i,
@@ -67,143 +69,100 @@ export function escapeHtml(value) {
 }
 
 // =====================================================
-// SANITIZE CLONE — buang elemen berbahaya dari clone DOM
+// PENCEGAHAN AUTO-LINK GMAIL (TEKS JADI BIRU)
+// Gmail otomatis membungkus email, nomor HP, tanggal, alamat
+// menjadi <a style="color:#1155cc"> biru bergaris bawah.
+// Kita sisipkan zero-width non-joiner (&zwnj;) agar Gmail
+// tidak mendeteksinya sebagai tautan, namun tetap terbaca rapi.
 // =====================================================
-export function sanitizeClone(root) {
-  // Hapus script, style, link
-  root.querySelectorAll('script,style,link').forEach((n) => n.remove());
+function neutralizeGmailAutoLinks(text) {
+  if (!text || typeof text !== 'string') return text;
 
-  // Hapus event handler
-  const elements = [root, ...root.querySelectorAll('*')];
-  for (const el of elements) {
-    for (const attr of [...el.attributes]) {
-      const name = attr.name.toLowerCase();
-      if (name.startsWith('on')) el.removeAttribute(attr.name);
-      if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(attr.value)) {
-        el.setAttribute(name, '#');
-      }
-    }
+  // Netralkan format email: user@domain.com -> user&zwnj;@&zwnj;domain.com
+  let res = text.replace(/([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '$1&zwnj;@&zwnj;$2');
+
+  // Netralkan format nomor telepon: 08xx / +62 / 123-456
+  res = res.replace(/(\+?\d{2,4})[-.\s]?(\d{3,4})[-.\s]?(\d{3,5})/g, (match, p1, p2, p3) => {
+    return `${p1}&zwnj;${p2}&zwnj;${p3}`;
+  });
+
+  return res;
+}
+
+// Terapkan netralisasi auto-link ke seluruh text node di dalam DOM clone
+function applyAntiAutoLinksToDom(root) {
+  const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const textNodes = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
   }
 
-  // Hapus elemen DEKORATIF yang positionnya absolute/fixed
-  // (lingkaran blur, watermark, stempel rotate, ornamen SVG).
-  // PENTING: cek dulu computed style untuk position,
-  // tidak hanya class-nya saja.
-  const decorativeSelectors = [
-    '[class*="absolute"]',
-    '[class*="fixed"]',
-    '[style*="position:absolute"]',
-    '[style*="position: absolute"]',
-    '[style*="position:fixed"]',
-    '[style*="position: fixed"]',
-    '[style*="rotate"]',
-  ];
-  const decorative = root.querySelectorAll(decorativeSelectors.join(','));
-  for (const el of decorative) {
-    if (!el.isConnected) continue;
-    const text = (el.textContent || '').trim();
-    const cls = (el.getAttribute('class') || '') + ' ' + (el.getAttribute('style') || '');
-
-    // SVG dekoratif → hapus
-    if (el.tagName === 'SVG' || el.tagName === 'svg') {
-      el.remove();
-      continue;
-    }
-
-    // Watermark angka raksasa (font sangat besar, sedikit karakter)
-    const isWatermark = /110px|90px|80px|9rem|10rem|12rem/.test(cls)
-      || (text.length <= 6 && /text-\[|font-thin|font-extralight/.test(cls));
-    if (isWatermark) {
-      el.remove();
-      continue;
-    }
-
-    // Badge status absolute yang PENTING (Paid/Lunas/Overdue) → jadikan static
-    if (/^(paid|unpaid|overdue|lunas|invoice)$/i.test(text)) {
-      el.removeAttribute('class');
-      el.setAttribute(
-        'style',
-        'display:inline-block;padding:4px 12px;margin:8px 0;'
-          + 'border:2px solid #111111;border-radius:8px;'
-          + 'font-size:12px;font-weight:700;color:#111111;background:#ffffff;',
-      );
-      continue;
-    }
-
-    // Elemen dekoratif murni (teks kosong, 1 kata pendek, rotasi/absolut)
-    const looksDecorative =
-      text.length === 0 ||
-      (text.length <= 20 && /absolute|rotate|fixed/i.test(cls));
-    if (looksDecorative) {
-      el.remove();
+  for (const node of textNodes) {
+    if (node.parentElement && ['SCRIPT', 'STYLE'].includes(node.parentElement.tagName)) continue;
+    const original = node.nodeValue || '';
+    if (/@|\+?\d{3,}/.test(original)) {
+      const sanitized = neutralizeGmailAutoLinks(original);
+      if (sanitized !== original) {
+        // Ganti dengan HTML fragment yang aman
+        const temp = root.ownerDocument.createElement('span');
+        temp.innerHTML = sanitized;
+        node.replaceWith(...temp.childNodes);
+      }
     }
   }
 }
 
 // =====================================================
-// INLINE COMPUTED STYLES
-// Salin computed style browser ke inline style tiap elemen
-// agar warna/font/spacing tetap di email client.
+// INLINE COMPUTED STYLES (TREE-TRAVERSAL PARALEL)
+// Menyalin computed styles langsung secara berpasangan
+// antara node source dan clone sehingga 100% SINKRON
+// tanpa ada pergeseran indeks (anti-salah alamat).
 // =====================================================
 export function inlineComputedStyles(source, target) {
-  const srcAll = [source, ...source.querySelectorAll('*')];
-  const dstAll = [target, ...target.querySelectorAll('*')];
-  const len = Math.min(srcAll.length, dstAll.length);
+  // Traversal paralel rekursif dari akar ke daun
+  function syncElementStyles(srcEl, dstEl) {
+    if (!(srcEl instanceof Element) || !(dstEl instanceof Element)) return;
 
-  for (let i = 0; i < len; i++) {
-    const src = srcAll[i];
-    const dst = dstAll[i];
-    if (!(src instanceof Element) || !(dst instanceof Element)) continue;
+    const computed = window.getComputedStyle(srcEl);
 
-    const computed = getComputedStyle(src);
-
-    // Skip elemen yang tersembunyi di browser (display:none)
-    // agar tidak muncul di email.
+    // Jika elemen di browser display:none, sembunyikan di email
     if (computed.getPropertyValue('display') === 'none') {
-      dst.setAttribute('style', 'display:none;');
-      dst.removeAttribute('class');
-      continue;
+      dstEl.setAttribute('style', 'display:none;');
+      dstEl.removeAttribute('class');
+      return;
     }
 
     const parts = [];
-    // Pertahankan inline style eksisting yang sudah ada
-    const existing = dst.getAttribute('style');
+    const existing = dstEl.getAttribute('style');
     if (existing) parts.push(existing.replace(/;\s*$/, ''));
 
     for (const prop of INLINE_PROPS) {
       if (isUnsafeProp(prop)) continue;
       const v = (computed.getPropertyValue(prop) || '').trim();
       if (!v) continue;
-      // Skip nilai default yang tidak berguna
-      if (prop === 'display' && v === 'block') {
-        // Tetap tulis display:block agar jelas
-      } else if (v === 'none' && prop !== 'display') continue;
+      if (v === 'none' && prop !== 'display') continue;
       if (v === 'normal' || v === 'auto') continue;
-      // Skip warna oklch/oklab (tidak didukung email client)
       if (v.startsWith('oklch') || v.startsWith('oklab')) continue;
-      // Skip transparent rgba(0,0,0,0) — akan ditangani FIX gradient-text
       if (/^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/i.test(v)) continue;
+
       parts.push(prop + ':' + v);
     }
 
-    // --- FIX: gradient-text → warna solid ---
-    // Ciri: computed color = transparent. Teks jadi INVISIBLE di email
-    // karena background-image gradient tidak jalan.
+    // --- FIX: gradient-text & transparent color ---
     const computedColor = (computed.getPropertyValue('color') || '').trim();
     const bgImage = (computed.getPropertyValue('background-image') || '').trim();
     const isTransparentText =
       computedColor === 'transparent' ||
-      computedColor === 'rgba(0, 0, 0, 0)';
+      computedColor === 'rgba(0, 0, 0, 0)' ||
+      computedColor.replace(/\s+/g, '') === 'rgba(0,0,0,0)';
 
     if (isTransparentText) {
-      // Ambil warna pertama dari gradient, fallback slate-800
       const firstColor = (bgImage.match(/(rgb[a]?\([^)]+\)|#[0-9a-fA-F]{3,8})/) || [])[1];
-      parts.push('color:' + (firstColor || '#1e293b'));
+      const fallbackColor = firstColor || '#1e293b';
+      parts.push('color:' + fallbackColor);
       parts.push('background-image:none');
-      parts.push('-webkit-background-clip:initial');
+      parts.push('-webkit-text-fill-color:' + fallbackColor);
     } else if (/gradient/i.test(bgImage)) {
-      // Gradient background (header, dll): Gmail tidak dukung oklch gradient
-      // → ganti warna solid pertama.
       const firstColor = (bgImage.match(/(rgb[a]?\([^)]+\)|#[0-9a-fA-F]{3,8})/) || [])[1];
       if (firstColor && !/oklch|oklab/i.test(bgImage)) {
         parts.push('background:' + firstColor);
@@ -215,60 +174,103 @@ export function inlineComputedStyles(source, target) {
       parts.push('background-image:none');
     }
 
-    if (parts.length) dst.setAttribute('style', parts.join(';'));
-    dst.removeAttribute('class');
+    // --- ANTI MENUMPUK: Lepas height kaku pada container pembungkus teks ---
+    // Di email client, font fallback ukurannya bisa beda sedikit.
+    // Jika container dikunci dengan fixed height (misal 32px), teks menabrak baris bawah.
+    if (!['IMG', 'SVG', 'CANVAS', 'HR'].includes(dstEl.tagName)) {
+      parts.push('height:auto');
+    }
 
-    // --- FIX link: paksa warna inherit agar tidak biru di Gmail ---
-    if (dst.tagName === 'A') {
-      // Ambil warna dari computed style elemen ini
-      const linkColorRaw = (computed.getPropertyValue('color') || '').trim();
-      // Hindari transparent/oklch
-      const safeColor = (
-        linkColorRaw &&
-        !linkColorRaw.startsWith('oklch') &&
-        !linkColorRaw.startsWith('oklab') &&
-        !/rgba\(0,0,0,0\)/.test(linkColorRaw.replace(/\s/g, ''))
-      ) ? linkColorRaw : '#0f172a';
+    // --- ANTI TEKS BIRU: Paksa tag <a> warisi warna sekitarnya ---
+    if (dstEl.tagName === 'A') {
+      const parentColor = (computed.getPropertyValue('color') || '').trim();
+      const safeColor = (parentColor && !parentColor.includes('oklch') && !isTransparentText)
+        ? parentColor
+        : 'inherit';
+      parts.push('color:' + safeColor + '!important');
+      parts.push('text-decoration:none!important');
+    }
 
-      const existStyle = dst.getAttribute('style') || '';
-      // Hapus color yang sudah ada lalu tulis ulang
-      const withoutColor = existStyle.replace(/\bcolor\s*:[^;]+;?/gi, '');
-      dst.setAttribute(
-        'style',
-        withoutColor.replace(/;$/, '') +
-          ';color:' + safeColor +
-          '!important;text-decoration:none!important;',
-      );
+    if (parts.length) {
+      dstEl.setAttribute('style', parts.join(';'));
+    }
+    dstEl.removeAttribute('class');
+
+    // Sinkronisasi anak-anak elemen secara berurutan
+    const srcChildren = [...srcEl.children];
+    const dstChildren = [...dstEl.children];
+    const count = Math.min(srcChildren.length, dstChildren.length);
+    for (let i = 0; i < count; i++) {
+      syncElementStyles(srcChildren[i], dstChildren[i]);
+    }
+  }
+
+  syncElementStyles(source, target);
+}
+
+// =====================================================
+// SANITIZE CLONE
+// Membersihkan script dan elemen yang tidak relevan
+// =====================================================
+export function sanitizeClone(root) {
+  root.querySelectorAll('script,style,link').forEach((n) => n.remove());
+
+  const elements = [root, ...root.querySelectorAll('*')];
+  for (const el of elements) {
+    for (const attr of [...el.attributes]) {
+      const name = attr.name.toLowerCase();
+      if (name.startsWith('on')) el.removeAttribute(attr.name);
+      if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(attr.value)) {
+        el.setAttribute(name, '#');
+      }
+    }
+  }
+
+  // Tangani elemen absolute agar tidak saling menumpuk:
+  // Watermark angka raksasa di-remove agar tidak menimpa teks isi.
+  // Badge status dibuat statis rapi.
+  const absoluteElements = root.querySelectorAll('[class*="absolute"], [style*="position:absolute"], [style*="position: absolute"]');
+  for (const el of absoluteElements) {
+    const text = (el.textContent || '').trim();
+    const styleAttr = (el.getAttribute('style') || '').toLowerCase();
+    const classAttr = (el.getAttribute('class') || '').toLowerCase();
+
+    // Watermark angka raksasa yang menimpa
+    const isGiantWatermark = /110px|90px|80px|text-\[|font-thin/.test(classAttr + styleAttr) && text.length <= 6;
+    if (isGiantWatermark) {
+      el.remove();
+      continue;
+    }
+
+    // Badge status (Paid, Unpaid, Lunas) diubah menjadi elemen statis yang rapi
+    if (/^(paid|unpaid|overdue|lunas|invoice)$/i.test(text)) {
+      el.style.position = 'static';
+      el.style.display = 'inline-block';
+      el.style.margin = '4px 0';
     }
   }
 }
 
 // =====================================================
-// KONVERTER LAYOUT: flex/grid → table
-// Gmail TIDAK mendukung display:flex, display:grid, gap.
-// Konversi ke <table><tr><td> agar kolom tidak menimpa.
+// KONVERTER LAYOUT EMAIL-SAFE (flex/grid -> table)
+// Mengubah container baris tingkat atas menjadi tabel email
+// sehingga layout 2 kolom (header, info, total) tetap
+// berdampingan sempurna di Gmail tanpa menumpuk.
 // =====================================================
 
 function styleOf(el) {
   return (el.getAttribute('style') || '').toLowerCase();
 }
 
-function isFlexRow(el) {
+export function isFlexRow(el) {
   const s = styleOf(el);
   if (!/display\s*:\s*flex/.test(s)) return false;
   if (/flex-direction\s*:\s*column/.test(s)) return false;
   return true;
 }
 
-function isGrid(el) {
-  return /display\s*:\s*(grid|inline-grid)/.test(styleOf(el));
-}
-
-// Hitung jumlah kolom dari grid-template-columns
-function gridColumnCount(el) {
-  const m = (el.getAttribute('style') || '').match(
-    /grid-template-columns\s*:\s*([^;]+)/i,
-  );
+export function gridColumnCount(el) {
+  const m = (el.getAttribute('style') || '').match(/grid-template-columns\s*:\s*([^;]+)/i);
   if (!m) return el.children.length || 1;
   const def = m[1].trim();
   const repeat = def.match(/repeat\(\s*(\d+)/i);
@@ -276,23 +278,7 @@ function gridColumnCount(el) {
   return Math.max(1, def.split(/\s+/).filter(Boolean).length);
 }
 
-// Hitung lebar td proporsional dari style anak
-function childWidths(container, count) {
-  const kids = [...container.children].filter(
-    (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
-  );
-  const widths = kids.map((kid) => {
-    const s = (kid.getAttribute('style') || '').toLowerCase();
-    const w = s.match(/(?:^|;)\s*width\s*:\s*([^;]+)/);
-    if (w) return w[1].trim();
-    return '*';
-  });
-  while (widths.length < count) widths.push('*');
-  const auto = (100 / count).toFixed(2) + '%';
-  return widths.map((w) => (w === '*' ? auto : w));
-}
-
-// Ubah container flex/grid menjadi <table>
+// Konversi hanya kontainer utama (2 atau 3 anak kolom horizontal)
 function flexGridToTable(container, colCount) {
   const doc = container.ownerDocument;
   const kids = [...container.children].filter(
@@ -300,44 +286,50 @@ function flexGridToTable(container, colCount) {
   );
   if (!kids.length) return;
 
-  const widths = childWidths(container, colCount || kids.length);
-
   const table = doc.createElement('table');
   table.setAttribute('width', '100%');
   table.setAttribute('cellpadding', '0');
   table.setAttribute('cellspacing', '0');
   table.setAttribute('border', '0');
   table.setAttribute('role', 'presentation');
-  table.setAttribute('style', 'width:100%;border-collapse:collapse;border-spacing:0;table-layout:fixed;');
+
+  // Pertahankan padding / background asli dari container
+  const cStyle = container.getAttribute('style') || '';
+  const cleanParentStyle = cStyle
+    .replace(/display\s*:[^;]+;?/gi, '')
+    .replace(/flex-direction\s*:[^;]+;?/gi, '')
+    .replace(/justify-content\s*:[^;]+;?/gi, '')
+    .replace(/align-items\s*:[^;]+;?/gi, '')
+    .replace(/gap\s*:[^;]+;?/gi, '');
+
+  table.setAttribute(
+    'style',
+    'width:100%;border-collapse:collapse;border-spacing:0;table-layout:fixed;' + cleanParentStyle,
+  );
 
   const tr = doc.createElement('tr');
-  const cs = styleOf(container);
-  const isCenter = /align-items\s*:\s*center/.test(cs);
-  const isEnd = /justify-(content\s*:\s*)?(space-between|between|end|flex-end)/.test(cs);
+  const count = colCount || kids.length;
+  const colWidthPct = (100 / count).toFixed(2) + '%';
+  const isBetweenOrEnd = /justify-content\s*:\s*(space-between|between|flex-end|end)/i.test(cStyle);
 
   kids.forEach((kid, i) => {
     const td = doc.createElement('td');
-    td.setAttribute('valign', isCenter ? 'middle' : 'top');
+    td.setAttribute('valign', 'top');
+    td.setAttribute('width', colWidthPct);
 
-    const w = widths[i] || widths[widths.length - 1];
-    if (w && !w.includes('*')) {
-      td.setAttribute('width', w);
-      td.setAttribute('style', 'vertical-align:' + (isCenter ? 'middle' : 'top') + ';padding:0;width:' + w + ';');
-    } else {
-      td.setAttribute('style', 'vertical-align:' + (isCenter ? 'middle' : 'top') + ';padding:0;');
+    let tdStyle = 'vertical-align:top;padding:0;width:' + colWidthPct + ';';
+    if (isBetweenOrEnd && i === kids.length - 1) {
+      tdStyle += 'text-align:right;';
     }
+    td.setAttribute('style', tdStyle);
 
-    // Rata kanan untuk kolom terakhir jika justify-between
-    if (isEnd && i === kids.length - 1) {
-      const ts = td.getAttribute('style') || '';
-      td.setAttribute('style', ts + 'text-align:right;');
-    }
-
-    // Pindahkan isi anak ke dalam wrapper div di dalam td
+    // Pindahkan isi kid ke td
     const wrapper = doc.createElement('div');
-    const kidStyle = kid.getAttribute('style');
-    if (kidStyle) wrapper.setAttribute('style', kidStyle);
-    while (kid.firstChild) wrapper.appendChild(kid.firstChild);
+    const kidStyle = kid.getAttribute('style') || '';
+    wrapper.setAttribute('style', kidStyle);
+    while (kid.firstChild) {
+      wrapper.appendChild(kid.firstChild);
+    }
     td.appendChild(wrapper);
     tr.appendChild(td);
   });
@@ -346,52 +338,78 @@ function flexGridToTable(container, colCount) {
   container.replaceWith(table);
 }
 
-// Konversi semua flex/grid (deepest-first) ke table
 export function convertToEmailSafeLayout(root) {
-  const all = [root, ...root.querySelectorAll('*')].reverse();
+  // Hanya proses container flex/grid tingkat atas yang memiliki 2 atau 3 anak
+  // Jangan ubah tabel asli (tabel item invoice) atau badge-badge kecil
+  const all = [...root.querySelectorAll('*')].reverse();
   for (const el of all) {
-    if (!(el instanceof Element)) continue;
-    if (!el.isConnected) continue;
+    if (!(el instanceof Element) || !el.isConnected) continue;
     const tag = el.tagName;
-    // Jangan ubah table asli
-    if (['TABLE', 'TR', 'TD', 'TH', 'THEAD', 'TBODY', 'TFOOT'].includes(tag)) continue;
-    if (['SCRIPT', 'STYLE', 'LINK'].includes(tag)) continue;
+    if (['TABLE', 'TR', 'TD', 'TH', 'THEAD', 'TBODY', 'TFOOT', 'SPAN', 'A', 'BUTTON', 'P'].includes(tag)) continue;
 
     const elementKids = [...el.children].filter(
       (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
     );
-    if (elementKids.length < 1) continue;
 
-    if (isGrid(el)) {
-      const cols = gridColumnCount(el);
-      if (cols <= 1 && elementKids.length <= 1) continue;
-      flexGridToTable(el, cols);
-    } else if (isFlexRow(el) && elementKids.length >= 2) {
-      flexGridToTable(el, elementKids.length);
+    // Hanya konversi kontainer utama (2 atau 3 anak kolom horizontal)
+    if (elementKids.length >= 2 && elementKids.length <= 4) {
+      const isGridContainer = /display\s*:\s*(grid|inline-grid)/i.test(styleOf(el));
+      const isFlexContainer = isFlexRow(el);
+
+      if (isGridContainer) {
+        flexGridToTable(el, gridColumnCount(el));
+      } else if (isFlexContainer) {
+        flexGridToTable(el, elementKids.length);
+      }
     }
   }
 }
 
 // =====================================================
-// ANTI-AUTO-LINK: Gmail otomatis membungkus email/telp/tanggal
-// jadi <a> biru. Strategi: CSS global di <style> + sisipkan
-// zero-width non-joiner (​) di tengah pola umum.
+// CSS HEAD KHUSUS GMAIL & EMAIL CLIENTS
+// Mengunci font, warna, dan mematikan auto-link biru Gmail.
 // =====================================================
-
 function gmailHeadStyle() {
   return '<style>'
-    + 'body,div,p,td,th,span{color:inherit!important}'
-    + 'img{max-width:100%!important;height:auto!important;display:block;}'
-    + 'table{border-collapse:collapse!important}'
-    // Paksa SEMUA link warisi warna teks sekitarnya, tanpa underline.
-    + 'a,a:visited,a:hover,a:active{'
-    + 'color:inherit!important;text-decoration:none!important}'
-    // Matikan auto-link biru Gmail (email/telp/tanggal/address).
-    + 'u + #body a,'
-    + '.gmail a,'
-    + 'span.MsoHyperlink,'
-    + 'span[style*="color:windowtext"]{'
-    + 'color:inherit!important;text-decoration:none!important}'
+    // Reset dasar tabel dan gambar
+    + 'img{max-width:100%!important;height:auto!important;display:block;border:0;outline:none;}'
+    + 'table{border-collapse:collapse!important;mso-table-lspace:0pt;mso-table-rspace:0pt;}'
+    + 'td{border-collapse:collapse!important;}'
+    // Reset universal untuk semua tautan (mencegah teks jadi biru bergaris bawah)
+    + 'a,a:link,a:visited,a:hover,a:active{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + 'font-family:inherit!important;'
+    + 'font-size:inherit!important;'
+    + 'font-weight:inherit!important;'
+    + 'line-height:inherit!important;'
+    + '}'
+    // Override spesifik mesin rendering Gmail
+    + 'u + #body a{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + '}'
+    + '#MessageViewBody a{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + '}'
+    + '.gmail a, .gmail-blend a{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + '}'
+    + 'span.MsoHyperlink, span[style*="color:windowtext"]{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + '}'
+    // Reset Apple Mail Data Detectors
+    + '[x-apple-data-detectors], [x-apple-data-detectors] *{'
+    + 'color:inherit!important;'
+    + 'text-decoration:none!important;'
+    + 'font-size:inherit!important;'
+    + 'font-family:inherit!important;'
+    + 'font-weight:inherit!important;'
+    + 'line-height:inherit!important;'
+    + '}'
     + '</style>';
 }
 
@@ -407,66 +425,90 @@ export function buildEmailPreviewHtml(previewEl, meta) {
 
   let html = '';
   try {
-    // 1. Clone DOM
+    // 1. Buat klon dari preview invoice
     const clone = previewEl.cloneNode(true);
 
-    // 2. Sanitasi — hapus dekorasi absolute, script, event handler
-    sanitizeClone(clone);
-
-    // 3. Salin computed styles ke inline style
+    // 2. Salin computed style secara rekursif tree-traversal (100% SINKRON)
     inlineComputedStyles(previewEl, clone);
 
-    // 4. Konversi flex/grid → table (deepest first)
+    // 3. Sanitasi script dan elemen berbahaya
+    sanitizeClone(clone);
+
+    // 4. Konversi kontainer flex/grid tingkat atas menjadi tabel email yang aman
     convertToEmailSafeLayout(clone);
 
-    // 5. Paksa wrapper berwarna putih & posisi statis
-    clone.setAttribute(
-      'style',
-      'display:block;background:#ffffff;color:#0f172a;position:static;'
-        + (clone.getAttribute('style') || '').replace(/position\s*:[^;]+;?/gi, ''),
-    );
-    clone.removeAttribute('class');
+    // 5. Terapkan netralisasi auto-link Gmail (zero-width characters)
+    applyAntiAutoLinksToDom(clone);
 
-    const inner = clone.outerHTML;
+    // Ambil warna latar belakang dan warna teks dari template yang dipilih
+    const rootComputed = window.getComputedStyle(previewEl);
+    const invoiceBg = rootComputed.backgroundColor && rootComputed.backgroundColor !== 'rgba(0, 0, 0, 0)'
+      ? rootComputed.backgroundColor
+      : '#ffffff';
+    const invoiceColor = rootComputed.color && rootComputed.color !== 'rgba(0, 0, 0, 0)'
+      ? rootComputed.color
+      : '#0f172a';
+
+    // Pastikan root wrapper invoice bersih dan tidak tumpang tindih
+    clone.style.position = 'static';
+    clone.style.display = 'block';
+    clone.style.width = '100%';
+    clone.style.maxWidth = '800px';
+    clone.style.margin = '0 auto';
+    clone.style.boxSizing = 'border-box';
+
+    const innerHtml = clone.outerHTML;
     const invoiceNumber = escapeHtml(meta.invoiceNumber || '');
     const fromName = escapeHtml(meta.fromName || 'kami');
     const toName = escapeHtml(meta.toName || 'Bapak/Ibu');
     const title = invoiceNumber ? ' #' + invoiceNumber : '';
 
-    html = '<!DOCTYPE html><html lang="id">'
+    html = '<!DOCTYPE html>'
+      + '<html lang="id" xmlns="http://www.w3.org/1999/xhtml">'
       + '<head>'
       + '<meta charset="UTF-8">'
       + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+      + '<meta http-equiv="X-UA-Compatible" content="IE=edge">'
       + '<meta name="color-scheme" content="light">'
       + '<meta name="supported-color-schemes" content="light">'
       + '<title>Invoice' + title + '</title>'
       + gmailHeadStyle()
       + '</head>'
-      + '<body id="body" class="gmail" style="margin:0;padding:24px 12px;'
-      + 'background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;'
-      + 'color:#172033;line-height:1.5;">'
+      + '<body id="body" class="gmail" style="margin:0;padding:24px 12px;background:#f1f5f9;'
+      + 'font-family:Arial,Helvetica,sans-serif;color:#1e293b;line-height:1.5;">'
 
-      // --- Blok sapaan ---
-      + '<div style="max-width:760px;margin:0 auto;">'
-      + '<div style="background:#ffffff;border:1px solid #e5e7eb;'
-      + 'border-radius:16px;padding:20px 24px;margin-bottom:16px;">'
-      + '<p style="margin:0 0 8px;font-size:14px;color:#334155;">Halo <strong>' + toName + '</strong>,</p>'
-      + '<p style="margin:0;font-size:14px;color:#334155;">'
-      + 'Berikut invoice dari <strong>' + fromName + '</strong>' + title + '.'
-      + ' Tampilan di bawah persis dengan desain yang dipilih.'
-      + ' PDF resmi terlampir.</p>'
+      // Outer container
+      + '<div style="max-width:820px;margin:0 auto;width:100%;">'
+
+      // --- KARTU SAPAAN RESMI ---
+      + '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin-bottom:20px;'
+      + 'box-shadow:0 1px 3px rgba(0,0,0,0.05);">'
+      + '<p style="margin:0 0 6px;font-size:15px;color:#0f172a;font-weight:600;">Halo ' + toName + ',</p>'
+      + '<p style="margin:0 0 10px;font-size:14px;color:#475569;line-height:1.6;">'
+      + 'Berikut adalah rincian tagihan resmi dari <strong>' + fromName + '</strong>' + title + '.'
+      + ' Tampilan invoice di bawah ini sesuai dengan format resmi yang diterbitkan.'
+      + '</p>'
+      + '<div style="display:inline-block;padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;'
+      + 'border-radius:6px;font-size:12px;color:#64748b;">'
+      + '📎 <strong>PDF Resmi Terlampir:</strong> Anda juga dapat mengunduh atau mencetak file PDF yang terlampir pada email ini.'
+      + '</div>'
       + '</div>'
 
-      // --- Wrapper invoice preview ---
-      + '<div style="max-width:760px;margin:0 auto;">'
-      + inner
+      // --- KONTEN INVOICE ASLI (PERSIS SESUAI TEMPLATE) ---
+      + '<div style="background:' + invoiceBg + ';color:' + invoiceColor + ';border:1px solid #e2e8f0;'
+      + 'border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);width:100%;box-sizing:border-box;">'
+      + innerHtml
       + '</div>'
 
-      // --- Footer ---
-      + '<p style="max-width:760px;margin:16px auto 0;font-size:12px;'
-      + 'color:#64748b;">PDF invoice resmi terlampir untuk disimpan atau dicetak.</p>'
+      // --- FOOTER EMAIL ---
+      + '<div style="margin-top:20px;text-align:center;font-size:12px;color:#94a3b8;line-height:1.6;">'
+      + '<p style="margin:0;">Invoice ini diterbitkan secara resmi melalui sistem invoice kami.</p>'
+      + '<p style="margin:4px 0 0;">Jika ada pertanyaan, silakan hubungi pengirim tagihan ini.</p>'
       + '</div>'
-      + '</body></html>';
+
+      + '</div>'
+      + '</body>'
+      + '</html>';
 
   } finally {
     previewEl.classList.remove('pdf-export');
@@ -476,5 +518,6 @@ export function buildEmailPreviewHtml(previewEl, meta) {
   if (clean.length < 100 || !/<(div|table|section|article)/i.test(clean)) {
     throw new Error('HTML preview invoice tidak valid.');
   }
+
   return clean;
 }
