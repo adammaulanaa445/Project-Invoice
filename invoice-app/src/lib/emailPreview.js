@@ -74,6 +74,49 @@ export function sanitizeClone(root) {
     if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') el.remove();
   }
   root.querySelectorAll('script,style,link').forEach((n) => n.remove());
+
+  // Hapus DEKORASI ABSOLUTE yang menimpa di Gmail:
+  // lingkaran blur, watermark angka raksasa, stempel rotate,
+  // badge absolute, ornamen svg absolute. Ini murni hiasan —
+  // tanpa mereka isi invoice tetap lengkap & rapi.
+  // (Daftar pola dari audit 42 template.)
+  const decorative = root.querySelectorAll([
+    '[class*="absolute"]',
+    '[class*="fixed"]',
+    '[style*="position:absolute"]',
+    '[style*="position: absolute"]',
+    '[style*="position:fixed"]',
+    '[style*="rotate"]',
+    'svg[class*="absolute"]',
+  ].join(','));
+  for (const el of decorative) {
+    const text = (el.textContent || '').trim();
+    const cls = (el.getAttribute('class') || '') + ' ' + (el.getAttribute('style') || '');
+    // Jangan hapus kalau mengandung DATA invoice (nomor, nama, angka).
+    // Dekorasi murni biasanya teks kosong / 1 kata pendek / svg.
+    const looksDecorative =
+      el.tagName === 'SVG' ||
+      text.length === 0 ||
+      (/^(paid|unpaid|overdue|lunas|invoice)$/i.test(text) && /absolute|rotate|fixed/i.test(cls));
+    // Watermark angka raksasa (MinimalisMono: text-[110px])
+    const isWatermark =
+      /110px|90px|80px/.test(cls) || (text.length <= 4 && /text-\[|font-thin/.test(cls));
+    if (looksDecorative || isWatermark) {
+      // Kecuali badge status absolute yang PENTING (Freelance/Retro):
+      // pindahkan jadi static di bawah header, bukan dihapus.
+      if (/^(paid|unpaid|overdue|lunas)$/i.test(text)) {
+        el.removeAttribute('class');
+        el.setAttribute(
+          'style',
+          'display:inline-block;padding:4px 12px;margin:8px 0;'
+          + 'border:2px solid #111111;border-radius:8px;'
+          + 'font-size:12px;font-weight:700;color:#111111;background:#ffffff;',
+        );
+        continue;
+      }
+      el.remove();
+    }
+  }
 }
 
 
@@ -185,7 +228,153 @@ export function buildEmailPreviewHtml(previewEl, meta) {
   try {
     const clone = previewEl.cloneNode(true);
     sanitizeClone(clone);
+
+// =====================================================
+// KONVERTER LAYOUT EMAIL-SAFE (inti perbaikan screenshot)
+// Gmail TIDAK mendukung: display:flex, display:grid, gap,
+// justify-between, items-center, grid-cols-3. Kalau dibiarkan,
+// kolom-kolom (3 kotak hitam, header kiri-kanan, subtotal)
+// akan SALING MENIMPA seperti di screenshot.
+// Solusi: ubah container flex/grid baris tunggal menjadi
+// <table><tr><td> dengan lebar proporsional + vertical-align.
+// Fungsi ini jalan di HASIL CLONE (sudah inline style),
+// jadi tidak mengubah tampilan editor sama sekali.
+// =====================================================
+function styleOf(el) {
+  return (el.getAttribute('style') || '').toLowerCase();
+}
+
+function isFlexRow(el) {
+  const s = styleOf(el);
+  if (!/display\s*:\s*flex/.test(s)) return false;
+  if (/flex-direction\s*:\s*column/.test(s)) return false;
+  return true;
+}
+
+function isGrid(el) {
+  return /display\s*:\s*(grid|inline-grid)/.test(styleOf(el));
+}
+
+// Ambil lebar grid-template-columns, misal "1fr 1fr 1fr" atau
+// "repeat(3, minmax(0px, 1fr))". Kembalikan jumlah kolom.
+function gridColumnCount(el) {
+  const m = (el.getAttribute('style') || '').match(
+    /grid-template-columns\s*:\s*([^;]+)/i,
+  );
+  if (!m) return el.children.length || 1;
+  const def = m[1].trim();
+  const repeat = def.match(/repeat\(\s*(\d+)/i);
+  if (repeat) return parseInt(repeat[1], 10);
+  const parts = def.split(/\s+/).filter(Boolean);
+  return Math.max(1, parts.length);
+}
+
+// Hitung lebar td dari flex anak (flex:1 -> rata, w-1/2 -> 50%).
+function childWidths(container, count) {
+  const widths = [];
+  const kids = [...container.children].filter(
+    (k) => k instanceof Element && k.tagName !== 'SCRIPT' && k.tagName !== 'STYLE',
+  );
+  for (const kid of kids) {
+    const s = (kid.getAttribute('style') || '').toLowerCase();
+    const w = s.match(/width\s*:\s*([^;]+)/);
+    if (w) {
+      widths.push(w[1].trim());
+      continue;
+    }
+    const flex = s.match(/flex(?:-grow)?\s*:\s*([^;]+)/);
+    if (flex && /^\d/.test(flex[1].trim())) {
+      widths.push('*');
+      continue;
+    }
+    widths.push('*');
+  }
+  while (widths.length < count) widths.push('*');
+  // '*' = rata: 100/count %
+  const auto = (100 / count).toFixed(2) + '%';
+  return widths.map((w) => (w === '*' ? auto : w));
+}
+
+// Ubah container flex/grid menjadi table.
+function flexGridToTable(container, colCount) {
+  const doc = container.ownerDocument;
+  const kids = [...container.children].filter(
+    (k) => k instanceof Element && k.tagName !== 'SCRIPT' && k.tagName !== 'STYLE',
+  );
+  if (!kids.length) return;
+
+  const widths = childWidths(container, colCount || kids.length);
+  const table = doc.createElement('table');
+  table.setAttribute('width', '100%');
+  table.setAttribute('cellpadding', '0');
+  table.setAttribute('cellspacing', '0');
+  table.setAttribute('border', '0');
+  table.setAttribute(
+    'style',
+    'width:100%;border-collapse:collapse;border-spacing:0;',
+  );
+
+  const tr = doc.createElement('tr');
+  kids.forEach((kid, i) => {
+    const td = doc.createElement('td');
+    td.setAttribute('valign', 'top');
+    const w = widths[i] || widths[widths.length - 1];
+    if (w && !w.includes('*')) td.setAttribute('width', w);
+    // Warisi align: justify-between -> td terakhir rata kanan,
+    // items-center -> vertical middle.
+    const cs = styleOf(container);
+    let tdStyle = 'vertical-align:top;padding:0;';
+    if (/align-items\s*:\s*center/.test(cs)) tdStyle = 'vertical-align:middle;padding:0;';
+    if (/justify-(content\s*:\s*)?(space-between|between|end|flex-end)/.test(cs) && i === kids.length - 1) {
+      tdStyle += 'text-align:right;';
+    }
+    td.setAttribute('style', tdStyle);
+    // Pindahkan isi anak ke td (bukan anaknya, supaya
+    // background/padding kotak hitam tetap di dalam td).
+    const wrapper = doc.createElement('div');
+    const kidStyle = kid.getAttribute('style');
+    if (kidStyle) wrapper.setAttribute('style', kidStyle);
+    while (kid.firstChild) wrapper.appendChild(kid.firstChild);
+    td.appendChild(wrapper);
+    tr.appendChild(td);
+  });
+
+  table.appendChild(tr);
+  container.replaceWith(table);
+}
+
+export function convertToEmailSafeLayout(root) {
+  // Proses dari DALAM ke LUAR (deepest first) supaya
+  // container bersarang (flex di dalam flex) ikut rapi.
+  const all = [root, ...root.querySelectorAll('*')].reverse();
+  for (const el of all) {
+    if (!(el instanceof Element)) continue;
+    if (!el.isConnected) continue;
+    const tag = el.tagName;
+    // Jangan ubah table asli (tabel item invoice) & struktur email.
+    if (tag === 'TABLE' || tag === 'TR' || tag === 'TD' || tag === 'TH') continue;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'LINK') continue;
+    // Hanya konversi yang anaknya elemen (bukan teks murni).
+    const elementKids = [...el.children].filter(
+      (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
+    );
+    if (elementKids.length < 2 && !isGrid(el)) continue;
+    if (elementKids.length < 1) continue;
+
+    if (isGrid(el)) {
+      const cols = gridColumnCount(el);
+      // Grid 1 kolom tidak perlu diubah.
+      if (cols <= 1 && elementKids.length <= 1) continue;
+      flexGridToTable(el, cols);
+    } else if (isFlexRow(el) && elementKids.length >= 2) {
+      flexGridToTable(el, elementKids.length);
+    }
+  }
+}
+
     inlineComputedStyles(previewEl, clone);
+    // Konversi flex/grid -> table agar tidak menimpa di Gmail.
+    convertToEmailSafeLayout(clone);
     clone.setAttribute(
       'style',
       'background:#ffffff;color:#0f172a;' + (clone.getAttribute('style') || ''),
