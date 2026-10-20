@@ -11,7 +11,7 @@ const INLINE_PROPS = [
   'display',
   'box-sizing',
   'width', 'min-width', 'max-width',
-  'min-height',
+  'height', 'min-height', 'max-height',
   'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
   'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
   'color', 'background', 'background-color',
@@ -19,18 +19,22 @@ const INLINE_PROPS = [
   'line-height', 'letter-spacing',
   'text-align', 'text-transform', 'text-decoration',
   'text-decoration-line', 'text-decoration-color', 'text-decoration-style',
-  'vertical-align', 'white-space', 'word-break',
+  'vertical-align', 'white-space', 'word-break', 'overflow-wrap',
   'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
   'border-color', 'border-top-color', 'border-right-color',
   'border-bottom-color', 'border-left-color',
   'border-width', 'border-style', 'border-radius',
+  'border-top-left-radius', 'border-top-right-radius',
+  'border-bottom-left-radius', 'border-bottom-right-radius',
   'border-collapse', 'border-spacing',
   'box-shadow', 'opacity',
-  'overflow',
+  'overflow', 'overflow-x', 'overflow-y',
   'flex-direction', 'flex-wrap', 'align-items', 'justify-content',
-  'gap', 'flex', 'flex-grow', 'flex-shrink',
+  'gap', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis',
   'grid-template-columns',
   'table-layout',
+  'object-fit',
+  'text-indent',
 ];
 
 // Properti yang TIDAK AMAN di email client karena menyebabkan teks saling menumpuk.
@@ -113,19 +117,53 @@ function applyAntiAutoLinksToDom(root) {
 }
 
 // =====================================================
+// COLLECT PIXEL WIDTHS
+// Sebelum clone, kumpulkan lebar pixel aktual setiap elemen
+// dari source DOM agar bisa digunakan saat konversi tabel.
+// =====================================================
+function collectPixelWidths(source) {
+  const widthMap = new WeakMap();
+  function walk(el) {
+    if (!(el instanceof Element)) return;
+    const rect = el.getBoundingClientRect();
+    widthMap.set(el, { width: rect.width });
+    for (let i = 0; i < el.children.length; i++) {
+      walk(el.children[i]);
+    }
+  }
+  walk(source);
+  return widthMap;
+}
+
+// Buat mapping paralel dari clone nodes ke source nodes
+function buildNodeMap(source, clone) {
+  const map = new Map();
+  function walk(src, dst) {
+    if (!(src instanceof Element) || !(dst instanceof Element)) return;
+    map.set(dst, src);
+    const srcKids = [...src.children];
+    const dstKids = [...dst.children];
+    const count = Math.min(srcKids.length, dstKids.length);
+    for (let i = 0; i < count; i++) {
+      walk(srcKids[i], dstKids[i]);
+    }
+  }
+  walk(source, clone);
+  return map;
+}
+
+// =====================================================
 // INLINE COMPUTED STYLES (TREE-TRAVERSAL PARALEL)
 // Menyalin computed styles langsung secara berpasangan
 // antara node source dan clone sehingga 100% SINKRON
 // tanpa ada pergeseran indeks (anti-salah alamat).
 // =====================================================
 export function inlineComputedStyles(source, target) {
-  // Traversal paralel rekursif dari akar ke daun
   function syncElementStyles(srcEl, dstEl) {
     if (!(srcEl instanceof Element) || !(dstEl instanceof Element)) return;
 
     const computed = window.getComputedStyle(srcEl);
 
-    // Jika elemen di browser display:none, sembunyikan di email
     if (computed.getPropertyValue('display') === 'none') {
       dstEl.setAttribute('style', 'display:none;');
       dstEl.removeAttribute('class');
@@ -140,7 +178,7 @@ export function inlineComputedStyles(source, target) {
       if (isUnsafeProp(prop)) continue;
       const v = (computed.getPropertyValue(prop) || '').trim();
       if (!v) continue;
-      if (v === 'none' && prop !== 'display') continue;
+      if (v === 'none' && prop !== 'display' && prop !== 'text-decoration') continue;
       if (v === 'normal' || v === 'auto') continue;
       if (v.startsWith('oklch') || v.startsWith('oklab')) continue;
       if (/^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/i.test(v)) continue;
@@ -174,15 +212,22 @@ export function inlineComputedStyles(source, target) {
       parts.push('background-image:none');
     }
 
-    // --- ANTI MENUMPUK: Lepas height kaku pada container pembungkus teks ---
-    // Di email client, font fallback ukurannya bisa beda sedikit.
-    // Jika container dikunci dengan fixed height (misal 32px), teks menabrak baris bawah.
-    if (!['IMG', 'SVG', 'CANVAS', 'HR'].includes(dstEl.tagName)) {
+    // --- HEIGHT HANDLING ---
+    // Container teks: set height:auto agar teks tidak terpotong di email client.
+    // Elemen dekoratif kecil tanpa teks (divider, garis): pertahankan height.
+    const tag = dstEl.tagName;
+    const hasTextContent = dstEl.textContent && dstEl.textContent.trim().length > 0;
+    const isMediaElement = ['IMG', 'SVG', 'CANVAS', 'HR', 'VIDEO'].includes(tag);
+    const computedHeight = (computed.getPropertyValue('height') || '').trim();
+    const isSmallDecorative = !hasTextContent && !isMediaElement &&
+      computedHeight && parseFloat(computedHeight) <= 8;
+
+    if (!isMediaElement && !isSmallDecorative) {
       parts.push('height:auto');
     }
 
     // --- ANTI TEKS BIRU: Paksa tag <a> warisi warna sekitarnya ---
-    if (dstEl.tagName === 'A') {
+    if (tag === 'A') {
       const parentColor = (computed.getPropertyValue('color') || '').trim();
       const safeColor = (parentColor && !parentColor.includes('oklch') && !isTransparentText)
         ? parentColor
@@ -196,7 +241,6 @@ export function inlineComputedStyles(source, target) {
     }
     dstEl.removeAttribute('class');
 
-    // Sinkronisasi anak-anak elemen secara berurutan
     const srcChildren = [...srcEl.children];
     const dstChildren = [...dstEl.children];
     const count = Math.min(srcChildren.length, dstChildren.length);
@@ -226,9 +270,7 @@ export function sanitizeClone(root) {
     }
   }
 
-  // Tangani elemen absolute agar tidak saling menumpuk:
-  // Watermark angka raksasa di-remove agar tidak menimpa teks isi.
-  // Badge status dibuat statis rapi.
+  // Tangani elemen absolute agar tidak saling menumpuk
   const absoluteElements = root.querySelectorAll('[class*="absolute"], [style*="position:absolute"], [style*="position: absolute"]');
   for (const el of absoluteElements) {
     const text = (el.textContent || '').trim();
@@ -253,9 +295,15 @@ export function sanitizeClone(root) {
 
 // =====================================================
 // KONVERTER LAYOUT EMAIL-SAFE (flex/grid -> table)
-// Mengubah container baris tingkat atas menjadi tabel email
-// sehingga layout 2 kolom (header, info, total) tetap
-// berdampingan sempurna di Gmail tanpa menumpuk.
+// Mengubah container flex/grid menjadi tabel email
+// sehingga layout kolom tetap berdampingan di Gmail.
+//
+// Perbaikan dari versi lama:
+// - Lebar kolom proporsional dari pixel width aktual
+// - Menangani container flex dengan jumlah anak berapapun
+// - Menangani flex-column -> block stacked
+// - Menangani single-child flex + ml-auto / justify-end
+// - Menangani nested flex containers (bottom-up)
 // =====================================================
 
 function styleOf(el) {
@@ -264,9 +312,16 @@ function styleOf(el) {
 
 export function isFlexRow(el) {
   const s = styleOf(el);
-  if (!/display\s*:\s*flex/.test(s)) return false;
+  if (!/display\s*:\s*(inline-)?flex/.test(s)) return false;
   if (/flex-direction\s*:\s*column/.test(s)) return false;
   return true;
+}
+
+function isFlexColumn(el) {
+  const s = styleOf(el);
+  if (!/display\s*:\s*(inline-)?flex/.test(s)) return false;
+  if (/flex-direction\s*:\s*column/.test(s)) return true;
+  return false;
 }
 
 export function gridColumnCount(el) {
@@ -278,8 +333,23 @@ export function gridColumnCount(el) {
   return Math.max(1, def.split(/\s+/).filter(Boolean).length);
 }
 
-// Konversi hanya kontainer utama (2 atau 3 anak kolom horizontal)
-function flexGridToTable(container, colCount) {
+// Strip flex-related CSS properties dari style string
+function stripFlexProps(styleStr) {
+  return styleStr
+    .replace(/display\s*:[^;]+;?/gi, '')
+    .replace(/flex-direction\s*:[^;]+;?/gi, '')
+    .replace(/flex-wrap\s*:[^;]+;?/gi, '')
+    .replace(/justify-content\s*:[^;]+;?/gi, '')
+    .replace(/align-items\s*:[^;]+;?/gi, '')
+    .replace(/gap\s*:[^;]+;?/gi, '')
+    .replace(/flex\s*:[^;]+;?/gi, '')
+    .replace(/flex-grow\s*:[^;]+;?/gi, '')
+    .replace(/flex-shrink\s*:[^;]+;?/gi, '')
+    .replace(/flex-basis\s*:[^;]+;?/gi, '');
+}
+
+// Konversi container flex/grid ke tabel email dengan lebar proporsional
+function flexGridToTable(container, colCount, widthMap, nodeMap) {
   const doc = container.ownerDocument;
   const kids = [...container.children].filter(
     (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
@@ -293,14 +363,8 @@ function flexGridToTable(container, colCount) {
   table.setAttribute('border', '0');
   table.setAttribute('role', 'presentation');
 
-  // Pertahankan padding / background asli dari container
   const cStyle = container.getAttribute('style') || '';
-  const cleanParentStyle = cStyle
-    .replace(/display\s*:[^;]+;?/gi, '')
-    .replace(/flex-direction\s*:[^;]+;?/gi, '')
-    .replace(/justify-content\s*:[^;]+;?/gi, '')
-    .replace(/align-items\s*:[^;]+;?/gi, '')
-    .replace(/gap\s*:[^;]+;?/gi, '');
+  const cleanParentStyle = stripFlexProps(cStyle);
 
   table.setAttribute(
     'style',
@@ -308,24 +372,40 @@ function flexGridToTable(container, colCount) {
   );
 
   const tr = doc.createElement('tr');
-  const count = colCount || kids.length;
-  const colWidthPct = (100 / count).toFixed(2) + '%';
+
+  // Hitung lebar proporsional dari pixel widths aktual
+  const kidWidths = kids.map((kid) => {
+    const srcNode = nodeMap ? nodeMap.get(kid) : null;
+    const info = srcNode && widthMap ? widthMap.get(srcNode) : null;
+    return info ? info.width : 0;
+  });
+  const totalKidWidth = kidWidths.reduce((s, w) => s + w, 0);
+
   const isBetweenOrEnd = /justify-content\s*:\s*(space-between|between|flex-end|end)/i.test(cStyle);
+  const isJustifyEnd = /justify-content\s*:\s*(flex-end|end)/i.test(cStyle);
 
   kids.forEach((kid, i) => {
     const td = doc.createElement('td');
     td.setAttribute('valign', 'top');
+
+    let colWidthPct;
+    if (totalKidWidth > 0 && kidWidths[i] > 0) {
+      colWidthPct = ((kidWidths[i] / totalKidWidth) * 100).toFixed(2) + '%';
+    } else {
+      colWidthPct = (100 / (colCount || kids.length)).toFixed(2) + '%';
+    }
     td.setAttribute('width', colWidthPct);
 
     let tdStyle = 'vertical-align:top;padding:0;width:' + colWidthPct + ';';
-    if (isBetweenOrEnd && i === kids.length - 1) {
+    if (isJustifyEnd) {
+      tdStyle += 'text-align:right;';
+    } else if (isBetweenOrEnd && i === kids.length - 1) {
       tdStyle += 'text-align:right;';
     }
     td.setAttribute('style', tdStyle);
 
-    // Pindahkan isi kid ke td
     const wrapper = doc.createElement('div');
-    const kidStyle = kid.getAttribute('style') || '';
+    const kidStyle = stripFlexProps(kid.getAttribute('style') || '');
     wrapper.setAttribute('style', kidStyle);
     while (kid.firstChild) {
       wrapper.appendChild(kid.firstChild);
@@ -338,28 +418,110 @@ function flexGridToTable(container, colCount) {
   container.replaceWith(table);
 }
 
-export function convertToEmailSafeLayout(root) {
-  // Hanya proses container flex/grid tingkat atas yang memiliki 2 atau 3 anak
-  // Jangan ubah tabel asli (tabel item invoice) atau badge-badge kecil
+// Konversi flex-column ke block stacked
+function flexColumnToBlock(container) {
+  const s = container.getAttribute('style') || '';
+  const cleanStyle = stripFlexProps(s);
+
+  // Konversi gap ke margin-bottom pada children
+  const gapMatch = s.match(/gap\s*:\s*([^;]+)/i);
+  container.setAttribute('style', 'display:block;' + cleanStyle);
+
+  if (gapMatch) {
+    const gapVal = gapMatch[1].trim();
+    const kids = [...container.children].filter(
+      (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
+    );
+    kids.forEach((kid, i) => {
+      if (i < kids.length - 1) {
+        const kidStyle = kid.getAttribute('style') || '';
+        kid.setAttribute('style', kidStyle + ';margin-bottom:' + gapVal);
+      }
+    });
+  }
+}
+
+// Konversi single-child flex + ml-auto / justify-end ke table align right
+function handleSingleChildFlex(container) {
+  const doc = container.ownerDocument;
+  const s = container.getAttribute('style') || '';
+  const isEnd = /justify-content\s*:\s*(flex-end|end)/i.test(s);
+  const isCenter = /justify-content\s*:\s*center/i.test(s);
+  const cleanStyle = stripFlexProps(s);
+  const kids = [...container.children].filter(
+    (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
+  );
+  if (kids.length !== 1) return;
+  const child = kids[0];
+
+  let alignment = '';
+  if (isEnd) alignment = 'text-align:right;';
+  else if (isCenter) alignment = 'text-align:center;';
+
+  container.setAttribute('style', 'display:block;' + alignment + cleanStyle);
+
+  // ml-auto child -> wrap dalam table rata kanan
+  const childStyle = child.getAttribute('style') || '';
+  const hasMarginLeftAuto = /margin-left\s*:\s*auto/i.test(childStyle);
+
+  if (hasMarginLeftAuto || isEnd) {
+    const tbl = doc.createElement('table');
+    tbl.setAttribute('width', '100%');
+    tbl.setAttribute('cellpadding', '0');
+    tbl.setAttribute('cellspacing', '0');
+    tbl.setAttribute('border', '0');
+    tbl.setAttribute('role', 'presentation');
+    tbl.setAttribute('style', 'width:100%;border-collapse:collapse;');
+    const tblTr = doc.createElement('tr');
+    const tblTd = doc.createElement('td');
+    tblTd.setAttribute('align', 'right');
+    tblTd.setAttribute('style', 'text-align:right;');
+
+    // Bersihkan ml-auto dari child, ganti display
+    const newChildStyle = childStyle
+      .replace(/margin-left\s*:\s*auto;?/gi, '')
+      .replace(/display\s*:\s*flex;?/gi, 'display:inline-block;');
+    child.setAttribute('style', newChildStyle);
+
+    const childClone = child.cloneNode(true);
+    tblTd.appendChild(childClone);
+    tblTr.appendChild(tblTd);
+    tbl.appendChild(tblTr);
+    child.replaceWith(tbl);
+  }
+}
+
+export function convertToEmailSafeLayout(root, widthMap, nodeMap) {
   const all = [...root.querySelectorAll('*')].reverse();
   for (const el of all) {
     if (!(el instanceof Element) || !el.isConnected) continue;
     const tag = el.tagName;
-    if (['TABLE', 'TR', 'TD', 'TH', 'THEAD', 'TBODY', 'TFOOT', 'SPAN', 'A', 'BUTTON', 'P'].includes(tag)) continue;
+    if (['TABLE', 'TR', 'TD', 'TH', 'THEAD', 'TBODY', 'TFOOT'].includes(tag)) continue;
 
+    const s = styleOf(el);
     const elementKids = [...el.children].filter(
       (k) => k instanceof Element && !['SCRIPT', 'STYLE'].includes(k.tagName),
     );
 
-    // Hanya konversi kontainer utama (2 atau 3 anak kolom horizontal)
-    if (elementKids.length >= 2 && elementKids.length <= 4) {
-      const isGridContainer = /display\s*:\s*(grid|inline-grid)/i.test(styleOf(el));
-      const isFlexContainer = isFlexRow(el);
+    const isGridContainer = /display\s*:\s*(grid|inline-grid)/i.test(s);
+    const isFlexContainer = isFlexRow(el);
+    const isFlexCol = isFlexColumn(el);
 
-      if (isGridContainer) {
-        flexGridToTable(el, gridColumnCount(el));
-      } else if (isFlexContainer) {
-        flexGridToTable(el, elementKids.length);
+    if (isFlexCol) {
+      flexColumnToBlock(el);
+      continue;
+    }
+
+    if (isGridContainer) {
+      flexGridToTable(el, gridColumnCount(el), widthMap, nodeMap);
+      continue;
+    }
+
+    if (isFlexContainer && elementKids.length >= 1) {
+      if (elementKids.length === 1) {
+        handleSingleChildFlex(el);
+      } else {
+        flexGridToTable(el, elementKids.length, widthMap, nodeMap);
       }
     }
   }
@@ -371,11 +533,9 @@ export function convertToEmailSafeLayout(root) {
 // =====================================================
 function gmailHeadStyle() {
   return '<style>'
-    // Reset dasar tabel dan gambar
     + 'img{max-width:100%!important;height:auto!important;display:block;border:0;outline:none;}'
     + 'table{border-collapse:collapse!important;mso-table-lspace:0pt;mso-table-rspace:0pt;}'
     + 'td{border-collapse:collapse!important;}'
-    // Reset universal untuk semua tautan (mencegah teks jadi biru bergaris bawah)
     + 'a,a:link,a:visited,a:hover,a:active{'
     + 'color:inherit!important;'
     + 'text-decoration:none!important;'
@@ -384,7 +544,6 @@ function gmailHeadStyle() {
     + 'font-weight:inherit!important;'
     + 'line-height:inherit!important;'
     + '}'
-    // Override spesifik mesin rendering Gmail
     + 'u + #body a{'
     + 'color:inherit!important;'
     + 'text-decoration:none!important;'
@@ -401,7 +560,6 @@ function gmailHeadStyle() {
     + 'color:inherit!important;'
     + 'text-decoration:none!important;'
     + '}'
-    // Reset Apple Mail Data Detectors
     + '[x-apple-data-detectors], [x-apple-data-detectors] *{'
     + 'color:inherit!important;'
     + 'text-decoration:none!important;'
@@ -425,8 +583,14 @@ export function buildEmailPreviewHtml(previewEl, meta) {
 
   let html = '';
   try {
+    // 0. Kumpulkan pixel widths dari source DOM SEBELUM clone
+    const widthMap = collectPixelWidths(previewEl);
+
     // 1. Buat klon dari preview invoice
     const clone = previewEl.cloneNode(true);
+
+    // 1b. Buat mapping clone -> source nodes untuk lookup pixel widths
+    const nodeMap = buildNodeMap(previewEl, clone);
 
     // 2. Salin computed style secara rekursif tree-traversal (100% SINKRON)
     inlineComputedStyles(previewEl, clone);
@@ -434,8 +598,8 @@ export function buildEmailPreviewHtml(previewEl, meta) {
     // 3. Sanitasi script dan elemen berbahaya
     sanitizeClone(clone);
 
-    // 4. Konversi kontainer flex/grid tingkat atas menjadi tabel email yang aman
-    convertToEmailSafeLayout(clone);
+    // 4. Konversi kontainer flex/grid menjadi tabel email yang aman
+    convertToEmailSafeLayout(clone, widthMap, nodeMap);
 
     // 5. Terapkan netralisasi auto-link Gmail (zero-width characters)
     applyAntiAutoLinksToDom(clone);
