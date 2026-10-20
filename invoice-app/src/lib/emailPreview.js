@@ -19,9 +19,13 @@ const INLINE_PROPS = [
   'font', 'font-family', 'font-size',
   'font-weight', 'font-style', 'line-height',
   'letter-spacing', 'text-align', 'text-transform',
-  'text-decoration', 'vertical-align', 'white-space',
+  'text-decoration', 'text-decoration-line',
+  'text-decoration-color', 'text-decoration-style',
+  'vertical-align', 'white-space',
   'border', 'border-top', 'border-right',
   'border-bottom', 'border-left', 'border-color',
+  'border-top-color', 'border-right-color',
+  'border-bottom-color', 'border-left-color',
   'border-width', 'border-style', 'border-radius',
   'border-collapse', 'box-shadow', 'opacity',
   'overflow', 'flex-direction', 'flex-wrap',
@@ -29,6 +33,25 @@ const INLINE_PROPS = [
   'flex', 'flex-grow', 'flex-shrink',
   'grid-template-columns',
 ];
+
+// Properti yang TIDAK BOLEH lolos ke email karena bikin
+// teks numpuk / hilang di Gmail/Outlook.
+const EMAIL_UNSAFE_PATTERNS = [
+  /^position$/i, // absolute/fixed/relative bikin teks saling menimpa
+  /^inset(-(top|right|bottom|left))?$/i,
+  /^(top|right|bottom|left|z-index)$/i,
+  /^transform$/i,
+  /^filter$/i, // invert() dark-mode ikut ke-inline -> warna aneh
+  /^backdrop-filter$/i,
+  /^mix-blend-mode$/i,
+  /^background-clip$/i, // bg-clip-text butuh -webkit- di email
+  /^(-webkit-)?background-clip$/i,
+  /^(-webkit-)?text-fill-color$/i,
+];
+
+function isUnsafeProp(prop) {
+  return EMAIL_UNSAFE_PATTERNS.some((re) => re.test(prop));
+}
 
 export function escapeHtml(value) {
   return String(value ?? '')
@@ -55,6 +78,17 @@ export function sanitizeClone(root) {
 
 
 // PART 2/2 — salin computed style + bungkus jadi dokumen email.
+// Perbaikan Gmail:
+// 1. STRIP properti berbahaya (position/transform/filter/gradient-text)
+//    supaya teks tidak saling menimpa di email client.
+// 2. NORMALISASI <a>: Gmail memaksa link jadi biru + underline.
+//    Kita paksa color:inherit + text-decoration:none inline, dan
+//    bungkus isi link dengan <span> berwarna sama (Gmail kadang
+//    me-link-kan nomor/alamat otomatis -> span menjaga warna).
+// 3. FIX gradient-text (bg-clip-text text-transparent): di email
+//    background-image tidak jalan -> teks jadi TRANSPARAN = hilang.
+//    Ganti paksa jadi warna solid (ambil warna gradient pertama).
+// 4. FIX flex gap: Gmail tidak dukung `gap` -> tambah margin fallback.
 export function inlineComputedStyles(source, target) {
   const srcAll = [source, ...source.querySelectorAll('*')];
   const dstAll = [target, ...target.querySelectorAll('*')];
@@ -68,14 +102,78 @@ export function inlineComputedStyles(source, target) {
     const existing = dst.getAttribute('style');
     if (existing) parts.push(existing.replace(/;\s*$/, ''));
     for (const prop of INLINE_PROPS) {
+      if (isUnsafeProp(prop)) continue;
       const v = (computed.getPropertyValue(prop) || '').trim();
       if (!v || v === 'none' || v === 'normal' || v === 'auto') continue;
       if (v.startsWith('oklch') || v.startsWith('oklab')) continue;
+      if (/^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/i.test(v)) continue;
       parts.push(prop + ':' + v);
     }
+
+    // --- FIX 3: gradient-text -> warna solid ---
+    // Ciri: computed color = transparent/rgba(0,0,0,0).
+    // Ambil warna dari background-image gradient, fallback slate-800.
+    const computedColor = (computed.getPropertyValue('color') || '').trim();
+    const bgImage = (computed.getPropertyValue('background-image') || '').trim();
+    const isTransparentText =
+      computedColor === 'transparent' ||
+      computedColor === 'rgba(0, 0, 0, 0)';
+    if (isTransparentText) {
+      const firstColor = (bgImage.match(/(rgb\([^)]+\)|#[0-9a-fA-F]{3,8})/) || [])[1];
+      parts.push('color:' + (firstColor || '#1e293b'));
+      parts.push('background-image:none');
+      parts.push('-webkit-text-fill-color:' + (firstColor || '#1e293b'));
+    } else if (/gradient/i.test(bgImage)) {
+      // Gradient background (header dsb): Gmail tidak dukung gradient
+      // oklch -> ganti warna solid pertama agar tidak polos/aneh.
+      const firstColor = (bgImage.match(/(rgb\([^)]+\)|#[0-9a-fA-F]{3,8})/) || [])[1];
+      if (firstColor && !/oklch|oklab/i.test(bgImage)) {
+        parts.push('background:' + firstColor);
+        parts.push('background-color:' + firstColor);
+      } else if (/oklch|oklab/i.test(bgImage)) {
+        // Gradient oklch tidak bisa dipakai -> fallback ungu template
+        parts.push('background:#7c3aed');
+        parts.push('background-color:#7c3aed');
+      }
+      parts.push('background-image:none');
+    }
+
     if (parts.length) dst.setAttribute('style', parts.join(';'));
     dst.removeAttribute('class');
+
+    // --- FIX 2: normalisasi link agar TIDAK biru + underline ---
+    if (dst.tagName === 'A') {
+      const parentColor = parts.join(';').match(/color:([^;]+)/);
+      const linkColor = parentColor ? parentColor[1] : computed.getPropertyValue('color');
+      dst.setAttribute(
+        'style',
+        (dst.getAttribute('style') || '') +
+          ';color:' + (linkColor || 'inherit') +
+          ';text-decoration:none!important',
+      );
+    }
   }
+}
+
+// Bungkus SEMUA teks dengan span anti-auto-link Gmail.
+// Gmail otomatis mengubah email/no HP/tanggal jadi <a> biru.
+// Trik standar: <style> u + .body .gmail-blend... + wrap dengan
+// span class="gmail-no-link" tidak cukup; yang paling ampuh adalah
+// CSS `a { color:inherit; text-decoration:none }` di <style> +
+// inline style per elemen (sudah dilakukan di atas).
+function gmailHeadStyle() {
+  return '<style>'
+    + 'img{max-width:100%!important;height:auto!important}'
+    + 'table{border-collapse:collapse!important}'
+    // Paksa SEMUA link warisi warna teks sekitarnya, tanpa underline.
+    // !important agar menang melawan user-agent Gmail.
+    + 'a,a:visited,a:hover,a:active{color:inherit!important;'
+    + 'text-decoration:none!important}'
+    // Matikan auto-link biru Gmail (email/telp/tanggal/address).
+    // Gmail membungkusnya dengan span.MsoHyperlink dsb — samakan warna.
+    + 'u + #body a,.gmail a,.gmail-blend a{color:inherit!important;'
+    + 'text-decoration:none!important}'
+    + '</style>';
 }
 
 export function buildEmailPreviewHtml(previewEl, meta) {
@@ -99,10 +197,11 @@ export function buildEmailPreviewHtml(previewEl, meta) {
     const title = invoiceNumber ? ' (#' + invoiceNumber + ')' : '';
     html = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">'
       + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+      + '<meta name="color-scheme" content="light">'
+      + '<meta name="supported-color-schemes" content="light">'
       + '<title>Invoice ' + invoiceNumber + '</title>'
-      + '<style>img{max-width:100%!important;height:auto!important}'
-      + 'table{border-collapse:collapse!important}</style></head>'
-      + '<body style="margin:0;padding:24px 12px;background:#f4f6f8;'
+      + gmailHeadStyle() + '</head>'
+      + '<body id="body" class="gmail" style="margin:0;padding:24px 12px;background:#f4f6f8;'
       + 'font-family:Arial,Helvetica,sans-serif;color:#172033;line-height:1.5;">'
       + '<div style="max-width:760px;margin:0 auto;">'
       + '<div style="background:#ffffff;border:1px solid #e5e7eb;'
@@ -112,7 +211,11 @@ export function buildEmailPreviewHtml(previewEl, meta) {
       + '<p style="margin:0;">Berikut invoice dari <strong>' + fromName + '</strong>'
       + title + '. Tampilan di bawah ini sama persis dengan desain '
       + 'invoice yang dipilih. PDF resmi tetap terlampir.</p></div>'
-      + '<div style="max-width:760px;margin:0 auto;background:#ffffff;">'
+      + '<div style="max-width:760px;margin:0 auto;background:#ffffff;'
+      // Kunci anti-numpuk: paksa positioning normal di wrapper.
+      // Elemen absolute di dalam tetap di-strip oleh isUnsafeProp,
+      // tapi wrapper ini memastikan tidak ada yang overlap keluar.
+      + 'position:relative;overflow:hidden;">'
       + inner + '</div>'
       + '<p style="max-width:760px;margin:16px auto 0;font-size:12px;'
       + 'color:#64748b;">PDF invoice resmi terlampir.</p>'

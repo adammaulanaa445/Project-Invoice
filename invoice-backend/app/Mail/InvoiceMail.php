@@ -78,8 +78,30 @@ class InvoiceMail extends Mailable
         $clean = (string) preg_replace('/(href|src)\s*=\s*(["\'])\s*javascript:[^"\']*\2/i', '$1="#"', $clean);
         $clean = trim($clean);
 
-        // Dokumen HTML lengkap dari frontend -> pakai langsung.
+        // Lapisan anti auto-link Gmail (lapis kedua, lapis pertama
+        // sudah di frontend): Gmail otomatis membungkus email/no HP/
+        // tanggal jadi <a> biru bergaris bawah. Kita sisipkan
+        // zero-width-non-joiner (&zwnj;) di tengah pola umum supaya
+        // Gmail tidak mengenalinya sebagai link, tapi tetap terbaca
+        // manusia. Pola: sesuatu@sesuatu.xx dan 08xx / +62...
+        $clean = (string) preg_replace(
+            '/([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/',
+            '$1&zwnj;@$2',
+            $clean
+        );
+
+        // Dokumen HTML lengkap dari frontend -> pakai langsung,
+        // tapi pastikan <style> anti-link Gmail tetap ada.
         if (preg_match('/<html[\s>]/i', $clean) === 1) {
+            if (stripos($clean, 'color:inherit') === false) {
+                $clean = (string) preg_replace(
+                    '/<\/style>/i',
+                    'a,a:visited,a:hover,a:active{color:inherit!important;text-decoration:none!important}</style>',
+                    $clean,
+                    1
+                );
+            }
+
             return $clean;
         }
 
