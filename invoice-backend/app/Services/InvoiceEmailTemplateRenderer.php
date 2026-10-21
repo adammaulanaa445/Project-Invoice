@@ -3,9 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
-use Illuminate\Support\Facades\Http;
 use Spatie\Browsershot\Browsershot;
-use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 
 class InvoiceEmailTemplateRenderer
 {
@@ -32,67 +30,91 @@ class InvoiceEmailTemplateRenderer
             $browser->setChromePath($chromePath);
         }
 
-        // Avoid evaluate(): Chromium/Puppeteer returns an array for it in the
-        // server runtime. bodyHtml() returns the completed Svelte DOM string.
-        $html = $browser->bodyHtml();
+        // Execute JavaScript untuk inline SEMUA computed style dari browser.
+        // Ini capture hasil render Svelte PERSIS seperti yang terlihat,
+        // termasuk semua Tailwind classes yang sudah di-compute jadi style.
+        // Email client tidak support external CSS atau class, jadi semuanya
+        // harus jadi inline style attribute.
+        $html = $browser->evaluate($this->getInlineStylesScript());
 
-        // Scripts are useless in email. Ambil stylesheet dari frontend lalu
-        // jadikan inline style karena sebagian besar email client mengabaikan
-        // class Tailwind dan <link rel="stylesheet"> eksternal.
-        $html = preg_replace('/<script\\b[^>]*>.*?<\\/script>/is', '', $html) ?? $html;
+        // evaluate() kembalikan array, ambil hasil dari index 0
+        if (is_array($html)) {
+            $html = $html[0] ?? '';
+        }
 
-        return $this->inlineTemplateStyles($html, $frontendUrl);
+        return $html;
     }
 
-    private function inlineTemplateStyles(string $html, string $frontendUrl): string
+    /**
+     * JavaScript yang inline semua computed style dari setiap element.
+     * Hasil: HTML email-safe dengan inline style persis seperti render Svelte.
+     * 
+     * Filter property yang relevan untuk email (skip animation, transition, dll)
+     * untuk kurangi size HTML.
+     */
+    private function getInlineStylesScript(): string
     {
-        $document = new \DOMDocument;
-        libxml_use_internal_errors(true);
-        $document->loadHTML($html);
-        libxml_clear_errors();
+        return <<<'JAVASCRIPT'
+(() => {
+  const relevantProps = new Set([
+    'color', 'background', 'background-color', 'background-image', 
+    'background-position', 'background-size', 'background-repeat',
+    'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
+    'border-width', 'border-style', 'border-color', 'border-radius',
+    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+    'width', 'height', 'max-width', 'max-height', 'min-width', 'min-height',
+    'font-family', 'font-size', 'font-weight', 'font-style', 'line-height',
+    'text-align', 'text-decoration', 'text-transform', 'letter-spacing',
+    'display', 'vertical-align', 'position', 'top', 'right', 'bottom', 'left',
+    'opacity', 'box-shadow', 'text-shadow', 'overflow', 'white-space',
+    'word-wrap', 'word-break', 'flex', 'flex-direction', 'justify-content',
+    'align-items', 'gap', 'grid', 'grid-template-columns'
+  ]);
 
-        $stylesheets = [];
+  function inlineElement(el) {
+    const computed = window.getComputedStyle(el);
+    const styles = [];
+    
+    for (const prop of relevantProps) {
+      const value = computed.getPropertyValue(prop);
+      if (value && value !== 'none' && value !== 'normal' && value !== 'auto') {
+        styles.push(`${prop}:${value}`);
+      }
+    }
+    
+    if (styles.length > 0) {
+      el.setAttribute('style', styles.join(';'));
+    }
+  }
 
-        foreach ($document->getElementsByTagName('link') as $link) {
-            if (! str_contains(strtolower($link->getAttribute('rel')), 'stylesheet')) {
-                continue;
-            }
+  // Inline semua element di print-wrapper
+  const wrapper = document.querySelector('.print-wrapper');
+  if (wrapper) {
+    const elements = wrapper.querySelectorAll('*');
+    elements.forEach(inlineElement);
+    inlineElement(wrapper);
+  }
 
-            $href = $link->getAttribute('href');
-            $url = str_starts_with($href, '/') ? $frontendUrl.$href : $href;
+  // Hapus script, link stylesheet, style tag
+  document.querySelectorAll('script').forEach(s => s.remove());
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(l => l.remove());
+  document.querySelectorAll('style').forEach(s => s.remove());
+  
+  // Tambah style minimal untuk email client compatibility
+  const head = document.querySelector('head');
+  if (head) {
+    const emailStyle = document.createElement('style');
+    emailStyle.textContent = `
+      body { margin: 0; padding: 0; }
+      img { max-width: 100%; height: auto; }
+      table { border-collapse: collapse; }
+    `;
+    head.appendChild(emailStyle);
+  }
 
-            // Hanya izinkan asset CSS dari frontend yang dipakai aplikasi.
-            if (! str_starts_with($url, $frontendUrl.'/')) {
-                continue;
-            }
-
-            try {
-                $response = Http::timeout(10)->get($url);
-                if ($response->successful()) {
-                    $stylesheets[] = $response->body();
-                }
-            } catch (\Throwable $exception) {
-                \Log::warning('Gagal mengambil stylesheet template email', [
-                    'url' => $url,
-                    'error' => $exception->getMessage(),
-                ]);
-            }
-        }
-
-        $html = preg_replace('/<link\\b[^>]*\\brel=["\']?stylesheet[^>]*>/i', '', $html) ?? $html;
-
-        if ($stylesheets === []) {
-            return $html;
-        }
-
-        try {
-            return (new CssToInlineStyles)->convert($html, implode("\n", $stylesheets));
-        } catch (\Throwable $exception) {
-            \Log::warning('Gagal menjadikan CSS template sebagai inline style', [
-                'error' => $exception->getMessage(),
-            ]);
-
-            return $html;
-        }
+  return document.documentElement.outerHTML;
+})()
+JAVASCRIPT;
     }
 }
