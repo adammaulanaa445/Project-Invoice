@@ -35,16 +35,23 @@ class InvoiceMail extends Mailable
         // Kalau frontend mengirim preview HTML (hasil render template
         // yang persis dilihat user), pakai itu sebagai isi email supaya
         // tampilannya sama dengan preview di editor.
-        // Kalau tidak ada, fallback ke template Blade bawaan agar
-        // pengiriman lama tetap jalan (tidak error 422).
         if ($previewHtml !== '' && strlen($previewHtml) >= 100) {
+            \Log::info('Using frontend preview HTML', [
+                'invoice_id' => $this->invoice->id,
+                'html_length' => strlen($previewHtml),
+            ]);
             return new Content(
                 htmlString: $this->wrapPreviewHtml($previewHtml),
             );
         }
 
+        // Fallback: render dari Blade template email bawaan
+        \Log::info('Using Blade email template fallback', [
+            'invoice_id' => $this->invoice->id,
+        ]);
         return new Content(
-            htmlString: app(InvoiceEmailTemplateRenderer::class)->render($this->invoice),
+            view: 'emails.invoice',
+            with: ['invoice' => $this->invoice->load('items')],
         );
     }
 
@@ -86,6 +93,11 @@ class InvoiceMail extends Mailable
             '$1&zwnj;@$2',
             $clean
         );
+
+        \Log::info('wrapPreviewHtml processing', [
+            'has_html_tag' => preg_match('/<html[\s>]/i', $clean) === 1,
+            'clean_length' => strlen($clean),
+        ]);
 
         // Dokumen HTML lengkap dari frontend → pakai langsung.
         if (preg_match('/<html[\s>]/i', $clean) === 1) {

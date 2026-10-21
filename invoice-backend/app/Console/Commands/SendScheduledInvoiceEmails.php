@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\InvoiceMail;
 use App\Models\ScheduledInvoiceEmail;
+use App\Services\InvoiceEmailTemplateRenderer;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -47,9 +48,13 @@ class SendScheduledInvoiceEmails extends Command
         try {
             $pdfPath = $this->generatePdf($invoice);
             $pdfData = file_get_contents($pdfPath);
+            
+            // Generate preview HTML untuk scheduled email
+            // agar desain invoice muncul di email, tidak cuma plain text
+            $previewHtml = $this->generatePreviewHtml($invoice);
 
             Mail::to($schedule->recipient_email)->send(
-                new InvoiceMail($invoice, $pdfData)
+                new InvoiceMail($invoice, $pdfData, $previewHtml)
             );
 
             $schedule->update([
@@ -117,6 +122,21 @@ class SendScheduledInvoiceEmails extends Command
         $browsershot->save($fullPath);
 
         return $fullPath;
+    }
+
+    protected function generatePreviewHtml($invoice): string
+    {
+        try {
+            return app(InvoiceEmailTemplateRenderer::class)->render($invoice);
+        } catch (\Throwable $e) {
+            \Log::warning('Gagal generate preview HTML untuk scheduled email', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            // Fallback ke string kosong, InvoiceMail akan pakai Blade template
+            return '';
+        }
     }
 
     protected function calculateNextSendAt(ScheduledInvoiceEmail $schedule): Carbon
